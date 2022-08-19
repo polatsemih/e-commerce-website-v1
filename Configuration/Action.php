@@ -2,6 +2,7 @@
 define('ADMIN_IP', '127.0.0.1');
 // password settings
 define('PEPPER', '��n�{B�Z@��yn��');
+define('SECRET_KEY_PWD', 'l��"���!�ٿ�J�q��b��|?�@U�4Ȕ���\��/�Wx׾�|�F�@=DIHֿ��w3���T`�');
 define('CONFIRM_TOKEN_KEY', 'R�J���s�]��D6��rdu����������y�r�@�)���Y;}�TmK�');
 // hCaptcha settings
 define('SECRET_KEY', '0x709C94d33BBC6bCAdb79f3642d6Ec9500076D7BF');

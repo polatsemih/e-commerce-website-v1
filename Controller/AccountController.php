@@ -40,7 +40,7 @@ class AccountController extends Controller
                             $is_cookie_not_valid = false;
                             session_regenerate_id(true);
                             $this->web_data['authed_user'] = $user_from_db;
-                            $this->$cookie_auth = $cookie_auth_from_db;
+                            $this->cookie_auth = $cookie_auth_from_db;
                         }
                     }
                 }
@@ -128,7 +128,7 @@ class AccountController extends Controller
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $comment = isset($_POST['comment_text']) ? $_POST['comment_text'] : '';
             $checked_inputs = $this->input_control->CheckPostedInputs(array(
-                'comment' => array('input' => $comment, 'error_message_empty' => ERROR_MESSAGE_EMPTY_COMMENT, 'length_control' => true, 'max_length' => COMMENT_LIMIT, 'error_message_max_length' => ERROR_MAX_LENGTH_COMMENT, 'preventxss' => true, 'length_limit' => COMMENT_LIMIT_DB),
+                'comment' => array('input' => strip_tags($comment), 'error_message_empty' => ERROR_MESSAGE_EMPTY_COMMENT, 'length_control' => true, 'max_length' => COMMENT_LIMIT, 'error_message_max_length' => ERROR_MAX_LENGTH_COMMENT, 'preventxss' => true, 'length_limit' => COMMENT_LIMIT_DB),
                 'item_url' => array('input' => isset($_POST['item_url']) ? $_POST['item_url'] : '', 'error_message_empty' => FORM_INPUT_ERROR, 'preventxss' => true),
                 'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => ERROR_MESSAGE_EMPTY_CSRF, 'preventxss' => true)
             ));
@@ -146,23 +146,27 @@ class AccountController extends Controller
                             'is_comment_approved' => 0
                         ));
                         if ($comment_create_result['result'] == 'Created') {
-                            $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_CREATE);
                             $created_comment_from_db = $this->CommentModel->GetCommentById($comment_create_result['id']);
-                            $created_comment_from_db['comment'] = strip_tags(stripslashes($comment));
-                            $created_comment_from_db['date_comment_created'] = date('d/m/Y', strtotime($created_comment_from_db['date_comment_created']));
-                            $response['comment'] = $created_comment_from_db;
-                            $response['comment_user'] = array(
-                                'user_first_name' => $this->web_data['authed_user']['first_name'],
-                                'user_last_name' => $this->web_data['authed_user']['last_name'],
-                                'profile_image_path' => $this->web_data['authed_user']['profile_image_path'],
-                                'user_profile_image' => $this->web_data['authed_user']['profile_image']
-                            );
-                            $csrf_token = $this->SetCSRFToken('ItemDetails');
-                            if (!is_null($csrf_token)) {
-                                $response['csrf_token'] = $csrf_token;
-                                $response['reset'] = false;
+                            if (!empty($created_comment_from_db)) {
+                                $created_comment_from_db['comment'] = stripslashes(strip_tags($comment));
+                                $created_comment_from_db['date_comment_created'] = date('d/m/Y', strtotime($created_comment_from_db['date_comment_created']));
+                                $csrf_token = $this->SetCSRFToken('ItemDetails');
+                                if (!is_null($csrf_token)) {
+                                    $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_CREATE);
+                                    $response['comment'] = $created_comment_from_db;
+                                    $response['comment_user'] = array(
+                                        'user_first_name' => ucfirst($this->web_data['authed_user']['first_name']),
+                                        'user_last_name' => ucfirst($this->web_data['authed_user']['last_name']),
+                                        'user_profile_image_path' => $this->web_data['authed_user']['profile_image_path'],
+                                        'user_profile_image' => $this->web_data['authed_user']['profile_image']
+                                    );
+                                    $response['form_token'] = $csrf_token;
+                                    $response['reset'] = false;
+                                } else {
+                                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(GENERAL_ERROR);
+                                }
                             } else {
-                                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(GENERAL_ERROR);
+                                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Success(SUCCESS_COMMENT_CREATE);
                             }
                         } else {
                             $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(DATABASE_ERROR);
@@ -176,8 +180,6 @@ class AccountController extends Controller
             } else {
                 $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
             }
-            echo json_encode($response);
-            exit(0);
         } else {
             $this->session_control->KillSession();
         }
@@ -192,7 +194,7 @@ class AccountController extends Controller
             $comment = isset($_POST['comment_text']) ? $_POST['comment_text'] : '';
             $checked_inputs = $this->input_control->CheckPostedInputs(array(
                 'comment_id' => array('input' => isset($_POST['comment_id']) ? $_POST['comment_id'] : '', 'error_message_empty' => FORM_INPUT_ERROR, 'preventxss' => true),
-                'comment' => array('input' => $comment, 'error_message_empty' => ERROR_MESSAGE_EMPTY_COMMENT, 'length_control' => true, 'max_length' => COMMENT_LIMIT, 'error_message_max_length' => ERROR_MAX_LENGTH_COMMENT, 'preventxss' => true, 'length_limit' => COMMENT_LIMIT_DB),
+                'comment' => array('input' => strip_tags($comment), 'error_message_empty' => ERROR_MESSAGE_EMPTY_COMMENT, 'length_control' => true, 'max_length' => COMMENT_LIMIT, 'error_message_max_length' => ERROR_MAX_LENGTH_COMMENT, 'preventxss' => true, 'length_limit' => COMMENT_LIMIT_DB),
                 'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => ERROR_MESSAGE_EMPTY_CSRF, 'preventxss' => true)
             ));
             if (empty($checked_inputs['error_message'])) {
@@ -206,11 +208,11 @@ class AccountController extends Controller
                             'id' => $confirm_comment['id']
                         ));
                         if ($comment_update_result == 'Updated') {
-                            $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_UPDATE);
-                            $response['comment'] = strip_tags(stripslashes($comment));
                             $csrf_token = $this->SetCSRFToken('ItemDetails');
                             if (!is_null($csrf_token)) {
-                                $response['csrf_token'] = $csrf_token;
+                                $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_UPDATE);
+                                $response['comment'] = array('comment' => stripslashes(strip_tags($comment)), 'id' => $confirm_comment['id']);
+                                $response['form_token'] = $csrf_token;
                                 $response['reset'] = false;
                             } else {
                                 $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(GENERAL_ERROR);
@@ -227,8 +229,6 @@ class AccountController extends Controller
             } else {
                 $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
             }
-            echo json_encode($response);
-            exit(0);
         } else {
             $this->session_control->KillSession();
         }
@@ -266,10 +266,11 @@ class AccountController extends Controller
                             'id' => $confirm_comment['id']
                         ));
                         if ($comment_delete_result == 'Updated') {
-                            $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_DELETE);
                             $csrf_token = $this->SetCSRFToken('ItemDetails');
                             if (!is_null($csrf_token)) {
-                                $response['csrf_token'] = $csrf_token;
+                                $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_DELETE);
+                                $response['comment_id'] = $confirm_comment['id'];
+                                $response['form_token'] = $csrf_token;
                                 $response['reset'] = false;
                             } else {
                                 $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(GENERAL_ERROR);
@@ -286,8 +287,6 @@ class AccountController extends Controller
             } else {
                 $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
             }
-            echo json_encode($response);
-            exit(0);
         } else {
             $this->session_control->KillSession();
         }
@@ -302,7 +301,7 @@ class AccountController extends Controller
             $comment_reply = isset($_POST['comment_reply_text']) ? $_POST['comment_reply_text'] : '';
             $checked_inputs = $this->input_control->CheckPostedInputs(array(
                 'comment_id' => array('input' => isset($_POST['comment_id']) ? $_POST['comment_id'] : '', 'error_message_empty' => DATABASE_ERROR, 'preventxss' => true),
-                'comment_reply' => array('input' => $comment_reply, 'error_message_empty' => ERROR_MESSAGE_EMPTY_COMMENT, 'length_control' => true, 'max_length' => COMMENT_LIMIT, 'error_message_max_length' => ERROR_MAX_LENGTH_COMMENT, 'preventxss' => true, 'length_limit' => COMMENT_LIMIT_DB),
+                'comment_reply' => array('input' => strip_tags($comment_reply), 'error_message_empty' => ERROR_MESSAGE_EMPTY_COMMENT, 'length_control' => true, 'max_length' => COMMENT_LIMIT, 'error_message_max_length' => ERROR_MAX_LENGTH_COMMENT, 'preventxss' => true, 'length_limit' => COMMENT_LIMIT_DB),
                 'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => ERROR_MESSAGE_EMPTY_CSRF, 'preventxss' => true)
             ));
             if (empty($checked_inputs['error_message'])) {
@@ -316,23 +315,27 @@ class AccountController extends Controller
                         'is_comment_reply_approved' => 0
                     ));
                     if ($comment_reply_create_result['result'] == 'Created') {
-                        $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_CREATE);
                         $created_comment_from_db = $this->CommentModel->GetCommentReplyById($comment_reply_create_result['id']);
-                        $created_comment_from_db['comment_reply'] = strip_tags(stripslashes($created_comment_from_db));
-                        $created_comment_from_db['date_comment_reply_created'] = date('d/m/Y', strtotime($created_comment_from_db['date_comment_reply_created']));
-                        $response['comment_reply'] = $created_comment_from_db;
-                        $response['comment_reply_user'] = array(
-                            'user_first_name' => $this->web_data['authed_user']['first_name'],
-                            'user_last_name' => $this->web_data['authed_user']['last_name'],
-                            'profile_image_path' => $this->web_data['authed_user']['profile_image_path'],
-                            'user_profile_image' => $this->web_data['authed_user']['profile_image']
-                        );
-                        $csrf_token = $this->SetCSRFToken('ItemDetails');
-                        if (!is_null($csrf_token)) {
-                            $response['csrf_token'] = $csrf_token;
-                            $response['reset'] = false;
+                        if (!empty($created_comment_from_db)) {
+                            $created_comment_from_db['comment_reply'] = stripslashes(strip_tags($comment_reply));
+                            $created_comment_from_db['date_comment_reply_created'] = date('d/m/Y', strtotime($created_comment_from_db['date_comment_reply_created']));
+                            $csrf_token = $this->SetCSRFToken('ItemDetails');
+                            if (!is_null($csrf_token)) {
+                                $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_CREATE);
+                                $response['comment_reply'] = $created_comment_from_db;
+                                $response['comment_reply_user'] = array(
+                                    'user_first_name' => ucfirst($this->web_data['authed_user']['first_name']),
+                                    'user_last_name' => ucfirst($this->web_data['authed_user']['last_name']),
+                                    'user_profile_image_path' => $this->web_data['authed_user']['profile_image_path'],
+                                    'user_profile_image' => $this->web_data['authed_user']['profile_image']
+                                );
+                                $response['form_token'] = $csrf_token;
+                                $response['reset'] = false;
+                            } else {
+                                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(GENERAL_ERROR);
+                            }
                         } else {
-                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(GENERAL_ERROR);
+                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Success(SUCCESS_COMMENT_CREATE);
                         }
                     } else {
                         $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(DATABASE_ERROR);
@@ -343,8 +346,6 @@ class AccountController extends Controller
             } else {
                 $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
             }
-            echo json_encode($response);
-            exit(0);
         } else {
             $this->session_control->KillSession();
         }
@@ -360,7 +361,7 @@ class AccountController extends Controller
             $checked_inputs = $this->input_control->CheckPostedInputs(array(
                 'comment_reply_id' => array('input' => isset($_POST['comment_reply_id']) ? $_POST['comment_reply_id'] : '', 'error_message_empty' => FORM_INPUT_ERROR, 'preventxss' => true),
                 'comment_id' => array('input' => isset($_POST['comment_id']) ? $_POST['comment_id'] : '', 'error_message_empty' => FORM_INPUT_ERROR, 'preventxss' => true),
-                'comment_reply' => array('input' => $comment_reply, 'error_message_empty' => ERROR_MESSAGE_EMPTY_COMMENT, 'length_control' => true, 'max_length' => COMMENT_LIMIT, 'error_message_max_length' => ERROR_MAX_LENGTH_COMMENT, 'preventxss' => true, 'length_limit' => COMMENT_LIMIT_DB),
+                'comment_reply' => array('input' => strip_tags($comment_reply), 'error_message_empty' => ERROR_MESSAGE_EMPTY_COMMENT, 'length_control' => true, 'max_length' => COMMENT_LIMIT, 'error_message_max_length' => ERROR_MAX_LENGTH_COMMENT, 'preventxss' => true, 'length_limit' => COMMENT_LIMIT_DB),
                 'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => ERROR_MESSAGE_EMPTY_CSRF, 'preventxss' => true)
             ));
             if (empty($checked_inputs['error_message'])) {
@@ -374,11 +375,11 @@ class AccountController extends Controller
                             'id' => $confirm_comment_reply['id']
                         ));
                         if ($comment_reply_update_result == 'Updated') {
-                            $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_UPDATE);
-                            $response['comment_reply'] = strip_tags(stripslashes($comment_reply));
                             $csrf_token = $this->SetCSRFToken('ItemDetails');
                             if (!is_null($csrf_token)) {
-                                $response['csrf_token'] = $csrf_token;
+                                $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_UPDATE);
+                                $response['comment_reply'] = array('comment_reply' => stripslashes(strip_tags($comment_reply)), 'id' => $confirm_comment_reply['id']);
+                                $response['form_token'] = $csrf_token;
                                 $response['reset'] = false;
                             } else {
                                 $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(GENERAL_ERROR);
@@ -395,8 +396,6 @@ class AccountController extends Controller
             } else {
                 $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
             }
-            echo json_encode($response);
-            exit(0);
         } else {
             $this->session_control->KillSession();
         }
@@ -425,10 +424,11 @@ class AccountController extends Controller
                             'id' => $confirm_comment_reply['id']
                         ));
                         if ($comment_reply_delete_result == 'Updated') {
-                            $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_DELETE);
                             $csrf_token = $this->SetCSRFToken('ItemDetails');
                             if (!is_null($csrf_token)) {
-                                $response['csrf_token'] = $csrf_token;
+                                $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_DELETE);
+                                $response['comment'] = array('comment_reply_id' => $confirm_comment_reply['id'], 'comment_id' => $confirm_comment_reply['comment_id']);
+                                $response['form_token'] = $csrf_token;
                                 $response['reset'] = false;
                             } else {
                                 $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(GENERAL_ERROR);
@@ -445,8 +445,6 @@ class AccountController extends Controller
             } else {
                 $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
             }
-            echo json_encode($response);
-            exit(0);
         } else {
             $this->session_control->KillSession();
         }
@@ -457,61 +455,7 @@ class AccountController extends Controller
 
 
 
-    function AddToCart()
-    {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_addtocart'])) {
-            if (isset($_POST['item_id']) && isset($_POST['item_size']) && isset($_POST['item_quantity'])) {
-                $item_id = $_POST['item_id'];
-                $item_size = $_POST['item_size'];
-                $item_quantity = $_POST['item_quantity'];
-                if (!empty($item_id) && (strlen($item_id) == 50) && !empty($item_size) && !empty($item_quantity) && is_numeric($item_quantity) && $item_quantity > 0) {
-                    if (isset($_COOKIE[COOKIE_CART_NAME])) {
-                        $cart_cookie = $this->cookie_control->GetCookie($_COOKIE[COOKIE_CART_NAME]);
-                        if (!empty($cart_cookie)) {
-                            $cart_items = json_decode($cart_cookie, true);
-                        } else {
-                            $cart_items = array();
-                        }
-                    } else {
-                        $cart_items = array();
-                    }
-                    $same_size = false;
-                    if (in_array($item_id, array_column($cart_items, 'item_id'))) {
-                        foreach ($cart_items as $key => $value) {
-                            if ($cart_items[$key]['item_id'] == $item_id && $cart_items[$key]['item_size'] == $item_size) {
-                                parent::GetModel('ItemModel');
-                                $item_in_cart = $this->ItemModel->GetItemById('beden_' . $cart_items[$key]['item_size'], $cart_items[$key]['item_id']);
-                                if ($item_in_cart['beden_' . $cart_items[$key]['item_size']] <= $cart_items[$key]['item_quantity']) {
-                                    $data = array('notification' => $this->notification_control->Danger('Stok Adedinden Fazla Ürünü Sepetinize Ekleyemezsiniz'));
-                                } elseif ($cart_items[$key]['item_quantity'] < 10 && $cart_items[$key]['item_quantity'] > 0) {
-                                    $cart_items[$key]['item_quantity'] = $cart_items[$key]['item_quantity'] + $item_quantity;
-                                } else {
-                                    $cart_items[$key]['item_quantity'] = 10;
-                                }
-                                $same_size = true;
-                            }
-                        }
-                    }
-                    if (!$same_size) {
-                        $cart_items[] = array(
-                            'item_id'   => $item_id,
-                            'item_size'   => $item_size,
-                            'item_quantity'  => 1
-                        );
-                    }
-                    $expires = time() + 60 * 60 * 24 * 30;
-                    $this->cookie_control->SetCookie(COOKIE_CART_NAME, json_encode($cart_items), $expires, '/', DOMAIN, SECURE, HTTP_ONLY, SAMESITE);
-                    header('Location: ' . URL . '/HomeController/HomeShoppingCart');
-                } else {
-                    $this->input_control->Redirect();
-                }
-            } else {
-                $this->input_control->Redirect();
-            }
-        } else {
-            $this->input_control->Redirect();
-        }
-    }
+    
     function RemoveFromCart()
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_removefromcart'])) {

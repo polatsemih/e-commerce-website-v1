@@ -6,38 +6,50 @@ class CommentModel extends Model
         parent::__construct();
     }
     // ItemDetails
-    function GetCommentsForAdminByItemId(string $item_id)
+    function GetCommentsForAdminByItemId(string $item_id, string $condition)
     {
-        return $this->db->GetAllWithColumnsByStringCondition(TABLE_COMMENT, 'id,user_id,comment,is_comment_approved,date_comment_created', 'WHERE item_id=? AND is_comment_deleted=0 ORDER BY date_comment_created DESC', $item_id);
+        return $this->db->GetAllWithColumnsByStringCondition(TABLE_COMMENT, 'id,user_id,comment,is_comment_approved,date_comment_created', $condition, $item_id);
+    }
+    function GetCommentsCountForAdminByItemId(string $item_id, string $condition)
+    {
+        return $this->db->GetAllWithColumnsByStringCondition(TABLE_COMMENT, 'id', $condition, $item_id);
     }
     function GetCommentsReplyForAdminByCommentId(String $comment_id)
     {
         return $this->db->GetAllWithColumnsByStringCondition(TABLE_COMMENT_REPLY, 'id,comment_id,user_id,comment_reply,is_comment_reply_approved,date_comment_reply_created', 'WHERE comment_id=? AND is_comment_reply_deleted=0 ORDER BY date_comment_reply_created ASC', $comment_id);
     }
-    function GetCommentsForUserByItemId(array $inputs)
+    function GetCommentsForUserByItemId(array $inputs, string $condition)
     {
-        return $this->db->GetAllWithColumnsByArrayCondition(TABLE_COMMENT, 'id,user_id,comment,date_comment_created', 'WHERE item_id=? AND is_comment_deleted=0 AND ((user_id=? AND is_comment_approved=0) OR is_comment_approved=1) ORDER BY date_comment_created DESC', $inputs);
+        return $this->db->GetAllWithColumnsByArrayCondition(TABLE_COMMENT, 'id,user_id,comment,date_comment_created', $condition, $inputs);
+    }
+    function GetCommentsCountForUserByItemId(array $inputs, string $condition)
+    {
+        return $this->db->GetAllWithColumnsByArrayCondition(TABLE_COMMENT, 'id', $condition, $inputs);
     }
     function GetCommentsReplyForUserByCommentId(array $inputs)
     {
         return $this->db->GetAllWithColumnsByArrayCondition(TABLE_COMMENT_REPLY, 'id,comment_id,user_id,comment_reply,date_comment_reply_created', 'WHERE comment_id=? AND is_comment_reply_deleted=0 AND ((user_id=? AND is_comment_reply_approved=0) OR is_comment_reply_approved=1) ORDER BY date_comment_reply_created ASC', $inputs);
     }
-    function GetCommentsForAnonymousByItemId(string $item_id)
+    function GetCommentsForAnonymousByItemId(string $item_id, string $condition)
     {
-        return $this->db->GetAllWithColumnsByStringCondition(TABLE_COMMENT, 'id,user_id,comment,date_comment_created', 'WHERE item_id=? AND is_comment_deleted=0 AND is_comment_approved=1 ORDER BY date_comment_created DESC', $item_id);
+        return $this->db->GetAllWithColumnsByStringCondition(TABLE_COMMENT, 'id,user_id,comment,date_comment_created', $condition, $item_id);
+    }
+    function GetCommentsCountForAnonymousByItemId(string $item_id, string $condition)
+    {
+        return $this->db->GetAllWithColumnsByStringCondition(TABLE_COMMENT, 'id', $condition, $item_id);
     }
     function GetCommentsReplyForAnonymousByCommentId(string $comment_id)
     {
         return $this->db->GetAllWithColumnsByStringCondition(TABLE_COMMENT_REPLY, 'id,comment_id,user_id,comment_reply,date_comment_reply_created', 'WHERE comment_id=? AND is_comment_reply_deleted=0 AND is_comment_reply_approved=1 ORDER BY date_comment_reply_created ASC', $comment_id);
     }
     // Comment
-    function GetCommentById(array $comment_id)
+    function GetCommentById(string $comment_id)
     {
-        return $this->db->GetWithColumnsByArrayCondition(TABLE_COMMENT, 'id,user_id,comment,date_comment_created', 'WHERE id=? AND is_comment_deleted=0', $comment_id);
+        return $this->db->GetWithColumnsByStringCondition(TABLE_COMMENT, 'id,user_id,comment,date_comment_created', 'WHERE id=? AND is_comment_deleted=0', $comment_id);
     }
-    function GetCommentReplyById(array $comment_reply_id)
+    function GetCommentReplyById(string $comment_reply_id)
     {
-        return $this->db->GetWithColumnsByArrayCondition(TABLE_COMMENT_REPLY, 'id,user_id,comment_reply,date_comment_reply_created', 'WHERE id=? AND is_comment_reply_deleted=0', $comment_reply_id);
+        return $this->db->GetWithColumnsByStringCondition(TABLE_COMMENT_REPLY, 'id,comment_id,user_id,comment_reply,date_comment_reply_created', 'WHERE id=? AND is_comment_reply_deleted=0', $comment_reply_id);
     }
     function ConfirmComment(array $inputs)
     {
@@ -45,7 +57,7 @@ class CommentModel extends Model
     }
     function ConfirmCommentReply(array $inputs)
     {
-        return $this->db->GetWithColumnsByArrayCondition(TABLE_COMMENT_REPLY, 'id', 'WHERE id=? AND comment_id=? AND user_id=? AND is_comment_reply_deleted=0', $inputs);
+        return $this->db->GetWithColumnsByArrayCondition(TABLE_COMMENT_REPLY, 'id,comment_id', 'WHERE id=? AND comment_id=? AND user_id=? AND is_comment_reply_deleted=0', $inputs);
     }
     function CreateComment(array $inputs)
     {

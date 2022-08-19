@@ -11,6 +11,13 @@
 </head>
 
 <body>
+    <div class="notification">
+        <?php if (isset($_SESSION[SESSION_NOTIFICATION])) {
+            echo $_SESSION[SESSION_NOTIFICATION];
+            unset($_SESSION[SESSION_NOTIFICATION]);
+        } ?>
+    </div>
+    <div class="notification-client"></div>
     <?php require 'View/SharedCommon/_common_loader.php'; ?>
     <header>
         <div class="header-container">
@@ -22,13 +29,6 @@
         </div>
     </header>
     <main>
-        <div class="notification">
-            <?php if (isset($_SESSION[SESSION_NOTIFICATION])) {
-                echo $_SESSION[SESSION_NOTIFICATION];
-                unset($_SESSION[SESSION_NOTIFICATION]);
-            } ?>
-        </div>
-        <div class="notification-client"></div>
         <section class="action-section">
             <div class="action-container">
                 <h1 class="forgot-password-title">Şifrenizi sıfırlamak için email adresinizi girin</h1>
@@ -71,6 +71,9 @@
     <script src="<?php echo URL; ?>assets/js/loader_notification_action.js"></script>
     <script>
         const notificationClient = document.querySelector('.notification-client');
+        window.addEventListener('scroll', () => {
+            notificationClient.classList.toggle('sticky', window.scrollY > 0);
+        });
         let notificationHidden = 0;
         let notificationRemoved = 0;
 

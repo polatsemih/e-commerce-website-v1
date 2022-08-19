@@ -110,9 +110,9 @@ class ActionController extends Controller
             if ($login_session_auth == 'admin') {
                 $this->input_control->Redirect(URL_ADMININDEX);
             } else {
-                if (isset($_POST['redirect'])) {
-                    $posted_redirect = explode('/', $_POST['redirect']);
-                    if (count($posted_redirect) == 2 && !empty($posted_redirect[0]) && $posted_redirect[1]) {
+                if (isset($_POST['redirect_location'])) {
+                    $posted_redirect = explode('/', $_POST['redirect_location']);
+                    if (!empty($posted_redirect) && count($posted_redirect) == 2 && !empty($posted_redirect[0]) && !empty($posted_redirect[1])) {
                         $redirect_perm = in_array($posted_redirect[0], REDIRECT_PERMISSION);
                         if ($redirect_perm) {
                             $redirect_login = $this->input_control->Check_GET_Input($posted_redirect[1]);
@@ -157,24 +157,25 @@ class ActionController extends Controller
             'login_success' => 1
         ));
         if ($result_cookie_auth['result'] == 'Created' && $result_user_lastlogin == 'Updated' && $result_log_login['result'] == 'Created') {
-            $this->cookie_control->SetCookie(COOKIE_AUTH_NAME, $cookie_token, time() + (EXPIRY_COOKIE_AUTH), '/', DOMAIN, SECURE, HTTP_ONLY, SAMESITE);
-            if (isset($_POST['redirect'])) {
-                $posted_redirect = explode('/', $_POST['redirect']);
-                if (count($posted_redirect) == 2 && !empty($posted_redirect[0]) && $posted_redirect[1]) {
-                    $redirect_perm = in_array($posted_redirect[0], REDIRECT_PERMISSION);
-                    if ($redirect_perm) {
-                        $redirect_login = $this->input_control->Check_GET_Input($posted_redirect[1]);
-                        if (!is_null($redirect_login)) {
-                            $this->input_control->Redirect($posted_redirect[0] . '/' . $posted_redirect[1]);
+            $result_auth_cookie_set = $this->cookie_control->SetCookie(COOKIE_AUTH_NAME, $cookie_token, time() + (EXPIRY_COOKIE_AUTH), '/', DOMAIN, SECURE, HTTP_ONLY, SAMESITE);
+            if ($result_auth_cookie_set) {
+                if (isset($_POST['redirect_location'])) {
+                    $posted_redirect = explode('/', $_POST['redirect_location']);
+                    if (!empty($posted_redirect) && count($posted_redirect) == 2 && !empty($posted_redirect[0]) && !empty($posted_redirect[1])) {
+                        $redirect_perm = in_array($posted_redirect[0], REDIRECT_PERMISSION);
+                        if ($redirect_perm) {
+                            $redirect_login = $this->input_control->Check_GET_Input($posted_redirect[1]);
+                            if (!is_null($redirect_login)) {
+                                $this->input_control->Redirect($posted_redirect[0] . '/' . $posted_redirect[1]);
+                            }
                         }
                     }
                 }
+                $this->input_control->Redirect();
             }
-            $this->input_control->Redirect();
-        } else {
-            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(DATABASE_ERROR);
-            $this->input_control->Redirect(URL_LOGIN);
         }
+        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(DATABASE_ERROR);
+        $this->input_control->Redirect(URL_LOGIN);
     }
     function SendVerifyTokenWithEmail($verify_token_user_id, $verify_token_user_email, $verify_token_type, $verify_token_auth, $verify_token_email_type, $verify_token_remember_me = 0)
     {
@@ -242,6 +243,7 @@ class ActionController extends Controller
             if (!empty($verify_token_from_db) && $verify_token_from_db['date_verify_token_expiry'] > date('Y-m-d H:i:s') && $verify_token_from_db['is_verify_token_used'] == 0) {
                 $this->web_data['verify_token'] = $this->action_control->GenerateBaitToken();
                 $this->web_data['verify_token_type'] = $verify_token_from_db['verify_token_type'];
+                $this->web_data['token_time_remain'] = (strtotime($verify_token_from_db['date_verify_token_expiry']) - strtotime(date('Y-m-d H:i:s'))) / 60;
                 $this->SetCSRFTokenAndGetView('VerifyToken', 'VerifyToken' . $verify_token_from_db['verify_token_csrf_type']);
             } else {
                 unset($_SESSION[SESSION_VERIFY_TOKEN]);
@@ -346,8 +348,8 @@ class ActionController extends Controller
                                 $this->web_data['verify_link_msg'] = CANCEL_REGISTER_ERROR_IS_SHOPPED;
                             } else {
                                 $result_update_cancel_register_user = $this->ActionModel->UpdateUser(array(
-                                    'deleted' => 1,
-                                    'date_deleted' => date('Y-m-d H:i:s'),
+                                    'is_user_deleted' => 1,
+                                    'date_user_deleted' => date('Y-m-d H:i:s'),
                                     'id' => $verify_link_user_from_db['id']
                                 ));
                                 if ($result_update_cancel_register_user == 'Updated') {
@@ -384,7 +386,7 @@ class ActionController extends Controller
             } else {
                 $result_check_csrf_token = $this->CheckCSRFToken($checked_inputs['csrf_token'], 'Login');
                 if ($result_check_csrf_token == false) {
-                    $this->input_control->Redirect(URL_LOGIN);
+                    $this->input_control->Redirect(URL_LOGIN . (isset($_POST['redirect_location']) ? '?yonlendir='.$_POST['redirect_location'] : ''));
                 }
             }
             $captcha_timeout_from_db = $this->ActionModel->GetCaptchaTimeOut($_SERVER['REMOTE_ADDR']);
@@ -414,7 +416,7 @@ class ActionController extends Controller
                     if ($login_type == 'admin') {
                         $this->input_control->Redirect(URL_ADMIN_LOGIN);
                     } else {
-                        $this->input_control->Redirect(URL_LOGIN);
+                        $this->input_control->Redirect(URL_LOGIN . (isset($_POST['redirect_location']) ? '?yonlendir='.$_POST['redirect_location'] : ''));
                     }
                 }
             }
@@ -456,7 +458,7 @@ class ActionController extends Controller
                     if ($login_type == 'admin') {
                         $this->input_control->Redirect(URL_ADMIN_LOGIN);
                     } else {
-                        $this->input_control->Redirect(URL_LOGIN);
+                        $this->input_control->Redirect(URL_LOGIN . (isset($_POST['redirect_location']) ? '?yonlendir='.$_POST['redirect_location'] : ''));
                     }
                 } elseif ($result_captcha === true) {
                     if (!empty($captcha_timeout_from_db)) {
@@ -472,9 +474,17 @@ class ActionController extends Controller
                         $bool_control = !empty($user_from_db);
                     }
                     if ($bool_control && !empty($user_from_db['password_salt'])) {
-                        $salted_pwd = $user_from_db['password_salt'] . $checked_inputs['password'];
-                        $decrypted_hashed_pwd = $this->input_control->DecrypteData($user_from_db['password'], PEPPER);
-                        $verified_pwd = password_verify($salted_pwd, $decrypted_hashed_pwd);
+                        $salted_pwd = hash_hmac('sha512', $user_from_db['password_salt'] . str_replace("\0", "", $checked_inputs['password']), SECRET_KEY_PWD, true);
+                        try {
+                            $decrypted_hashed_pwd = $this->input_control->DecrypteData($user_from_db['password'], PEPPER);
+                            if (!is_null($decrypted_hashed_pwd)) {
+                                $verified_pwd = password_verify($salted_pwd, $decrypted_hashed_pwd);
+                            } else {
+                                $verified_pwd = false;
+                            }
+                        } catch (\Throwable) {
+                            $verified_pwd = false;
+                        }
                         if ($verified_pwd) {
                             $bcrypt_options = $this->password_control->BcryptOptions();
                             if (password_needs_rehash($decrypted_hashed_pwd, PASSWORD_BCRYPT, $bcrypt_options)) {
@@ -550,7 +560,7 @@ class ActionController extends Controller
                     if ($login_type == 'admin') {
                         $this->input_control->Redirect(URL_ADMIN_LOGIN);
                     } else {
-                        $this->input_control->Redirect(URL_LOGIN);
+                        $this->input_control->Redirect(URL_LOGIN . (isset($_POST['redirect_location']) ? '?yonlendir='.$_POST['redirect_location'] : ''));
                     }
                 }
             } else {
@@ -562,6 +572,9 @@ class ActionController extends Controller
         if ($login_type == 'admin') {
             $this->SetCSRFTokenAndGetView('AdminLogin', 'AdminLogin');
         } else {
+            if (isset($_POST['redirect_location'])) {
+                $this->web_data['redirect_location'] = $_POST['redirect_location'];
+            }
             $this->web_data['email'] = $email;
             $this->web_data['password'] = $password;
             $this->SetCSRFTokenAndGetView('Login', 'Login');
@@ -586,7 +599,7 @@ class ActionController extends Controller
     {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             if (isset($_GET['yonlendir'])) {
-                $this->web_data['redirect'] = $_GET['yonlendir'];
+                $this->web_data['redirect_location'] = $_GET['yonlendir'];
             }
             $this->SetCSRFTokenAndGetView('Login', 'Login');
         } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -613,9 +626,9 @@ class ActionController extends Controller
             if (empty($checked_inputs['error_message'])) {
                 $result_check_csrf_token = $this->CheckCSRFToken($checked_inputs['csrf_token'], 'Register');
                 if ($result_check_csrf_token == true) {
-                    $pwd_salt = strtr(sodium_bin2base64(random_bytes(112), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING), array('-' => '2', '_' => '4'));
-                    $salted_pwd = $pwd_salt . $checked_inputs['password'];
-                    $salted_repwd = $pwd_salt . $checked_inputs['repassword'];
+                    $pwd_salt = strtr(sodium_bin2base64(random_bytes(75), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING), array('-' => '2', '_' => '4'));
+                    $salted_pwd = hash_hmac('sha512', $pwd_salt . str_replace("\0", "", $checked_inputs['password']), SECRET_KEY_PWD, true);
+                    $salted_repwd = hash_hmac('sha512', $pwd_salt . str_replace("\0", "", $checked_inputs['repassword']), SECRET_KEY_PWD, true);
                     $hashed_pwd = password_hash($salted_pwd, PASSWORD_BCRYPT, $this->password_control->BcryptOptions());
                     $verified_pwd = password_verify($salted_repwd, $hashed_pwd);
                     if ($verified_pwd) {
@@ -690,11 +703,11 @@ class ActionController extends Controller
                                             'id' => $captcha_timeout_from_db['id']
                                         ));
                                     }
-                                    $email_accounts = $this->ActionModel->GetUsersByEmail('deleted', $checked_inputs['email']);
+                                    $email_accounts = $this->ActionModel->GetUsersByEmail('is_user_deleted', $checked_inputs['email']);
                                     if (!empty($email_accounts)) {
                                         $is_email_not_unique = false;
                                         foreach ($email_accounts as $email_account) {
-                                            if ($email_account['deleted'] == 0) {
+                                            if ($email_account['is_user_deleted'] == 0) {
                                                 $is_email_not_unique = true;
                                                 break;
                                             }

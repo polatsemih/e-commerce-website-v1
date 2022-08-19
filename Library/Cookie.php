@@ -17,7 +17,7 @@ class Cookie
     }
     function SetCookie(string $cookie_name, string $cookie, int $expires, string $path, string $domain, bool $secure, bool $httponly, string $samesite)
     {
-        setcookie($cookie_name, $cookie, array(
+        return setcookie($cookie_name, $cookie, array(
             'expires' => $expires,
             'path' => $path,
             'domain' => $domain,
@@ -28,7 +28,7 @@ class Cookie
     }
     function EmptyCookie(string $cookie_name)
     {
-        setcookie($cookie_name, false, array(
+        return setcookie($cookie_name, false, array(
             'expires' => time() - 1,
             'path' => '/',
             'domain' => DOMAIN,

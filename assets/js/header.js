@@ -7,17 +7,25 @@ window.addEventListener('scroll', () => {
 // Header Mobile Settings
 const togglerIcon = document.querySelector('.toggler-icon');
 togglerIcon.addEventListener('click', () => {
-    if (body.classList.contains('noscroll')) {
+    if (!headerNav.classList.contains('active')) {
         if (headerSearch.classList.contains('active')) {
             closeSearch();
-            headerNav.classList.add('active');
+            if (!headerNav.classList.contains('active')) {
+                headerNav.classList.add('active');
+            }
         } else {
-            body.classList.remove('noscroll');
-            headerNav.classList.remove('active');
+            if (!body.classList.contains('noscroll')) {
+                body.classList.add('noscroll');
+            }
+            if (!headerNav.classList.contains('active')) {
+                headerNav.classList.add('active');
+            }
         }
     } else {
-        body.classList.add('noscroll');
-        headerNav.classList.add('active');
+        if (body.classList.contains('noscroll')) {
+            body.classList.remove('noscroll');
+        }
+        headerNav.classList.remove('active');
     }
 });
 
@@ -35,7 +43,9 @@ function openSearch() {
     purgatoryIcons.forEach(purgatoryIcon => {
         purgatoryIcon.classList.add('disable');
     });
-    body.classList.add('noscroll');
+    if (!body.classList.contains('noscroll')) {
+        body.classList.add('noscroll');
+    }
     headerSearch.classList.remove('disable');
     setTimeout(() => {
         headerSearch.classList.add('active');
@@ -61,8 +71,10 @@ searchIconPrimary.addEventListener('click', () => {
     if (headerNav.classList.contains('active')) {
         headerNav.classList.remove('active');
         openSearch();
-    } else if (body.classList.contains('noscroll')) {
-        body.classList.remove('noscroll');
+    } else if (headerSearch.classList.contains('active')) {
+        if (body.classList.contains('noscroll')) {
+            body.classList.remove('noscroll');
+        }
         closeSearch();
     } else {
         openSearch();

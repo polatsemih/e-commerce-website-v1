@@ -9,7 +9,7 @@ class FilterModel extends Model
     // ItemDetails
     function GetSizes()
     {
-        return $this->db->GetAllWithColumns(TABLE_FILTER_SIZE, 'id,size_name,size_url');
+        return $this->db->GetAllWithColumns(TABLE_FILTER_SIZE, 'id,size_cart_id,size_name,size_url');
     }
 
 

@@ -40,7 +40,7 @@ class Input
     }
     function IsString($input)
     {
-        if (is_string($input) && !empty($input)) {
+        if (is_string($input) && !empty($input) && !empty(trim($input))) {
             return stripslashes($input);
         }
         return null;
@@ -58,6 +58,16 @@ class Input
         if (is_numeric($input)) {
             $input = (int)$input;
             if ($input > 0) {
+                return $input;
+            }
+        }
+        return null;
+    }
+    function IsIntegerAndPositiveOrZero($input)
+    {
+        if (is_numeric($input)) {
+            $input = (int)$input;
+            if ($input >= 0) {
                 return $input;
             }
         }
@@ -188,6 +198,14 @@ class Input
                         return $error;
                     }
                 }
+                if (!empty($posted_input['is_integer_and_positive'])) {
+                    $input = $this->IsIntegerAndPositive($input);
+                    if (is_null($input)) {
+                        $error['error_input'] = $key;
+                        $error['error_message'] = $posted_input['error_message_is_integer_and_positive'];
+                        return $error;
+                    }
+                }
                 $checked_inputs[$key] = $input;
             } else {
                 $error['error_input'] = $key;
@@ -251,9 +269,15 @@ class Input
         }
         return $relevant_items_from_db;
     }
-
-
-
+    function GetItemMainImage(string $item_images_param)
+    {
+        $item_images = explode('_', $item_images_param);
+        $item_images_name = array();
+        for ($i = 0; $i < count($item_images); $i++) {
+            $item_images_name[] = explode('-', $item_images[$i]);
+        }
+        return $item_images_name[0][1];
+    }
 
 
 

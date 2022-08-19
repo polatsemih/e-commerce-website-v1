@@ -11,6 +11,13 @@
 </head>
 
 <body>
+    <div class="notification">
+        <?php if (isset($_SESSION[SESSION_NOTIFICATION])) {
+            echo $_SESSION[SESSION_NOTIFICATION];
+            unset($_SESSION[SESSION_NOTIFICATION]);
+        } ?>
+    </div>
+    <div class="notification-client"></div>
     <?php require 'View/SharedCommon/_common_loader.php'; ?>
     <header>
         <div class="header-container">
@@ -22,13 +29,6 @@
         </div>
     </header>
     <main>
-        <div class="notification">
-            <?php if (isset($_SESSION[SESSION_NOTIFICATION])) {
-                echo $_SESSION[SESSION_NOTIFICATION];
-                unset($_SESSION[SESSION_NOTIFICATION]);
-            } ?>
-        </div>
-        <div class="notification-client"></div>
         <section class="action-section">
             <div class="action-container">
                 <h1 class="action-title">Giriş</h1>
@@ -42,8 +42,8 @@
                     <?php if (!empty($web_data['csrf_token'])) : ?>
                         <input type="hidden" name="form_token" value="<?php echo $web_data['csrf_token']; ?>">
                     <?php endif; ?>
-                    <?php if (!empty($web_data['redirect'])) : ?>
-                        <input type="hidden" name="redirect" value="<?php echo $web_data['redirect']; ?>">
+                    <?php if (!empty($web_data['redirect_location'])) : ?>
+                        <input type="hidden" name="redirect_location" value="<?php echo $web_data['redirect_location']; ?>">
                     <?php endif; ?>
                     <div class="action-container-3">
                         <div class="action-group">
@@ -106,6 +106,9 @@
     <script src="<?php echo URL; ?>assets/js/eyebtn.js"></script>
     <script>
         const notificationClient = document.querySelector('.notification-client');
+        window.addEventListener('scroll', () => {
+            notificationClient.classList.toggle('sticky', window.scrollY > 0);
+        });
         let notificationHidden = 0;
         let notificationRemoved = 0;
 

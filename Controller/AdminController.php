@@ -100,10 +100,11 @@ class AdminController extends Controller
                         'id' => $checked_inputs['comment_id']
                     ));
                     if ($comment_delete_result == 'Updated') {
-                        $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_DELETE);
                         $csrf_token = $this->SetCSRFToken('ItemDetails');
                         if (!is_null($csrf_token)) {
-                            $response['csrf_token'] = $csrf_token;
+                            $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_DELETE);
+                            $response['comment_id'] = $checked_inputs['comment_id'];
+                            $response['form_token'] = $csrf_token;
                             $response['reset'] = false;
                         } else {
                             $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(GENERAL_ERROR);
@@ -142,16 +143,16 @@ class AdminController extends Controller
                         'id' => $checked_inputs['comment_id']
                     ));
                     if ($result_comment_approve == 'Updated') {
-                        if ($is_comment_approved == 1) {
-                            $response['notification'] = $this->notification_control->Warning(COMMENT_APPROVED);
-                            $response['is_approved'] = 1;
-                        } else {
-                            $response['notification'] = $this->notification_control->Warning(COMMENT_DISAPPROVED);
-                            $response['is_approved'] = 0;
-                        }
                         $csrf_token = $this->SetCSRFToken('ItemDetails');
                         if (!is_null($csrf_token)) {
-                            $response['csrf_token'] = $csrf_token;
+                            if ($is_comment_approved == 1) {
+                                $response['notification'] = $this->notification_control->Warning(COMMENT_APPROVED);
+                                $response['is_approved'] = 1;
+                            } else {
+                                $response['notification'] = $this->notification_control->Warning(COMMENT_DISAPPROVED);
+                                $response['is_approved'] = 0;
+                            }
+                            $response['form_token'] = $csrf_token;
                             $response['reset'] = false;
                         } else {
                             $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(GENERAL_ERROR);
@@ -191,10 +192,11 @@ class AdminController extends Controller
                         'id' => $checked_inputs['comment_reply_id']
                     ));
                     if ($comment_reply_delete_result == 'Updated') {
-                        $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_DELETE);
                         $csrf_token = $this->SetCSRFToken('ItemDetails');
                         if (!is_null($csrf_token)) {
-                            $response['csrf_token'] = $csrf_token;
+                            $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_DELETE);
+                            $response['comment'] = array('comment_reply_id' => $checked_inputs['comment_reply_id'], 'comment_id' => $checked_inputs['comment_id']);
+                            $response['form_token'] = $csrf_token;
                             $response['reset'] = false;
                         } else {
                             $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(GENERAL_ERROR);
@@ -208,8 +210,6 @@ class AdminController extends Controller
             } else {
                 $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
             }
-            echo json_encode($response);
-            exit(0);
         } else {
             $this->session_control->KillSession();
         }
@@ -235,16 +235,16 @@ class AdminController extends Controller
                         'id' => $checked_inputs['comment_reply_id']
                     ));
                     if ($result_comment_reply_approve == 'Updated') {
-                        if ($is_comment_reply_approved == 1) {
-                            $response['notification'] = $this->notification_control->Warning(COMMENT_APPROVED);
-                            $response['is_reply_approved'] = 1;
-                        } else {
-                            $response['notification'] = $this->notification_control->Warning(COMMENT_DISAPPROVED);
-                            $response['is_reply_approved'] = 0;
-                        }
                         $csrf_token = $this->SetCSRFToken('ItemDetails');
                         if (!is_null($csrf_token)) {
-                            $response['csrf_token'] = $csrf_token;
+                            if ($is_comment_reply_approved == 1) {
+                                $response['notification'] = $this->notification_control->Warning(COMMENT_APPROVED);
+                                $response['is_reply_approved'] = 1;
+                            } else {
+                                $response['notification'] = $this->notification_control->Warning(COMMENT_DISAPPROVED);
+                                $response['is_reply_approved'] = 0;
+                            }
+                            $response['form_token'] = $csrf_token;
                             $response['reset'] = false;
                         } else {
                             $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(GENERAL_ERROR);
@@ -955,6 +955,7 @@ class AdminController extends Controller
     }
     function ItemCreate()
     {
+        // item_cart_id için strtr(sodium_bin2base64(random_bytes(2), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING), array('-' => 'A', '_' => '9'));
         $this->input_control->CheckUrl();
         // aynı-1
         parent::GetModel('FilterModel');

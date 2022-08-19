@@ -226,7 +226,6 @@
 </head>
 
 <body>
-    <?php require 'View/SharedCommon/_common_loader.php'; ?>
     <div class="notification">
         <?php if (isset($_SESSION[SESSION_NOTIFICATION])) {
             echo $_SESSION[SESSION_NOTIFICATION];
@@ -234,6 +233,7 @@
         } ?>
     </div>
     <div class="notification-client"></div>
+    <?php require 'View/SharedCommon/_common_loader.php'; ?>
     <div class="admin-login-container">
         <form action="<?php echo URL . URL_ADMIN_LOGIN; ?>" method="POST" class="form-admin" id="form-admin-login" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
             <?php if (!empty($web_data['csrf_token'])) : ?>
@@ -270,6 +270,9 @@
     <script src="<?php echo URL; ?>assets/js/loader_notification.js"></script>
     <script>
         const notificationClient = document.querySelector('.notification-client');
+        window.addEventListener('scroll', () => {
+            notificationClient.classList.toggle('sticky', window.scrollY > 0);
+        });
         let notificationHidden = 0;
         let notificationRemoved = 0;
         function setClientNotification(notificationMessage) {

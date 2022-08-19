@@ -26,6 +26,12 @@ define('RESET_PWD_ERROR', 'Bir hata oldu. Lütfen tekrar deneyin.');
 define('RESET_PWD_SUCCESS', 'Şifreniz başarıyla güncellendi. Yeni şifreniz ile giriş yapabilirsiniz.');
 define('FORGOT_PASSWORD_NO_EMAIL', 'Girilen email adresine ait kayıtlı bir '.BRAND.' hesabı yok');
 define('LOGIN_WITH_ADMIN_LOGIN', 'Yönetici panelinden giriş yapın');
+define('ERROR_ADD_TO_CART', 'Ürün sepete eklenirken bir hata oldu');
+define('ERROR_CART_SELECT_SIZE', 'Ürünü sepete eklemeden önce size uygun bedeni seçin');
+define('ERROR_CART_STOCK', 'Sepetinize stok adedinden fazla ürünü ekleyemezsiniz');
+define('ERROR_CART_FULL', 'Sepete aynı üründen en fazla 10 adet ekleyebilirsiniz. Daha fazla adette sipariş verebilmek için bizimle iletişime geçin.');
+define('ERROR_CART_4000_LIMIT', 'Sepete daha fazla ürün ekleyemezsiniz');
+define('ERROR_UPDATE_THE_CART', 'Sepet güncellenirken bir hata oldu.');
 // Comment
 define('ERROR_COMMENT_CREATE', 'Yorum oluşturulurken bir hata oldu. Lütfen tekrar deneyiniz.');
 define('SUCCESS_COMMENT_CREATE', 'Yorum başarıyla eklendi. Değerli düşüncelerinizi paylaştığınız için teşekkür ederiz.');

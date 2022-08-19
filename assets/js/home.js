@@ -20,6 +20,7 @@ window.onload = function () {
 // Back To Top Settings
 const btnBackToTop = document.querySelector('.footer-back-to-top');
 window.addEventListener('scroll', () => {
+    notification.classList.toggle('sticky', window.scrollY > 0);
     btnBackToTop.classList.toggle("active", window.scrollY > 500);
 });
 btnBackToTop.addEventListener('click', () => {

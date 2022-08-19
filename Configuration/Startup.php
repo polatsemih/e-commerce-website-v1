@@ -3,6 +3,10 @@ define('URL_MAPS', array(
     // HomeController
     array('pattern' => 'urunler/?', 'controller' => 'HomeController', 'action' => 'Items'),
     array('pattern' => 'urun/?', 'controller' => 'HomeController', 'action' => 'ItemDetails'),
+    array('url' => 'sepete-ekle', 'controller' => 'HomeController', 'action' => 'AddToCart'),
+    array('url' => 'sepet', 'controller' => 'HomeController', 'action' => 'Cart'),
+    array('url' => 'sepeti-guncelle', 'controller' => 'HomeController', 'action' => 'UpdateCart'),
+    array('url' => 'sepeti-bosalt', 'controller' => 'HomeController', 'action' => 'EmptyCart'),
     // ActionController
     array('url' => 'yonetici-giris', 'controller' => 'ActionController', 'action' => 'AdminLogin'),
     array('url' => 'giris', 'controller' => 'ActionController', 'action' => 'Login'),
@@ -35,10 +39,8 @@ define('URL_MAPS', array(
     // ErrorController
     array('url' => '404', 'controller' => 'ErrorController', 'action' => 'NotFound'),
     // HomeController
-    array('url' => 'sepete-ekle', 'controller' => 'HomeController', 'action' => 'AddToCart'),
     array('url' => 'profil', 'controller' => 'HomeController', 'action' => 'Profile'),
     array('url' => 'ayarlar', 'controller' => 'HomeController', 'action' => 'Settings'),
-    array('url' => 'sepet', 'controller' => 'HomeController', 'action' => 'ShoppingCart'),
     array('url' => 'favoriler', 'controller' => 'HomeController', 'action' => 'Favorites'),
     // AdminController
     array('url' => 'yonetici', 'controller' => 'AdminController', 'action' => 'Index'),
@@ -78,6 +80,10 @@ define('URL_MAPS', array(
 // HomeController
 define('URL_ITEMS', 'urunler');
 define('URL_ITEM_DETAILS', 'urun');
+define('URL_ADD_TO_CART', 'sepete-ekle');
+define('URL_CART', 'sepet');
+define('URL_UPDATE_THE_CART', 'sepeti-guncelle');
+define('URL_EMPTY_CART', 'sepeti-bosalt');
 // ActionController
 define('URL_ADMIN_LOGIN', 'yonetici-giris');
 define('URL_LOGIN', 'giris');
@@ -110,10 +116,8 @@ define('URL_ADMIN_COMMENT_REPLY_APPROVE', 'yonetici-yorum-cevap-onayla');
 
 
 // HomeController
-define('URL_ADD_TO_CART', 'sepete-ekle');
 define('URL_PROFILE', 'profil');
 define('URL_SETTINGS', 'ayarlar');
-define('URL_SHOPPINGCART', 'sepet');
 define('URL_FAVORITES', 'favoriler');
 // HomeController
 define('URL_NOTFOUND', '404');

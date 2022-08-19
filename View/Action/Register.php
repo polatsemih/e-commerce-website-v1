@@ -11,6 +11,13 @@
 </head>
 
 <body>
+    <div class="notification">
+        <?php if (isset($_SESSION[SESSION_NOTIFICATION])) {
+            echo $_SESSION[SESSION_NOTIFICATION];
+            unset($_SESSION[SESSION_NOTIFICATION]);
+        } ?>
+    </div>
+    <div class="notification-client"></div>
     <?php require 'View/SharedCommon/_common_loader.php'; ?>
     <header>
         <div class="header-container">
@@ -22,13 +29,6 @@
         </div>
     </header>
     <main>
-        <div class="notification">
-            <?php if (isset($_SESSION[SESSION_NOTIFICATION])) {
-                echo $_SESSION[SESSION_NOTIFICATION];
-                unset($_SESSION[SESSION_NOTIFICATION]);
-            } ?>
-        </div>
-        <div class="notification-client"></div>
         <section class="action-section">
             <div class="action-container">
                 <h1 class="action-title">Kayıt</h1>
@@ -114,6 +114,9 @@
     <script src="<?php echo URL; ?>assets/js/eyebtn.js"></script>
     <script>
         const notificationClient = document.querySelector('.notification-client');
+        window.addEventListener('scroll', () => {
+            notificationClient.classList.toggle('sticky', window.scrollY > 0);
+        });
         let notificationHidden = 0;
         let notificationRemoved = 0;
         function setClientNotification(notificationMessage) {
@@ -195,7 +198,11 @@
                 passwordMessage.innerHTML = '<?php echo ERROR_MAX_LENGTH_PASSWORD; ?>';
             } else if (!/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])/.test(inputPassword.value)) {
                 passwordMessage.innerHTML = '<?php echo ERROR_NOT_VALID_PASSWORD; ?>';
+            } else if (inputPassword.value != inputRepassword.value) {
+                repasswordMessage.innerHTML = '<?php echo PASSWORDS_NOT_SAME; ?>';
+                passwordMessage.innerHTML = '';
             } else {
+                repasswordMessage.innerHTML = '';
                 passwordMessage.innerHTML = '';
             }
         });

@@ -191,10 +191,10 @@
                 <div class="verify-token-container">
                     <?php if (!empty($web_data['verify_token_type'])) : ?>
                         <?php if ($web_data['verify_token_type'] == 'two_fa') {
-                            $token_time_remain = EXPIRY_TWO_FA_TOKEN_MINUTE;
+                            $token_time_remain = !empty($web_data['token_time_remain']) ? (int)$web_data['token_time_remain'] : EXPIRY_TWO_FA_TOKEN_MINUTE;
                             echo '<h1 class="verify-token-title">Email kutunuza gelen doğrulama kodunu alt bölüme girerek giriş yapabilirsiniz.</h1>';
                         } elseif ($web_data['verify_token_type'] == 'confirm_email') {
-                            $token_time_remain = EXPIRY_CONFIRM_EMAIL_TOKEN_MINUTE;
+                            $token_time_remain = !empty($web_data['token_time_remain']) ? (int)$web_data['token_time_remain'] : EXPIRY_CONFIRM_EMAIL_TOKEN_MINUTE;
                             echo '<h1 class="verify-token-title">Email kutunuza gelen doğrulama kodunu alt bölüme girerek üyeliğinizi aktif edebilirsniz.</h1>';
                         } ?>
                         <div style="width: 100%; height: 3px; background-color: #000000; margin-bottom: 10px;"></div>
