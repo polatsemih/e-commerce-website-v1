@@ -4,10 +4,6 @@ class Action
     function __construct()
     {
     }
-    function GenerateCSRFToken()
-    {
-        return strtr(sodium_bin2base64(random_bytes(112), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING), array('-' => 'B', '_' => 'U'));
-    }
     function GenerateVerifyToken()
     {
         return strtr(sodium_bin2base64(random_bytes(191), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING), array('-' => 'R', '_' => 'O'));

@@ -4,27 +4,45 @@ class AdminController extends Controller
     function __construct()
     {
         parent::__construct();
-        $this->GetModel('ActionModel');
-        $session_auth_error = true;
-        if (isset($_SESSION[SESSION_AUTH]) && $_SERVER['REMOTE_ADDR'] === ADMIN_IP && strlen($_SESSION[SESSION_AUTH]) === 255) {
-            $session_auth_from_db = $this->ActionModel->GetSessionAuth(array($_SESSION[SESSION_AUTH], $_SERVER['REMOTE_ADDR']));
-            if (!empty($session_auth_from_db) && $session_auth_from_db['date_session_auth_expiry'] > date('Y-m-d H:i:s') && $session_auth_from_db['session_auth_is_logout'] == 0) {
-                $user_from_db = $this->ActionModel->GetUserById('id,first_name,last_name,profile_image_path,profile_image,user_role', $session_auth_from_db['user_id']);
-                if (!empty($user_from_db) && $user_from_db['user_role'] === ADMIN_ROLE_ID) {
-                    $session_auth_error = false;
-                    session_regenerate_id(true);
-                    if (empty($_SESSION[COOKIE_ADMIN_MENU])) {
-                        $_SESSION[COOKIE_ADMIN_MENU] = 'true';
+        if (!empty($_SESSION[SESSION_AUTHENTICATION_NAME]) && !empty($_COOKIE[COOKIE_AUTHENTICATION_NAME])) {
+            if ($this->session_control->KillSession() && $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME)) {
+                $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_AUTHENTICATION_KILLED);
+                $this->input_control->Redirect(URL_LOGIN);
+            } else {
+                parent::GetView('Error/NotResponse');
+            }
+        }
+        $session_authentication_error = true;
+        if (!empty($_SESSION[SESSION_AUTHENTICATION_NAME]) && $_SERVER['REMOTE_ADDR'] === ADMIN_IP_ADDRESS) {
+            $checked_session_authentication_token = $this->input_control->CheckInputWithLength($_SESSION[SESSION_AUTHENTICATION_NAME], 255);
+            if (!is_null($checked_session_authentication_token)) {
+                $session_authentication_from_database = $this->ActionModel->GetSessionAuthentication(array($_SERVER['REMOTE_ADDR'], $checked_session_authentication_token));
+                if (!empty($session_authentication_from_database) && $session_authentication_from_database['date_session_authentication_expiry'] > date('Y-m-d H:i:s') && $session_authentication_from_database['session_authentication_is_logout'] == 0) {
+                    $authenticated_user_from_database = $this->UserModel->GetUser('id,user_role', $session_authentication_from_database['user_id']);
+                    if (!empty($authenticated_user_from_database) && $authenticated_user_from_database['user_role'] === ADMIN_ROLE_ID) {
+                        if (session_regenerate_id(true)) {
+                            $session_authentication_error = false;
+                            if (empty($_SESSION[COOKIE_ADMIN_MENU_NAME])) {
+                                $_SESSION[COOKIE_ADMIN_MENU_NAME] = 'true';
+                            }
+                            $this->web_data['authenticated_user_id'] = $authenticated_user_from_database['id'];
+                        }
                     }
-                    $this->web_data['authed_user'] = $user_from_db;
                 }
             }
         }
-        if ($session_auth_error) {
-            $this->session_control->KillSession();
-            $this->input_control->Redirect(URL_LOGIN);
+        if ($session_authentication_error) {
+            if ($this->session_control->KillSession()) {
+                $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_AUTHENTICATION_KILLED);
+                $this->input_control->Redirect(URL_LOGIN);
+            } else {
+                parent::GetView('Error/NotResponse');
+            }
         }
     }
+
+
+    
     function SetCSRFToken(string $csrf_page)
     {
         $csrf_token = $this->action_control->GenerateCSRFToken();
@@ -34,7 +52,7 @@ class AdminController extends Controller
                 $result_log_csrf_update = $this->ActionModel->UpdateLogCSRF(array(
                     'csrf_token' => $csrf_token,
                     'csrf_page' => $csrf_page,
-                    'date_csrf_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_CSRF)),
+                    'date_csrf_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_CSRF_TOKEN)),
                     'date_last_csrf_created' => date('Y-m-d H:i:s'),
                     'is_csrf_used' => 0,
                     'id' => $csrf_exist_in_db['id']
@@ -47,7 +65,7 @@ class AdminController extends Controller
                     'user_ip' => $_SERVER['REMOTE_ADDR'],
                     'csrf_token' => $csrf_token,
                     'csrf_page' => $csrf_page,
-                    'date_csrf_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_CSRF)),
+                    'date_csrf_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_CSRF_TOKEN)),
                     'date_last_csrf_created' => date('Y-m-d H:i:s'),
                     'is_csrf_used' => 0
                 ));
@@ -102,21 +120,21 @@ class AdminController extends Controller
                     if ($comment_delete_result == 'Updated') {
                         $csrf_token = $this->SetCSRFToken('ItemDetails');
                         if (!is_null($csrf_token)) {
-                            $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_DELETE);
+                            $response['notification'] = $this->notification_control->SetNotification('SUCCESS', SUCCESS_COMMENT_DELETE);
                             $response['comment_id'] = $checked_inputs['comment_id'];
                             $response['form_token'] = $csrf_token;
                             $response['reset'] = false;
                         } else {
-                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(GENERAL_ERROR);
+                            $this->notification_control->SetNotification('DANGER', GENERAL_ERROR);
                         }
                     } else {
-                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(DATABASE_ERROR);
+                        $this->notification_control->SetNotification('DANGER', DATABASE_ERROR);
                     }
                 } else {
-                    $_SESSION[SESSION_NOTIFICATION] = $result_check_csrf_token;
+                    $_SESSION[SESSION_NOTIFICATION_NAME] = $result_check_csrf_token;
                 }
             } else {
-                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
+                $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
             }
         } else {
             $this->session_control->KillSession();
@@ -155,16 +173,16 @@ class AdminController extends Controller
                             $response['form_token'] = $csrf_token;
                             $response['reset'] = false;
                         } else {
-                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(GENERAL_ERROR);
+                            $this->notification_control->SetNotification('DANGER', GENERAL_ERROR);
                         }
                     } else {
-                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(DATABASE_ERROR);
+                        $this->notification_control->SetNotification('DANGER', DATABASE_ERROR);
                     }
                 } else {
-                    $_SESSION[SESSION_NOTIFICATION] = $result_check_csrf_token;
+                    $_SESSION[SESSION_NOTIFICATION_NAME] = $result_check_csrf_token;
                 }
             } else {
-                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
+                $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
             }
         } else {
             $this->session_control->KillSession();
@@ -194,21 +212,21 @@ class AdminController extends Controller
                     if ($comment_reply_delete_result == 'Updated') {
                         $csrf_token = $this->SetCSRFToken('ItemDetails');
                         if (!is_null($csrf_token)) {
-                            $response['notification'] = $this->notification_control->Success(SUCCESS_COMMENT_DELETE);
+                            $response['notification'] = $this->notification_control->SetNotification('SUCCESS', SUCCESS_COMMENT_DELETE);
                             $response['comment'] = array('comment_reply_id' => $checked_inputs['comment_reply_id'], 'comment_id' => $checked_inputs['comment_id']);
                             $response['form_token'] = $csrf_token;
                             $response['reset'] = false;
                         } else {
-                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(GENERAL_ERROR);
+                            $this->notification_control->SetNotification('DANGER', GENERAL_ERROR);
                         }
                     } else {
-                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(GENERAL_ERROR);
+                        $this->notification_control->SetNotification('DANGER', GENERAL_ERROR);
                     }
                 } else {
-                    $_SESSION[SESSION_NOTIFICATION] = $result_check_csrf_token;
+                    $_SESSION[SESSION_NOTIFICATION_NAME] = $result_check_csrf_token;
                 }
             } else {
-                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
+                $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
             }
         } else {
             $this->session_control->KillSession();
@@ -247,16 +265,16 @@ class AdminController extends Controller
                             $response['form_token'] = $csrf_token;
                             $response['reset'] = false;
                         } else {
-                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(GENERAL_ERROR);
+                            $this->notification_control->SetNotification('DANGER', GENERAL_ERROR);
                         }
                     } else {
-                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(DATABASE_ERROR);
+                        $this->notification_control->SetNotification('DANGER', DATABASE_ERROR);
                     }
                 } else {
-                    $_SESSION[SESSION_NOTIFICATION] = $result_check_csrf_token;
+                    $_SESSION[SESSION_NOTIFICATION_NAME] = $result_check_csrf_token;
                 }
             } else {
-                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
+                $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
             }
         } else {
             $this->session_control->KillSession();
@@ -295,12 +313,12 @@ class AdminController extends Controller
     function MenuPreference()
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            if (isset($_SESSION[COOKIE_ADMIN_MENU])) {
-                $menu_preference = $_SESSION[COOKIE_ADMIN_MENU];
+            if (isset($_SESSION[COOKIE_ADMIN_MENU_NAME])) {
+                $menu_preference = $_SESSION[COOKIE_ADMIN_MENU_NAME];
                 if ($menu_preference === 'true') {
-                    $_SESSION[COOKIE_ADMIN_MENU] = 'false';
+                    $_SESSION[COOKIE_ADMIN_MENU_NAME] = 'false';
                 } elseif ($menu_preference === 'false') {
-                    $_SESSION[COOKIE_ADMIN_MENU] = 'true';
+                    $_SESSION[COOKIE_ADMIN_MENU_NAME] = 'true';
                 } else {
                     $this->session_control->KillSession();
                     exit(0);
@@ -317,14 +335,13 @@ class AdminController extends Controller
 
     function Index()
     {
-        $this->GetView('Admin/Index', $this->web_data);
+        parent::GetView('Admin/Index', $this->web_data);
     }
 
     function Items()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $this->input_control->CheckUrl(array('filter', 'search', 'max', 'min', 'sort', 'limit', 'page'));
-            parent::GetModel('ItemModel');
             $prices = $this->ItemModel->GetItemsDiscountPrices();
             if (!empty($prices)) {
                 $prices_for_filter = array();
@@ -339,7 +356,7 @@ class AdminController extends Controller
             $cond_params = array();
             $pagination = false;
             if (isset($_GET['filter'])) {
-                $checked_filter = $this->input_control->Check_GET_Input($_GET['filter']);
+                $checked_filter = $this->input_control->CheckGETInput($_GET['filter']);
                 if (!is_null($checked_filter)) {
                     switch ($checked_filter) {
                         case 'butun-urunler':
@@ -372,7 +389,7 @@ class AdminController extends Controller
                 }
             }
             if (isset($_GET['search'])) {
-                $checked_search = $this->input_control->Check_GET_Input($_GET['search']);
+                $checked_search = $this->input_control->CheckGETInput($_GET['search']);
                 if (!is_null($checked_search) && strlen($checked_search) <= 200) {
                     $get_with_param = true;
                     $this->web_data['search'] = $checked_search;
@@ -385,8 +402,8 @@ class AdminController extends Controller
             }
             if (isset($_GET['max']) && isset($_GET['min'])) {
                 if (is_numeric($_GET['min']) && is_numeric($_GET['max'])) {
-                    $min_price = (int)$this->input_control->Check_GET_Input($this->input_control->IsIntegerAndPositive($_GET['min']));
-                    $max_price = (int)$this->input_control->Check_GET_Input($this->input_control->IsIntegerAndPositive($_GET['max']));
+                    $min_price = (int)$this->input_control->CheckGETInput($this->input_control->IsIntegerAndPositive($_GET['min']));
+                    $max_price = (int)$this->input_control->CheckGETInput($this->input_control->IsIntegerAndPositive($_GET['max']));
                     if (!is_null($min_price) && !is_null($max_price) && ($min_price < $max_price)) {
                         $get_with_param = true;
                         $this->web_data['selected_min_price'] = $min_price;
@@ -404,7 +421,7 @@ class AdminController extends Controller
                 }
             }
             if (isset($_GET['sort'])) {
-                $checked_sort = $this->input_control->Check_GET_Input($_GET['sort']);
+                $checked_sort = $this->input_control->CheckGETInput($_GET['sort']);
                 if (!is_null($checked_sort)) {
                     switch ($checked_sort) {
                         case 'isim-azalan':
@@ -467,7 +484,7 @@ class AdminController extends Controller
                 }
             }
             if (isset($_GET['limit'])) {
-                $checked_limit = $this->input_control->Check_GET_Input($_GET['limit']);
+                $checked_limit = $this->input_control->CheckGETInput($_GET['limit']);
                 if (!is_null($checked_limit)) {
                     switch ($checked_limit) {
                         case '5':
@@ -502,7 +519,7 @@ class AdminController extends Controller
             }
             if (isset($_GET['page'])) {
                 if (is_numeric($_GET['page'])) {
-                    $checked_page = $this->input_control->Check_GET_Input($this->input_control->IsIntegerAndPositive($_GET['page']));
+                    $checked_page = $this->input_control->CheckGETInput($this->input_control->IsIntegerAndPositive($_GET['page']));
                     if (!is_null($checked_page)) {
                         $get_with_param = true;
                         $pagination = true;
@@ -644,7 +661,7 @@ class AdminController extends Controller
             } else {
                 $this->web_data['notfound_item'] = true;
             }
-            $this->GetView('Admin/Items', $this->web_data);
+            parent::GetView('Admin/Items', $this->web_data);
         } else {
             $this->session_control->KillSession();
             header('Location: ' . URL);
@@ -655,12 +672,11 @@ class AdminController extends Controller
     {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $this->input_control->CheckUrl();
-            $item_url = $this->input_control->Check_GET_Input($item_url);
+            $item_url = $this->input_control->CheckGETInput($item_url);
             if (!empty($item_url)) {
-                parent::GetModel('ItemModel');
                 $item = $this->ItemModel->GetItemByUrl($item_url);
                 if (!empty($item)) {
-                    $item = $this->input_control->GetItemsImages($item);
+                    $item = $this->input_control->GetItemImages($item);
                     if (!empty($item['item_images'])) {
                         $this->web_data['item'] = $item;
                     } else {
@@ -670,7 +686,6 @@ class AdminController extends Controller
                     $this->web_data['notfound_item'] = true;
                 }
                 // aynı-1
-                parent::GetModel('FilterModel');
                 $filters_main = $this->FilterModel->GetFiltersForAdminItem();
                 if (!empty($filters_main)) {
                     $filters = array();
@@ -686,7 +701,7 @@ class AdminController extends Controller
                     $this->web_data['filters'] = $filters;
                 }
                 // aynı-1
-                $this->GetView('Admin/ItemDetails', $this->web_data);
+                parent::GetView('Admin/ItemDetails', $this->web_data);
             } else {
                 header('Location: ' . URL . '/AdminController/Items');
                 exit(0);
@@ -700,9 +715,8 @@ class AdminController extends Controller
     {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $this->input_control->CheckUrl(array('filter', 'search', 'sort', 'limit', 'page'));
-            $checked_url = $this->input_control->Check_GET_Input($item_url);
+            $checked_url = $this->input_control->CheckGETInput($item_url);
             if (!empty($checked_url)) {
-                parent::GetModel('ItemModel');
                 $item = $this->ItemModel->GetItemByUrlForComment($checked_url);
                 if (!empty($item)) {
                     $this->web_data['item'] = $item;
@@ -711,7 +725,7 @@ class AdminController extends Controller
                     $cond_params = array();
                     $pagination = false;
                     if (isset($_GET['filter'])) {
-                        $checked_filter = $this->input_control->Check_GET_Input($_GET['filter']);
+                        $checked_filter = $this->input_control->CheckGETInput($_GET['filter']);
                         if (!is_null($checked_filter)) {
                             switch ($checked_filter) {
                                 case 'butun-yorumlar':
@@ -744,7 +758,7 @@ class AdminController extends Controller
                         }
                     }
                     if (isset($_GET['search'])) {
-                        $checked_search = $this->input_control->Check_GET_Input($_GET['search']);
+                        $checked_search = $this->input_control->CheckGETInput($_GET['search']);
                         if (!is_null($checked_search) && strlen($checked_search) <= 200) {
                             $get_with_param = true;
                             $this->web_data['search'] = $checked_search;
@@ -756,7 +770,7 @@ class AdminController extends Controller
                         }
                     }
                     if (isset($_GET['sort'])) {
-                        $checked_sort = $this->input_control->Check_GET_Input($_GET['sort']);
+                        $checked_sort = $this->input_control->CheckGETInput($_GET['sort']);
                         if (!is_null($checked_sort)) {
                             switch ($checked_sort) {
                                 case 'ekleme-tarihi-azalan':
@@ -795,7 +809,7 @@ class AdminController extends Controller
                         }
                     }
                     if (isset($_GET['limit'])) {
-                        $checked_limit = $this->input_control->Check_GET_Input($_GET['limit']);
+                        $checked_limit = $this->input_control->CheckGETInput($_GET['limit']);
                         if (!is_null($checked_limit)) {
                             switch ($checked_limit) {
                                 case '5':
@@ -830,7 +844,7 @@ class AdminController extends Controller
                     }
                     if (isset($_GET['page'])) {
                         if (is_numeric($_GET['page'])) {
-                            $checked_page = $this->input_control->Check_GET_Input($this->input_control->IsIntegerAndPositive($_GET['page']));
+                            $checked_page = $this->input_control->CheckGETInput($this->input_control->IsIntegerAndPositive($_GET['page']));
                             if (!is_null($checked_page)) {
                                 $get_with_param = true;
                                 $pagination = true;
@@ -943,7 +957,7 @@ class AdminController extends Controller
                 } else {
                     $this->web_data['notfound_item'] = true;
                 }
-                $this->GetView('Admin/ItemComments', $this->web_data);
+                parent::GetView('Admin/ItemComments', $this->web_data);
             } else {
                 header('Location: ' . URL . '/AdminController/Items');
                 exit(0);
@@ -958,7 +972,6 @@ class AdminController extends Controller
         // item_cart_id için strtr(sodium_bin2base64(random_bytes(2), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING), array('-' => 'A', '_' => '9'));
         $this->input_control->CheckUrl();
         // aynı-1
-        parent::GetModel('FilterModel');
         $filters_main = $this->FilterModel->GetFiltersForAdminItem();
         if (!empty($filters_main)) {
             $filters = array();
@@ -1037,7 +1050,7 @@ class AdminController extends Controller
             if (empty($checked_inputs['error_message'])) {
                 if (!empty($size_calculator) && $size_calculator !== (int)$checked_inputs['item_total_number']) {
                     $error = true;
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Beden stok adetleri ile toplam stok adedi uyuşmuyor');
+                    $this->notification_control->SetNotification('DANGER', 'Beden stok adetleri ile toplam stok adedi uyuşmuyor');
                 } elseif (isset($_FILES['item_image'])) {
                     $item_images = $_FILES['item_image'];
                     $image_tmp_names = array();
@@ -1053,26 +1066,26 @@ class AdminController extends Controller
                                     } else {
                                         $error = true;
                                         $this->web_data['image_error_message'] = 'Görselin uzantısı desteklenmiyor (Görsel ' . ($i + 1) . ')' . ' (Desteklenen uzantılar: ' . ITEM_IMAGE_ACCEPTED_TYPES_STR . ')';
-                                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Görselin uzantısı desteklenmiyor (Görsel ' . ($i + 1) . ')' . ' (Desteklenen uzantılar: ' . ITEM_IMAGE_ACCEPTED_TYPES_STR . ')');
+                                        $this->notification_control->SetNotification('DANGER', 'Görselin uzantısı desteklenmiyor (Görsel ' . ($i + 1) . ')' . ' (Desteklenen uzantılar: ' . ITEM_IMAGE_ACCEPTED_TYPES_STR . ')');
                                         break;
                                     }
                                 } else {
                                     $error = true;
                                     $this->web_data['image_error_message'] = 'Görselin boyutu ' . ITEM_IMAGE_MAX_SIZE_MB . ' MB dan fazla olamaz (Görsel ' . ($i + 1) . ')';
-                                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Görselin boyutu ' . ITEM_IMAGE_MAX_SIZE_MB . ' MB dan fazla olamaz (Görsel ' . ($i + 1) . ')');
+                                    $this->notification_control->SetNotification('DANGER', 'Görselin boyutu ' . ITEM_IMAGE_MAX_SIZE_MB . ' MB dan fazla olamaz (Görsel ' . ($i + 1) . ')');
                                     break;
                                 }
                             } else {
                                 $error = true;
                                 $this->web_data['image_error_message'] = 'Görsel yüklenirken bir hata oldu (Görsel ' . ($i + 1) . ')';
-                                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Görsel yüklenirken bir hata oldu (Görsel ' . ($i + 1) . ')');
+                                $this->notification_control->SetNotification('DANGER', 'Görsel yüklenirken bir hata oldu (Görsel ' . ($i + 1) . ')');
                                 break;
                             }
                         }
                     } else {
                         $error = true;
                         $this->web_data['image_error_message'] = 'En az 3 adet en fazla 6 adet ürün görseli yükleyebilirsiniz';
-                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('En az 3 adet ürün görseli yükleyin');
+                        $this->notification_control->SetNotification('DANGER', 'En az 3 adet ürün görseli yükleyin');
                     }
                     if (!$error) {
                         $id = strtolower(substr(strtr(base64_encode(hash_hmac('SHA512', time(), base64_encode(random_bytes(128)), true)), array('+' => '1', '=' => 'j', '/' => 'm', '.' => 's', '_' => 'b')), 30, 50));
@@ -1113,34 +1126,33 @@ class AdminController extends Controller
                                 $checked_inputs['item_ishome'] = isset($_POST['item_ishome']) ? 1 : 0;
                                 $checked_inputs['item_insale'] = isset($_POST['item_insale']) ? 1 : 0;
                                 $checked_inputs['id'] = $id;
-                                parent::GetModel('ItemModel');
                                 $result = $this->ItemModel->CreateItem($checked_inputs);
                                 if ($result['result'] == 'Created') {
-                                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Success(ucwords($checked_inputs['item_name']) . ' başarıyla eklendi');
+                                    $_SESSION[SESSION_NOTIFICATION_NAME] = $this->notification_control->SetNotification('SUCCESS', ucwords($checked_inputs['item_name']) . ' başarıyla eklendi');
                                 } else {
-                                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Ürün ekleme başarısız');
+                                    $this->notification_control->SetNotification('DANGER', 'Ürün ekleme başarısız');
                                 }
                                 header('Location: ' . URL . '/AdminController/Items');
                             } else {
                                 $error = true;
                                 $data['image_error_message'] = 'Ürün görselleri yüklenirken bir hata oldu';
-                                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Ürün görselleri yüklenirken bir hata oldu');
+                                $this->notification_control->SetNotification('DANGER', 'Ürün görselleri yüklenirken bir hata oldu');
                             }
                         } else {
                             $error = true;
                             $this->web_data['image_error_message'] = 'Ürün görselleri yüklenirken bir hata oldu';
-                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Ürün görselleri yüklenirken bir hata oldu');
+                            $this->notification_control->SetNotification('DANGER', 'Ürün görselleri yüklenirken bir hata oldu');
                         }
                     }
                 } else {
                     $error = true;
                     $this->web_data['image_error_message'] = 'En az 3 adet ürün görseli yükleyin';
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('En az 3 adet ürün görseli yükleyin');
+                    $this->notification_control->SetNotification('DANGER', 'En az 3 adet ürün görseli yükleyin');
                 }
             } else {
                 $error = true;
                 $this->web_data['error_input'] = $checked_inputs['error_input'];
-                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
+                $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
             }
             if ($error) {
                 $inputs = array();
@@ -1148,10 +1160,10 @@ class AdminController extends Controller
                     $inputs[$key] = $posted_input['input'];
                 }
                 $this->web_data['item'] = $inputs;
-                $this->GetView('Admin/ItemCreate', $this->web_data);
+                parent::GetView('Admin/ItemCreate', $this->web_data);
             }
         } elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            $this->GetView('Admin/ItemCreate', $this->web_data);
+            parent::GetView('Admin/ItemCreate', $this->web_data);
         } else {
             $this->session_control->KillSession();
             header('Location: ' . URL);
@@ -1161,9 +1173,7 @@ class AdminController extends Controller
     function ItemUpdate()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_item'])) {
-            parent::GetModel('ItemModel');
             // aynı-1
-            parent::GetModel('FilterModel');
             $filters_main = $this->FilterModel->GetFiltersForAdminItem();
             if (!empty($filters_main)) {
                 $filters = array();
@@ -1252,7 +1262,7 @@ class AdminController extends Controller
                 }
                 if (!empty($size_calculator) && $size_calculator !== (int)$checked_inputs['item_total_number']) {
                     $error = true;
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Beden stok adetleri ile toplam stok adedi uyuşmuyor');
+                    $this->notification_control->SetNotification('DANGER', 'Beden stok adetleri ile toplam stok adedi uyuşmuyor');
                 } elseif ($image_setted) {
                     $item_images = $_FILES['item_image'];
                     $image_tmp_names = array();
@@ -1269,26 +1279,26 @@ class AdminController extends Controller
                                     } else {
                                         $error = true;
                                         $this->web_data['image_error_message'] = 'Görselin uzantısı desteklenmiyor (Görsel ' . ($index + 1) . ')' . ' (Desteklenen uzantılar: ' . ITEM_IMAGE_ACCEPTED_TYPES_STR . ')';
-                                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Görselin uzantısı desteklenmiyor (Görsel ' . ($index + 1) . ')' . ' (Desteklenen uzantılar: ' . ITEM_IMAGE_ACCEPTED_TYPES_STR . ')');
+                                        $this->notification_control->SetNotification('DANGER', 'Görselin uzantısı desteklenmiyor (Görsel ' . ($index + 1) . ')' . ' (Desteklenen uzantılar: ' . ITEM_IMAGE_ACCEPTED_TYPES_STR . ')');
                                         break;
                                     }
                                 } else {
                                     $error = true;
                                     $this->web_data['image_error_message'] = 'Görselin boyutu ' . ITEM_IMAGE_MAX_SIZE_MB . ' MB dan fazla olamaz (Görsel ' . ($index + 1) . ')';
-                                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Görselin boyutu ' . ITEM_IMAGE_MAX_SIZE_MB . ' MB dan fazla olamaz (Görsel ' . ($index + 1) . ')');
+                                    $this->notification_control->SetNotification('DANGER', 'Görselin boyutu ' . ITEM_IMAGE_MAX_SIZE_MB . ' MB dan fazla olamaz (Görsel ' . ($index + 1) . ')');
                                     break;
                                 }
                             } else {
                                 $error = true;
                                 $this->web_data['image_error_message'] = 'Görsel yüklenirken bir hata oldu (Görsel ' . ($index + 1) . ')';
-                                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Görsel yüklenirken bir hata oldu (Görsel ' . ($index + 1) . ')');
+                                $this->notification_control->SetNotification('DANGER', 'Görsel yüklenirken bir hata oldu (Görsel ' . ($index + 1) . ')');
                                 break;
                             }
                         }
                     } else {
                         $error = true;
                         $this->web_data['image_error_message'] = 'En az 3 adet en fazla 6 adet ürün görseli yükleyebilirsiniz';
-                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('En az 3 adet ürün görseli yükleyin');
+                        $this->notification_control->SetNotification('DANGER', 'En az 3 adet ürün görseli yükleyin');
                     }
                     if (!$error) {
                         $image_folder = UPLOAD_IMAGES_PATH . $checked_inputs['id'];
@@ -1298,9 +1308,9 @@ class AdminController extends Controller
                             $item_images_db_passed = 0;
                             for ($i = 0; $i < count($image_tmp_names); $i++) {
                                 $image_random_name = strtolower(substr(strtr(base64_encode(hash_hmac('SHA512', time(), base64_encode(random_bytes(128)), true)), array('+' => '3', '=' => '5', '/' => '7', '.' => '4', '_' => '9')), 21, 10));
-                                $item_images_from_db = $this->ItemModel->GetItemsImagesForAdminUpdate($checked_inputs['id']);
+                                $item_images_from_db = $this->ItemModel->GetItemImagesForAdminUpdate($checked_inputs['id']);
                                 if (!empty($item_images_from_db)) {
-                                    $checked_item_images = $this->input_control->GetItemsImages($item_images_from_db);
+                                    $checked_item_images = $this->input_control->GetItemImages($item_images_from_db);
                                     $index = $image_setted_position[$i] + 1;
                                     if ($index < count($checked_item_images['item_images']) + 1) {
                                         foreach ($checked_item_images['item_images'] as $item_image) {
@@ -1357,7 +1367,7 @@ class AdminController extends Controller
                                 } else {
                                     $error = true;
                                     $this->web_data['image_error_message'] = 'Ürün görselleri yüklenirken bir hata oldu';
-                                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Ürün görselleri yüklenirken bir hata oldu');
+                                    $this->notification_control->SetNotification('DANGER', 'Ürün görselleri yüklenirken bir hata oldu');
                                 }
                             }
                             $checked_inputs['item_images'] = rtrim($item_images_db, '_');
@@ -1368,15 +1378,15 @@ class AdminController extends Controller
                             $checked_inputs['id'] = $temp_id;
                             $result = $this->ItemModel->UpdateItem($checked_inputs);
                             if ($result == 'Updated') {
-                                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Success(ucwords($checked_inputs['item_name']) . ' başarıyla güncellendi');
+                                $_SESSION[SESSION_NOTIFICATION_NAME] = $this->notification_control->SetNotification('SUCCESS', ucwords($checked_inputs['item_name']) . ' başarıyla güncellendi');
                             } else {
-                                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Ürün güncelleme başarısız');
+                                $this->notification_control->SetNotification('DANGER', 'Ürün güncelleme başarısız');
                             }
                             header('Location: ' . URL . '/AdminController/Items');
                         } else {
                             $error = true;
                             $this->web_data['image_error_message'] = 'Ürün görselleri yüklenirken bir hata oldu';
-                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Ürün görselleri yüklenirken bir hata oldu');
+                            $this->notification_control->SetNotification('DANGER', 'Ürün görselleri yüklenirken bir hata oldu');
                         }
                     }
                 } else {
@@ -1387,9 +1397,9 @@ class AdminController extends Controller
                     $checked_inputs['id'] = $temp_id;
                     $result = $this->ItemModel->UpdateItem($checked_inputs);
                     if ($result == 'Updated') {
-                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Success(ucwords($checked_inputs['item_name']) . ' başarıyla güncellendi');
+                        $_SESSION[SESSION_NOTIFICATION_NAME] = $this->notification_control->SetNotification('SUCCESS', ucwords($checked_inputs['item_name']) . ' başarıyla güncellendi');
                     } else {
-                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Ürün güncelleme başarısız');
+                        $this->notification_control->SetNotification('DANGER', 'Ürün güncelleme başarısız');
                     }
                     header('Location: ' . URL . '/AdminController/Items');
                     exit(0);
@@ -1397,7 +1407,7 @@ class AdminController extends Controller
             } else {
                 $error = true;
                 $this->web_data['error_input'] = $checked_inputs['error_input'];
-                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
+                $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
             }
             if ($error) {
                 if ((!empty($checked_inputs['error_input']) && ($checked_inputs['error_input'] != 'id')) || (!empty($posted_inputs['id']['input']) && (strlen($posted_inputs['id']['input'] != 50)))) {
@@ -1411,7 +1421,7 @@ class AdminController extends Controller
                         $inputs['item_insale'] = isset($_POST['item_insale']) ? 1 : 0;
                         $inputs['item_date_added'] = $item['item_date_added'];
                         $inputs['item_date_updated'] = $item['item_date_updated'];
-                        $item = $this->input_control->GetItemsImages($item);
+                        $item = $this->input_control->GetItemImages($item);
                         if (!is_null($item['item_images'])) {
                             $inputs['item_images'] = $item['item_images'];
                         } else {
@@ -1437,7 +1447,7 @@ class AdminController extends Controller
                 } else {
                     $this->web_data['notfound_item'] = true;
                 }
-                $this->GetView('Admin/ItemDetails', $this->web_data);
+                parent::GetView('Admin/ItemDetails', $this->web_data);
             }
         } else {
             $this->session_control->KillSession();
@@ -1451,7 +1461,6 @@ class AdminController extends Controller
             $item_id = $this->input_control->IsString(isset($_POST['item_id']) ? $_POST['item_id'] : '');
             if (!is_null($item_id)) {
                 $checked_id = $this->input_control->PreventXSS($item_id);
-                parent::GetModel('ItemModel');
                 $result = $this->ItemModel->DeleteItem($checked_id);
                 if ($result == 'Deleted') {
                     $image_folder = UPLOAD_IMAGES_PATH . $checked_id;
@@ -1464,12 +1473,12 @@ class AdminController extends Controller
                         $result_delete_images = rmdir($image_folder);
                     }
                     if ($result_delete_images) {
-                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Success('Ürün başarıyla silindi');
+                        $_SESSION[SESSION_NOTIFICATION_NAME] = $this->notification_control->SetNotification('SUCCESS', 'Ürün başarıyla silindi');
                     } else {
-                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Ürün başarıyla silindi. Ürün görselleri silme başarısız');
+                        $this->notification_control->SetNotification('DANGER', 'Ürün başarıyla silindi. Ürün görselleri silme başarısız');
                     }
                 } else {
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Ürün silme başarısız');
+                    $this->notification_control->SetNotification('DANGER', 'Ürün silme başarısız');
                 }
                 header('Location: ' . URL . '/AdminController/Items');
             } else {
@@ -1486,7 +1495,6 @@ class AdminController extends Controller
 
     function Filters()
     {
-        parent::GetModel('FilterModel');
         $data = array();
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['s'])) {
             $search_input = $this->input_control->IsString($_GET['s']);
@@ -1502,13 +1510,12 @@ class AdminController extends Controller
             $filters = $this->FilterModel->GetFilters();
             !empty($filters) ? $data['filters'] = $filters : $data['notfound_filter'] = $this->notification_control->NotFound('Kayıtlı Filtre Yok');
         }
-        $this->GetView('Admin/Filters', $data);
+        parent::GetView('Admin/Filters', $data);
     }
     function FilterDetails(string $filter_url = null)
     {
         $url_input = $this->input_control->IsString($filter_url);
         if ($url_input !== null) {
-            parent::GetModel('FilterModel');
             $data = array();
             $filter = $this->FilterModel->GetFilterByUrl($this->input_control->CheckAndGenerateUrl($url_input));
             if (!empty($filter)) {
@@ -1518,7 +1525,7 @@ class AdminController extends Controller
             } else {
                 $data['notfound_filter'] = $this->notification_control->NotFound("Filtre Bulunamadı");
             }
-            $this->GetView('Admin/FilterDetails', $data);
+            parent::GetView('Admin/FilterDetails', $data);
         } else {
             header('Location: ' . URL . '/AdminController/Filters');
         }
@@ -1535,7 +1542,6 @@ class AdminController extends Controller
             $checked_inputs = $this->input_control->CheckPostedInputs($posted_inputs);
             if (empty($checked_inputs['input_error_name'])) {
                 $checked_inputs = $this->input_control->CheckPostedInputsForDb($checked_inputs['input_datas']);
-                parent::GetModel('FilterModel');
                 $data = array();
                 $filter_names = $this->FilterModel->GetAllFilterWithName();
                 $filter_name_match = true;
@@ -1552,27 +1558,27 @@ class AdminController extends Controller
                     $result = $this->FilterModel->CreateFilter($checked_inputs);
                     if ($checked_inputs['filter_type'] == 2) {
                         $result2 = $this->FilterModel->CreateItemColumnCountable($checked_inputs['filter_name']);
-                        $_SESSION[SESSION_NOTIFICATION] = ($result['result'] == 'Created' && $result2 == 'Column Created') ? $this->notification_control->Success(ucwords($checked_inputs['filter_name']) . ' Başarıyla Eklendi') : $this->notification_control->Danger('Filtre Ekleme Başarısız');
+                        $_SESSION[SESSION_NOTIFICATION_NAME] = ($result['result'] == 'Created' && $result2 == 'Column Created') ? $this->notification_control->SetNotification('SUCCESS', ucwords($checked_inputs['filter_name']) . ' Başarıyla Eklendi') : $this->notification_control->Danger('Filtre Ekleme Başarısız');
                     } else {
-                        $_SESSION[SESSION_NOTIFICATION] = $result['result'] == 'Created' ? $this->notification_control->Success(ucwords($checked_inputs['filter_name']) . ' Başarıyla Eklendi') : $this->notification_control->Danger('Filtre Ekleme Başarısız');
+                        $_SESSION[SESSION_NOTIFICATION_NAME] = $result['result'] == 'Created' ? $this->notification_control->SetNotification('SUCCESS', ucwords($checked_inputs['filter_name']) . ' Başarıyla Eklendi') : $this->notification_control->Danger('Filtre Ekleme Başarısız');
                     }
                     $filters = $this->FilterModel->GetFilters();
                     !empty($filters) ? $data_redirect['filters'] = $filters : $data_redirect['notfound_filter'] = $this->notification_control->NotFound('Kayıtlı Filtre Yok');
-                    $this->GetView('Admin/Filters', $data_redirect);
+                    parent::GetView('Admin/Filters', $data_redirect);
                 } else {
                     $data['filter'] = $checked_inputs;
                     $data['input_error_key'] = 'filter_duplicate';
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Filtre Adı Zaten Kayıtlı');
-                    $this->GetView('Admin/FilterCreate', $data);
+                    $this->notification_control->SetNotification('DANGER', 'Filtre Adı Zaten Kayıtlı');
+                    parent::GetView('Admin/FilterCreate', $data);
                 }
             } else {
                 $data['filter'] = $checked_inputs['input_datas'];
                 $data['input_error_key'] = $checked_inputs['input_error_key'];
-                $_SESSION[SESSION_NOTIFICATION] = !empty($checked_inputs['input_error_length']) ? $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Ve ' . $checked_inputs['input_error_length'] . ' Karakterden Fazla Olamaz') : $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Olamaz');
-                $this->GetView('Admin/FilterCreate', $data);
+                $_SESSION[SESSION_NOTIFICATION_NAME] = !empty($checked_inputs['input_error_length']) ? $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Ve ' . $checked_inputs['input_error_length'] . ' Karakterden Fazla Olamaz') : $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Olamaz');
+                parent::GetView('Admin/FilterCreate', $data);
             }
         } else {
-            $this->GetView('Admin/FilterCreate');
+            parent::GetView('Admin/FilterCreate');
         }
     }
     function FilterUpdate()
@@ -1586,7 +1592,6 @@ class AdminController extends Controller
                 'id' => (isset($_POST['id']) ? $_POST['id'] : '') . '|Filtre&ID'
             );
             $checked_inputs = $this->input_control->CheckPostedInputs($posted_inputs);
-            parent::GetModel('FilterModel');
             $data = array();
             if (empty($checked_inputs['input_error_name'])) {
                 $checked_inputs = $this->input_control->CheckPostedInputsForDb($checked_inputs['input_datas']);
@@ -1623,19 +1628,19 @@ class AdminController extends Controller
                             if ($filter_ori_type == 2 && $checked_inputs['filter_type'] == 2) {
                                 $result2 = $this->FilterModel->DeleteItemColumn($filter_ori_name);
                                 $result3 = $this->FilterModel->CreateItemColumnCountable($checked_inputs['filter_name']);
-                                $_SESSION[SESSION_NOTIFICATION] = ($result == 'Updated' && $result2 == 'Column Deleted' && $result3 == 'Column Created') ? $this->notification_control->Success(ucwords($checked_inputs['filter_name']) . ' Başarıyla Güncellendi') : $this->notification_control->Danger('Filtre Güncelleme Başarısız');
+                                $_SESSION[SESSION_NOTIFICATION_NAME] = ($result == 'Updated' && $result2 == 'Column Deleted' && $result3 == 'Column Created') ? $this->notification_control->SetNotification('SUCCESS', ucwords($checked_inputs['filter_name']) . ' Başarıyla Güncellendi') : $this->notification_control->Danger('Filtre Güncelleme Başarısız');
                             } elseif ($filter_ori_type == 2 && $checked_inputs['filter_type'] != 2) {
                                 $result2 = $this->FilterModel->DeleteItemColumn($filter_ori_name);
-                                $_SESSION[SESSION_NOTIFICATION] = ($result == 'Updated' && $result2 == 'Column Deleted') ? $this->notification_control->Success(ucwords($checked_inputs['filter_name']) . ' Başarıyla Güncellendi') : $this->notification_control->Danger('Filtre Güncelleme Başarısız');
+                                $_SESSION[SESSION_NOTIFICATION_NAME] = ($result == 'Updated' && $result2 == 'Column Deleted') ? $this->notification_control->SetNotification('SUCCESS', ucwords($checked_inputs['filter_name']) . ' Başarıyla Güncellendi') : $this->notification_control->Danger('Filtre Güncelleme Başarısız');
                             } elseif ($filter_ori_type != 2 && $checked_inputs['filter_type'] == 2) {
                                 $result2 = $this->FilterModel->CreateItemColumnCountable($checked_inputs['filter_name']);
-                                $_SESSION[SESSION_NOTIFICATION] = ($result == 'Updated' && $result2 == 'Column Created') ? $this->notification_control->Success(ucwords($checked_inputs['filter_name']) . ' Başarıyla Güncellendi') : $this->notification_control->Danger('Filtre Güncelleme Başarısız');
+                                $_SESSION[SESSION_NOTIFICATION_NAME] = ($result == 'Updated' && $result2 == 'Column Created') ? $this->notification_control->SetNotification('SUCCESS', ucwords($checked_inputs['filter_name']) . ' Başarıyla Güncellendi') : $this->notification_control->Danger('Filtre Güncelleme Başarısız');
                             } else {
-                                $_SESSION[SESSION_NOTIFICATION] = $result == 'Updated' ? $this->notification_control->Success(ucwords($checked_inputs['filter_name']) . ' Başarıyla Güncellendi') : $this->notification_control->Danger(ucwords($checked_inputs['filter_name']) . ' Güncelleme Başarısız');
+                                $_SESSION[SESSION_NOTIFICATION_NAME] = $result == 'Updated' ? $this->notification_control->SetNotification('SUCCESS', ucwords($checked_inputs['filter_name']) . ' Başarıyla Güncellendi') : $this->notification_control->Danger(ucwords($checked_inputs['filter_name']) . ' Güncelleme Başarısız');
                             }
                             $filters = $this->FilterModel->GetFilters();
                             !empty($filters) ? $data_redirect['filters'] = $filters : $data_redirect['notfound_filter'] =  $this->notification_control->NotFound('Filtre Bulunamadı');
-                            $this->GetView('Admin/Filters', $data_redirect);
+                            parent::GetView('Admin/Filters', $data_redirect);
                         } else {
                             header('Location: ' . URL . '/AdminController/Filters');
                         }
@@ -1644,8 +1649,8 @@ class AdminController extends Controller
                         $filters_sub = $this->FilterModel->GetSubFiltersByFilterId('*', $filter['id']);
                         !empty($filters_sub) ? $data['filters_sub'] = $filters_sub : $data['notfound_filter_sub'] = $this->notification_control->NotFound('"' . ucwords($filter['filter_name']) . '" Filtresinin Alt Filtresi Yok');
                         $data['input_error_key'] = 'filter_duplicate';
-                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Filtre Adı Zaten Kayıtlı');
-                        $this->GetView('Admin/FilterDetails', $data);
+                        $this->notification_control->SetNotification('DANGER', 'Filtre Adı Zaten Kayıtlı');
+                        parent::GetView('Admin/FilterDetails', $data);
                     }
                 } else {
                     header('Location: ' . URL . '/AdminController/Filters');
@@ -1657,8 +1662,8 @@ class AdminController extends Controller
                     $filters_sub = $this->FilterModel->GetSubFiltersByFilterId('*', $filter['id']);
                     !empty($filters_sub) ? $data['filters_sub'] = $filters_sub : $data['notfound_filter_sub'] = $this->notification_control->NotFound('"' . ucwords($filter['filter_name']) . '" Filtresinin Alt Filtresi Yok');
                     $data['input_error_key'] = $checked_inputs['input_error_key'];
-                    $_SESSION[SESSION_NOTIFICATION] = !empty($checked_inputs['input_error_length']) ? $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Ve ' . $checked_inputs['input_error_length'] . ' Karakterden Fazla Olamaz') : $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Olamaz');
-                    $this->GetView('Admin/FilterDetails', $data);
+                    $_SESSION[SESSION_NOTIFICATION_NAME] = !empty($checked_inputs['input_error_length']) ? $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Ve ' . $checked_inputs['input_error_length'] . ' Karakterden Fazla Olamaz') : $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Olamaz');
+                    parent::GetView('Admin/FilterDetails', $data);
                 } else {
                     header('Location: ' . URL . '/AdminController/Filters');
                 }
@@ -1672,7 +1677,6 @@ class AdminController extends Controller
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_filter'])) {
             $input_id = $this->input_control->IsString(isset($_POST['filter_id']) ? $_POST['filter_id'] : '');
             if ($input_id !== null) {
-                parent::GetModel('FilterModel');
                 $data = array();
                 $checked_id = $this->input_control->CheckPostedInputForDb($input_id);
                 $persmission = true;
@@ -1686,13 +1690,13 @@ class AdminController extends Controller
                     $result = $this->FilterModel->DeleteFilter($checked_id);
                     if ($filter['filter_type'] == 2) {
                         $result2 = $this->FilterModel->DeleteItemColumn($filter['filter_name']);
-                        $_SESSION[SESSION_NOTIFICATION] = ($result == 'Deleted' && $result2 == 'Column Deleted') ? $this->notification_control->Success('Filtre Başarıyla Silindi') : $this->notification_control->Danger('Filtre Silme Başarısız');
+                        $_SESSION[SESSION_NOTIFICATION_NAME] = ($result == 'Deleted' && $result2 == 'Column Deleted') ? $this->notification_control->SetNotification('SUCCESS', 'Filtre Başarıyla Silindi') : $this->notification_control->Danger('Filtre Silme Başarısız');
                     } else {
-                        $_SESSION[SESSION_NOTIFICATION] = $result == 'Deleted' ? $this->notification_control->Success('Filtre Başarıyla Silindi') : $this->notification_control->Danger('Filtre Silme Başarısız');
+                        $_SESSION[SESSION_NOTIFICATION_NAME] = $result == 'Deleted' ? $this->notification_control->SetNotification('SUCCESS', 'Filtre Başarıyla Silindi') : $this->notification_control->Danger('Filtre Silme Başarısız');
                     }
                     $filters = $this->FilterModel->GetFilters();
                     !empty($filters) ? $data['filters'] = $filters : $data['notfound_filter'] = $this->notification_control->NotFound('Kayıtlı Filtre Yok');
-                    $this->GetView('Admin/Filters', $data);
+                    parent::GetView('Admin/Filters', $data);
                 } else {
                     header('Location: ' . URL . '/AdminController/Filters');
                 }
@@ -1708,8 +1712,6 @@ class AdminController extends Controller
     {
         $url_input = $this->input_control->IsString($filter_sub_url);
         if ($url_input !== null) {
-            parent::GetModel('FilterModel');
-            parent::GetModel('ItemModel');
             $data = array();
             $filter_sub = $this->FilterModel->GetSubFilterByUrl($this->input_control->CheckAndGenerateUrl($url_input));
             if (!empty($filter_sub)) {
@@ -1731,14 +1733,13 @@ class AdminController extends Controller
             } else {
                 $data['notfound_filter_sub'] = $this->notification_control->NotFound('Alt Filtre Bulunamadı');
             }
-            $this->GetView('Admin/FilterSubDetails', $data);
+            parent::GetView('Admin/FilterSubDetails', $data);
         } else {
             header('Location: ' . URL . '/AdminController/Filters');
         }
     }
     function FilterSubCreate()
     {
-        parent::GetModel('FilterModel');
         $data = array();
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_filter_sub'])) {
             $posted_inputs = array(
@@ -1776,10 +1777,10 @@ class AdminController extends Controller
                             $result = $this->FilterModel->CreateFilterSub($checked_inputs);
                             if ($filter['filter_has_sub'] == 0) {
                                 $result3 = $this->FilterModel->UpdateFilterValidation(array('filter_has_sub' => 1, 'id' => $checked_inputs['filter_id']));
-                                $_SESSION[SESSION_NOTIFICATION] = ($result['result'] == 'Created' && $result3 == 'Updated') ? $this->notification_control->Success($checked_inputs['filter_sub_name'] . ' Başarıyla Eklendi') : $this->notification_control->Danger($checked_inputs['filter_sub_name'] . ' Ekleme Başarısız');
+                                $_SESSION[SESSION_NOTIFICATION_NAME] = ($result['result'] == 'Created' && $result3 == 'Updated') ? $this->notification_control->SetNotification('SUCCESS', $checked_inputs['filter_sub_name'] . ' Başarıyla Eklendi') : $this->notification_control->Danger($checked_inputs['filter_sub_name'] . ' Ekleme Başarısız');
                             }
-                            if (empty($_SESSION[SESSION_NOTIFICATION])) {
-                                $result['result'] == 'Created' ? $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Success($checked_inputs['filter_sub_name'] . ' Başarıyla Eklendi') : $this->notification_control->Danger($checked_inputs['filter_sub_name'] . ' Ekleme Başarısız');
+                            if (empty($_SESSION[SESSION_NOTIFICATION_NAME])) {
+                                $result['result'] == 'Created' ? $_SESSION[SESSION_NOTIFICATION_NAME] = $this->notification_control->SetNotification('SUCCESS', $checked_inputs['filter_sub_name'] . ' Başarıyla Eklendi') : $this->notification_control->Danger($checked_inputs['filter_sub_name'] . ' Ekleme Başarısız');
                             }
                         } elseif ($checked_inputs2['filter_type'] == 1 || $checked_inputs2['filter_type'] == 3) {
                             $result = $this->FilterModel->CreateFilterSub($checked_inputs);
@@ -1787,9 +1788,9 @@ class AdminController extends Controller
                             $result2 = $this->FilterModel->CreateItemColumnCountable($checked_inputs2['filter_name'] . '_' . $sub_name_fordb);
                             if ($filter['filter_has_sub'] == 0) {
                                 $result3 = $this->FilterModel->UpdateFilterValidation(array('filter_has_sub' => 1, 'id' => $checked_inputs['filter_id']));
-                                $_SESSION[SESSION_NOTIFICATION] = ($result['result'] == 'Created' && $result2 == 'Column Created' && $result3 == 'Updated') ? $this->notification_control->Success($checked_inputs['filter_sub_name'] . ' Başarıyla Eklendi') : $this->notification_control->Danger($checked_inputs['filter_sub_name'] . ' Ekleme Başarısız');
+                                $_SESSION[SESSION_NOTIFICATION_NAME] = ($result['result'] == 'Created' && $result2 == 'Column Created' && $result3 == 'Updated') ? $this->notification_control->SetNotification('SUCCESS', $checked_inputs['filter_sub_name'] . ' Başarıyla Eklendi') : $this->notification_control->Danger($checked_inputs['filter_sub_name'] . ' Ekleme Başarısız');
                             }
-                            $_SESSION[SESSION_NOTIFICATION] = ($result['result'] == 'Created' && $result2 == 'Column Created') ? $this->notification_control->Success($checked_inputs['filter_sub_name'] . ' Başarıyla Eklendi') : $this->notification_control->Danger($checked_inputs['filter_sub_name'] . ' Ekleme Başarısız');
+                            $_SESSION[SESSION_NOTIFICATION_NAME] = ($result['result'] == 'Created' && $result2 == 'Column Created') ? $this->notification_control->SetNotification('SUCCESS', $checked_inputs['filter_sub_name'] . ' Başarıyla Eklendi') : $this->notification_control->Danger($checked_inputs['filter_sub_name'] . ' Ekleme Başarısız');
                         } else {
                             header('Location: ' . URL . '/AdminController/Filters');
                         }
@@ -1803,7 +1804,7 @@ class AdminController extends Controller
                             } else {
                                 $data['notfound_filter'] = $this->notification_control->NotFound("Filtre Bulunamadı");
                             }
-                            $this->GetView('Admin/FilterDetails', $data);
+                            parent::GetView('Admin/FilterDetails', $data);
                         } else {
                             header('Location: ' . URL . '/AdminController/Filters');
                         }
@@ -1816,8 +1817,8 @@ class AdminController extends Controller
                         $data['filter'] = $filter;
                         $data['filter_sub'] = $checked_inputs;
                         $data['input_error_key'] = 'sub_filter_duplicate';
-                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(ucwords($filter['filter_name']) . ' Filtre Adı Zaten Kayıtlı');
-                        $this->GetView('Admin/FilterSubCreate', $data);
+                        $this->notification_control->SetNotification('DANGER', ucwords($filter['filter_name']) . ' Filtre Adı Zaten Kayıtlı');
+                        parent::GetView('Admin/FilterSubCreate', $data);
                     } else {
                         header('Location: ' . URL . '/AdminController/Filters');
                     }
@@ -1828,8 +1829,8 @@ class AdminController extends Controller
                     $data['filter'] = $filter;
                     $data['filter_sub'] = $checked_inputs['input_datas'];
                     $data['input_error_key'] = $checked_inputs['input_error_key'];
-                    $_SESSION[SESSION_NOTIFICATION] = !empty($checked_inputs['input_error_length']) ? $this->notification_control->Danger(ucwords($filter['filter_name']) . ' ' . $checked_inputs['input_error_name'] . ' Boş Ve ' . $checked_inputs['input_error_length'] . ' Karakterden Fazla Olamaz') : $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Olamaz');
-                    $this->GetView('Admin/FilterSubCreate', $data);
+                    $_SESSION[SESSION_NOTIFICATION_NAME] = !empty($checked_inputs['input_error_length']) ? $this->notification_control->Danger(ucwords($filter['filter_name']) . ' ' . $checked_inputs['input_error_name'] . ' Boş Ve ' . $checked_inputs['input_error_length'] . ' Karakterden Fazla Olamaz') : $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Olamaz');
+                    parent::GetView('Admin/FilterSubCreate', $data);
                 } else {
                     header('Location: ' . URL . '/AdminController/Filters');
                 }
@@ -1840,7 +1841,7 @@ class AdminController extends Controller
                 $filter = $this->FilterModel->GetFilterById('*', $this->input_control->CheckPostedInputForDb($posted_id));
                 if (!empty($filter)) {
                     $data['filter'] = $filter;
-                    $this->GetView('Admin/FilterSubCreate', $data);
+                    parent::GetView('Admin/FilterSubCreate', $data);
                 } else {
                     header('Location: ' . URL . '/AdminController/Filters');
                 }
@@ -1861,8 +1862,6 @@ class AdminController extends Controller
                 'id' => (isset($_POST['id']) ? $_POST['id'] : '') . '|Alt&Filtre&ID'
             );
             $checked_inputs = $this->input_control->CheckPostedInputs($posted_inputs);
-            parent::GetModel('FilterModel');
-            parent::GetModel('ItemModel');
             $data = array();
             if (empty($checked_inputs['input_error_name'])) {
                 $checked_inputs = $this->input_control->CheckPostedInputsForDb($checked_inputs['input_datas']);
@@ -1885,7 +1884,7 @@ class AdminController extends Controller
                         $old_sub_name_fordb = str_replace(' ', '_', $filter_sub['filter_sub_name']);
                         $this->FilterModel->RenameItemColumn($filter['filter_name'] . '_' . $old_sub_name_fordb, $filter['filter_name'] . '_' . $sub_name_fordb);
                     }
-                    $_SESSION[SESSION_NOTIFICATION] = $result == 'Updated' ? $this->notification_control->Success(ucwords($checked_inputs['filter_sub_name']) . ' Başarıyla Güncellendi') : $this->notification_control->Danger('Alt Filtre Güncelleme Başarısız');
+                    $_SESSION[SESSION_NOTIFICATION_NAME] = $result == 'Updated' ? $this->notification_control->SetNotification('SUCCESS', ucwords($checked_inputs['filter_sub_name']) . ' Başarıyla Güncellendi') : $this->notification_control->Danger('Alt Filtre Güncelleme Başarısız');
                     $filter = $this->FilterModel->GetFilterById('*', $checked_inputs['filter_id']);
                     if (!empty($filter)) {
                         $data['filter'] = $filter;
@@ -1894,7 +1893,7 @@ class AdminController extends Controller
                     } else {
                         $data['notfound_filter'] = $this->notification_control->NotFound("Filtre Bulunamadı");
                     }
-                    $this->GetView('Admin/FilterDetails', $data);
+                    parent::GetView('Admin/FilterDetails', $data);
                 } else {
                     $filter = $this->FilterModel->GetFilterById('*', $checked_inputs['filter_id']);
                     $filter_sub = $this->FilterModel->GetFilterSubById($checked_inputs['id']);
@@ -1909,8 +1908,8 @@ class AdminController extends Controller
                         }
                         !empty($items) ? $data['items'] = $items : $data['notfound_item'] = $this->notification_control->NotFound('Alt Filtreye Ait Ürün Yok');
                         $data['input_error_key'] = 'sub_filter_duplicate';
-                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(ucwords($filter['filter_name']) . ' Filtre Adı Zaten Kayıtlı');
-                        $this->GetView('Admin/FilterSubDetails', $data);
+                        $this->notification_control->SetNotification('DANGER', ucwords($filter['filter_name']) . ' Filtre Adı Zaten Kayıtlı');
+                        parent::GetView('Admin/FilterSubDetails', $data);
                     } else {
                         header('Location: ' . URL . '/AdminController/Filters');
                     }
@@ -1929,8 +1928,8 @@ class AdminController extends Controller
                     }
                     !empty($items) ? $data['items'] = $items : $data['notfound_item'] = $this->notification_control->NotFound('Alt Filtreye Ait Ürün Yok');
                     $data['input_error_key'] = $checked_inputs['input_error_key'];
-                    $_SESSION[SESSION_NOTIFICATION] = !empty($checked_inputs['input_error_length']) ? $this->notification_control->Danger(ucwords($filter['filter_name']) . ' ' . $checked_inputs['input_error_name'] . ' Boş Ve ' . $checked_inputs['input_error_length'] . ' Karakterden Fazla Olamaz') : $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Olamaz');
-                    $this->GetView('Admin/FilterSubDetails', $data);
+                    $_SESSION[SESSION_NOTIFICATION_NAME] = !empty($checked_inputs['input_error_length']) ? $this->notification_control->Danger(ucwords($filter['filter_name']) . ' ' . $checked_inputs['input_error_name'] . ' Boş Ve ' . $checked_inputs['input_error_length'] . ' Karakterden Fazla Olamaz') : $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Olamaz');
+                    parent::GetView('Admin/FilterSubDetails', $data);
                 } else {
                     header('Location: ' . URL . '/AdminController/Filters');
                 }
@@ -1944,8 +1943,6 @@ class AdminController extends Controller
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_filter_sub'])) {
             $input_id = $this->input_control->IsString(isset($_POST['filter_sub_id']) ? $_POST['filter_sub_id'] : '');
             if ($input_id !== null) {
-                parent::GetModel('FilterModel');
-                parent::GetModel('ItemModel');
                 $data = array();
                 $checked_id = $this->input_control->CheckPostedInputForDb($input_id);
                 $permission = true;
@@ -1971,15 +1968,15 @@ class AdminController extends Controller
                             }
                             if ($filter['filter_type'] == 2) {
                                 $result2 = $this->FilterModel->EmptyItemColumn($filter['filter_name'], $filter_sub['id']);
-                                $_SESSION[SESSION_NOTIFICATION] = ($result == 'Deleted' && $result2 == 'Updated') ? $this->notification_control->Success($filter_sub['filter_sub_name'] . ' Filtresi Başarıyla Silindi') : $this->notification_control->Danger($filter_sub['filter_sub_name'] . ' Filtre Silme Başarısız');
+                                $_SESSION[SESSION_NOTIFICATION_NAME] = ($result == 'Deleted' && $result2 == 'Updated') ? $this->notification_control->SetNotification('SUCCESS', $filter_sub['filter_sub_name'] . ' Filtresi Başarıyla Silindi') : $this->notification_control->Danger($filter_sub['filter_sub_name'] . ' Filtre Silme Başarısız');
                             } elseif ($filter['filter_type'] == 1 || $filter['filter_type'] === 3) {
                                 $sub_name_fordb = str_replace(' ', '_', $filter_sub['filter_sub_name']);
                                 $result2 = $this->FilterModel->DeleteItemColumn($filter['filter_name'] . '_' . $sub_name_fordb);
-                                $_SESSION[SESSION_NOTIFICATION] = ($result == 'Deleted' && $result2 == 'Column Deleted') ? $this->notification_control->Success($filter_sub['filter_sub_name'] . ' Filtresi Başarıyla Silindi') : $this->notification_control->Danger($filter_sub['filter_sub_name'] . ' Filtre Silme Başarısız');
+                                $_SESSION[SESSION_NOTIFICATION_NAME] = ($result == 'Deleted' && $result2 == 'Column Deleted') ? $this->notification_control->SetNotification('SUCCESS', $filter_sub['filter_sub_name'] . ' Filtresi Başarıyla Silindi') : $this->notification_control->Danger($filter_sub['filter_sub_name'] . ' Filtre Silme Başarısız');
                             } else {
                                 header('Location: ' . URL . '/AdminController/Filters');
                             }
-                            $this->GetView('Admin/FilterDetails', $data);
+                            parent::GetView('Admin/FilterDetails', $data);
                         } else {
                             header('Location: ' . URL . '/AdminController/Filters');
                         }
@@ -2029,7 +2026,7 @@ class AdminController extends Controller
                 $data['notfound_user'] = $this->notification_control->NotFound('Kayıtlı Ürün Yok');
             }
         }
-        $this->GetView('Admin/Users', $data);
+        parent::GetView('Admin/Users', $data);
     }
     function UserDetails(string $user_id = null)
     {
@@ -2045,7 +2042,6 @@ class AdminController extends Controller
                 $data['roles'] = $this->RoleModel->GetRoleNamesAndId();
                 $comments = $this->UserModel->GetCommentsByUserId($user['id']);
                 if (!empty($comments)) {
-                    parent::GetModel('ItemModel');
                     $items = array();
                     foreach ($comments as $comment) {
                         $items[$comment['user_id']] = $this->ItemModel->GetItemNameAndUrlById($comment['item_id']);
@@ -2058,7 +2054,7 @@ class AdminController extends Controller
             } else {
                 $data['notfound_user'] = $this->notification_control->NotFound("Kullanıcı Bulunamadı");
             }
-            $this->GetView('Admin/UserDetails', $data);
+            parent::GetView('Admin/UserDetails', $data);
         } else {
             header('Location: ' . URL . '/AdminController/Users');
         }
@@ -2113,18 +2109,18 @@ class AdminController extends Controller
                                         foreach ($users_emails as $user_email) {
                                             if ($user_email['email'] === $checked_inputs['email']) {
                                                 $data['input_error_key'] = 'email_duplicate';
-                                                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Email Zaten Kayıtlı');
+                                                $this->notification_control->SetNotification('DANGER', 'Email Zaten Kayıtlı');
                                                 break;
                                             }
                                         }
                                     } else {
                                         $data['input_error_key'] = 'not_valid_email';
-                                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Email Geçerli Değil');
+                                        $this->notification_control->SetNotification('DANGER', 'Email Geçerli Değil');
                                     }
                                 }
                             } else {
                                 $data['input_error_key'] = 'not_valid_email';
-                                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Email Geçerli Değil');
+                                $this->notification_control->SetNotification('DANGER', 'Email Geçerli Değil');
                             }
                             if (empty($data['input_error_key'])) {
                                 $users_tels = $this->UserModel->GetUsersPhoneNumbers();
@@ -2133,7 +2129,7 @@ class AdminController extends Controller
                                     foreach ($users_tels as $user_tel) {
                                         if ($user_tel['tel'] === '90' . $checked_inputs['tel']) {
                                             $data['input_error_key'] = 'tel_duplicate';
-                                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Telefon Numarası Zaten Kayıtlı');
+                                            $this->notification_control->SetNotification('DANGER', 'Telefon Numarası Zaten Kayıtlı');
                                             $tel_duplicate = false;
                                             break;
                                         }
@@ -2141,7 +2137,7 @@ class AdminController extends Controller
                                 }
                                 if ($tel_duplicate && strlen($checked_inputs['tel']) != 10) {
                                     $data['input_error_key'] = 'tel';
-                                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Telefon Numarası Geçersiz');
+                                    $this->notification_control->SetNotification('DANGER', 'Telefon Numarası Geçersiz');
                                 }
                             }
                             if (empty($data['input_error_key'])) {
@@ -2153,22 +2149,22 @@ class AdminController extends Controller
                                 $checked_inputs['email'] = $this->input_control->CheckAndEncodeMail($checked_inputs['email']);
                                 $result = $this->UserModel->CreateUser($checked_inputs);
                                 $data_redirect = array();
-                                $_SESSION[SESSION_NOTIFICATION] = $result['result'] == 'Created' ? $this->notification_control->Success('Kullanıcı Başarıyla Eklendi') : $this->notification_control->Danger('Kullanıcı Ekleme Başarısız');
+                                $_SESSION[SESSION_NOTIFICATION_NAME] = $result['result'] == 'Created' ? $this->notification_control->SetNotification('SUCCESS', 'Kullanıcı Başarıyla Eklendi') : $this->notification_control->Danger('Kullanıcı Ekleme Başarısız');
                                 $users = $this->UserModel->GetAllUser();
                                 foreach ($users as $key => $user) {
                                     $users[$key]['email'] = $this->input_control->DecodeMail($user['email']);
                                 }
                                 !empty($users) ? $data_redirect['users'] = $users : $data_redirect['notfound_user'] = $this->notification_control->NotFound('Kayıtlı Kullanıcı Yok');
-                                $this->GetView('Admin/Users', $data_redirect);
+                                parent::GetView('Admin/Users', $data_redirect);
                             } else {
                                 $data['user'] = $checked_inputs;
-                                $this->GetView('Admin/UserCreate', $data);
+                                parent::GetView('Admin/UserCreate', $data);
                             }
                         } else {
                             $data['user'] = $checked_inputs['input_datas'];
                             $data['input_error_key'] = $checked_inputs['input_error_key'];
-                            $_SESSION[SESSION_NOTIFICATION] = !empty($checked_inputs['input_error_length']) ? $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Ve ' . $checked_inputs['input_error_length'] . ' Karakterden Fazla Olamaz') : $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Olamaz');
-                            $this->GetView('Admin/UserCreate', $data);
+                            $_SESSION[SESSION_NOTIFICATION_NAME] = !empty($checked_inputs['input_error_length']) ? $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Ve ' . $checked_inputs['input_error_length'] . ' Karakterden Fazla Olamaz') : $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Olamaz');
+                            parent::GetView('Admin/UserCreate', $data);
                         }
                     } else {
                         header('Location: ' . URL . '/AdminController/Users');
@@ -2177,10 +2173,10 @@ class AdminController extends Controller
                     header('Location: ' . URL . '/AdminController/Users');
                 }
             } else {
-                $this->GetView('Admin/UserCreate', $data);
+                parent::GetView('Admin/UserCreate', $data);
             }
         } else {
-            $this->GetView('Admin/Users', array('notification' => $this->notification_control->Danger('Önce Bir Rol Eklemelsiniz')));
+            parent::GetView('Admin/Users', array('notification' => $this->notification_control->Danger('Önce Bir Rol Eklemelsiniz')));
         }
     }
     function UserUpdate()
@@ -2209,13 +2205,13 @@ class AdminController extends Controller
                         $checked_inputs = $this->input_control->CheckPostedInputsForDb($checked_inputs['input_datas']);
                         $data_redirect = array();
                         $result = $this->UserModel->UpdateUser($checked_inputs);
-                        $_SESSION[SESSION_NOTIFICATION] = $result == 'Updated' ? $this->notification_control->Success('Kullanıcı Başarıyla Güncellendi') : $this->notification_control->Danger('Kullanıcı Güncelleme Başarısız');
+                        $_SESSION[SESSION_NOTIFICATION_NAME] = $result == 'Updated' ? $this->notification_control->SetNotification('SUCCESS', 'Kullanıcı Başarıyla Güncellendi') : $this->notification_control->Danger('Kullanıcı Güncelleme Başarısız');
                         $users = $this->UserModel->GetAllUser();
                         foreach ($users as $key => $user) {
                             $users[$key]['email'] = $this->input_control->DecodeMail($user['email']);
                         }
                         !empty($users) ? $data_redirect['users'] = $users : $data_redirect['notfound_user'] = $this->notification_control->NotFound('Kayıtlı Kullanıcı Yok');
-                        $this->GetView('Admin/Users', $data_redirect);
+                        parent::GetView('Admin/Users', $data_redirect);
                     } else {
                         header('Location: ' . URL . '/AdminController/Users');
                     }
@@ -2250,7 +2246,7 @@ class AdminController extends Controller
                         rmdir($new_image_folder, 0777, true);
                     }
                     $result = $this->UserModel->DeleteUser($checked_id);
-                    $_SESSION[SESSION_NOTIFICATION] = $result == 'Deleted' ? $this->notification_control->Success('Kullanıcı Başarıyla Silindi') : $this->notification_control->Danger('Kullanıcı Silme Başarısız');
+                    $_SESSION[SESSION_NOTIFICATION_NAME] = $result == 'Deleted' ? $this->notification_control->SetNotification('SUCCESS', 'Kullanıcı Başarıyla Silindi') : $this->notification_control->Danger('Kullanıcı Silme Başarısız');
                     $users = $this->UserModel->GetAllUser();
                     if (!empty($users)) {
                         foreach ($users as $key => $user) {
@@ -2260,7 +2256,7 @@ class AdminController extends Controller
                     } else {
                         $data['notfound_user'] = $this->notification_control->NotFound('Kayıtlı Ürün Yok');
                     }
-                    $this->GetView('Admin/Users', $data);
+                    parent::GetView('Admin/Users', $data);
                 } else {
                     header('Location: ' . URL . '/AdminController/Users');
                 }
@@ -2290,7 +2286,7 @@ class AdminController extends Controller
             $roles = $this->RoleModel->GetAllRole();
             !empty($roles) ? $data['roles'] = $roles : $data['notfound_role'] = $this->notification_control->NotFound('Kayıtlı Rol Yok');
         }
-        $this->GetView('Admin/Roles', $data);
+        parent::GetView('Admin/Roles', $data);
     }
     function RoleDetails(string $role_url = null)
     {
@@ -2314,7 +2310,7 @@ class AdminController extends Controller
             } else {
                 $data['notfound_role'] = $this->notification_control->NotFound("Rol Bulunamadı");
             }
-            $this->GetView('Admin/RoleDetails', $data);
+            parent::GetView('Admin/RoleDetails', $data);
         } else {
             header('Location: ' . URL . '/AdminController/Roles');
         }
@@ -2341,24 +2337,24 @@ class AdminController extends Controller
                 if ($role_not_match) {
                     $data_redirect = array();
                     $result = $this->RoleModel->CreateRole($checked_inputs);
-                    $_SESSION[SESSION_NOTIFICATION] = $result['result'] == 'Created' ? $this->notification_control->Success(ucwords($checked_inputs['role_name']) . ' Rolü Başarıyla Eklendi') : $this->notification_control->Danger('Rol Ekleme Başarısız');
+                    $_SESSION[SESSION_NOTIFICATION_NAME] = $result['result'] == 'Created' ? $this->notification_control->SetNotification('SUCCESS', ucwords($checked_inputs['role_name']) . ' Rolü Başarıyla Eklendi') : $this->notification_control->Danger('Rol Ekleme Başarısız');
                     $roles = $this->RoleModel->GetAllRole();
                     !empty($roles) ? $data_redirect['roles'] = $roles : $data_redirect['notfound_role'] = $this->notification_control->NotFound('Kayıtlı Rol Yok');
-                    $this->GetView('Admin/Roles', $data_redirect);
+                    parent::GetView('Admin/Roles', $data_redirect);
                 } else {
                     $data['role'] = $checked_inputs;
                     $data['input_error_key'] = 'role_duplicate';
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Rol Zaten Kayıtlı');
-                    $this->GetView('Admin/RoleCreate', $data);
+                    $this->notification_control->SetNotification('DANGER', 'Rol Zaten Kayıtlı');
+                    parent::GetView('Admin/RoleCreate', $data);
                 }
             } else {
                 $data['role'] = $checked_inputs['input_datas'];
                 $data['input_error_key'] = $checked_inputs['input_error_key'];
-                $_SESSION[SESSION_NOTIFICATION] = !empty($checked_inputs['input_error_length']) ? $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Ve ' . $checked_inputs['input_error_length'] . ' Karakterden Fazla Olamaz') : $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Olamaz');
-                $this->GetView('Admin/RoleCreate', $data);
+                $_SESSION[SESSION_NOTIFICATION_NAME] = !empty($checked_inputs['input_error_length']) ? $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Ve ' . $checked_inputs['input_error_length'] . ' Karakterden Fazla Olamaz') : $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Olamaz');
+                parent::GetView('Admin/RoleCreate', $data);
             }
         } else {
-            $this->GetView('Admin/RoleCreate');
+            parent::GetView('Admin/RoleCreate');
         }
     }
     function RoleUpdate()
@@ -2385,10 +2381,10 @@ class AdminController extends Controller
                 if ($role_not_match) {
                     $data_redirect = array();
                     $result = $this->RoleModel->UpdateRole($checked_inputs);
-                    $_SESSION[SESSION_NOTIFICATION] = $result == 'Updated' ? $this->notification_control->Success(ucwords($checked_inputs['role_name']) . ' Rolü Başarıyla Güncellendi') : $this->notification_control->Danger('Rol Güncelleme Başarısız');
+                    $_SESSION[SESSION_NOTIFICATION_NAME] = $result == 'Updated' ? $this->notification_control->SetNotification('SUCCESS', ucwords($checked_inputs['role_name']) . ' Rolü Başarıyla Güncellendi') : $this->notification_control->Danger('Rol Güncelleme Başarısız');
                     $roles = $this->RoleModel->GetAllRole();
                     !empty($roles) ? $data_redirect['roles'] = $roles : $data_redirect['notfound_role'] = $this->notification_control->NotFound('Kayıtlı Rol Yok');
-                    $this->GetView('Admin/Roles', $data_redirect);
+                    parent::GetView('Admin/Roles', $data_redirect);
                 } else {
                     if (!empty($checked_inputs['id'])) {
                         $role = $this->RoleModel->GetRoleById($checked_inputs['id']);
@@ -2405,8 +2401,8 @@ class AdminController extends Controller
                                 $data['notfound_user'] = $this->notification_control->NotFound(ucwords($role['role_name']) . ' Rolüne Ait Kullanıcı Bulunamadı');
                             }
                             $data['input_error_key'] = 'role_duplicate';
-                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Rol Zaten Kayıtlı');
-                            $this->GetView('Admin/RoleDetails', $data);
+                            $this->notification_control->SetNotification('DANGER', 'Rol Zaten Kayıtlı');
+                            parent::GetView('Admin/RoleDetails', $data);
                         } else {
                             header('Location: ' . URL . '/AdminController/Roles');
                         }
@@ -2430,8 +2426,8 @@ class AdminController extends Controller
                             $data['notfound_user'] = $this->notification_control->NotFound(ucwords($role['role_name']) . ' Rolüne Ait Kullanıcı Bulunamadı');
                         }
                         $data['input_error_key'] = $checked_inputs['input_error_key'];
-                        $_SESSION[SESSION_NOTIFICATION] = !empty($checked_inputs['input_error_length']) ? $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Ve ' . $checked_inputs['input_error_length'] . ' Karakterden Fazla Olamaz') : $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Olamaz');
-                        $this->GetView('Admin/RoleDetails', $data);
+                        $_SESSION[SESSION_NOTIFICATION_NAME] = !empty($checked_inputs['input_error_length']) ? $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Ve ' . $checked_inputs['input_error_length'] . ' Karakterden Fazla Olamaz') : $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Olamaz');
+                        parent::GetView('Admin/RoleDetails', $data);
                     } else {
                         header('Location: ' . URL . '/AdminController/Roles');
                     }
@@ -2470,18 +2466,18 @@ class AdminController extends Controller
             }
             if ($role_not_match) {
                 if ($this->model->UpdateRole($checked_inputs) == 'Updated') {
-                    $this->GetView('Admin/Roles', array('roles' => $this->model->GetAllRole(), 'notification' => $this->notification_control->Success($checked_inputs['role_name'] . ' Başarıyla Güncellendi')));
+                    parent::GetView('Admin/Roles', array('roles' => $this->model->GetAllRole(), 'notification' => $this->notification_control->SetNotification('SUCCESS', $checked_inputs['role_name'] . ' Başarıyla Güncellendi')));
                 } else {
-                    $this->GetView('Admin/Roles', array('roles' => $this->model->GetAllRole(), 'notification' => $this->notification_control->Success('Rol Güncelleme Başarısız')));
+                    parent::GetView('Admin/Roles', array('roles' => $this->model->GetAllRole(), 'notification' => $this->notification_control->SetNotification('SUCCESS', 'Rol Güncelleme Başarısız')));
                 }
             } else {
                 $role = $this->model->GetRoleById($this->input_control->CheckPostedInputForDb(isset($_POST['id']) ? $_POST['id'] : ''));
                 if (!empty($role)) {
                     $users_in_role = $this->model->GetUsersByRole($role['id']);
                     if (!empty($users_in_role)) {
-                        $this->GetView('Admin/RoleDetails', array('role' => $role, 'users' => $users_in_role, 'input_error' => 'role_duplicate'));
+                        parent::GetView('Admin/RoleDetails', array('role' => $role, 'users' => $users_in_role, 'input_error' => 'role_duplicate'));
                     } else {
-                        $this->GetView('Admin/RoleDetails', array('role' => $role, 'notfound_user' => $this->notification_control->NotFound('Role Ait Kullanıcı Bulunamadı'), 'input_error' => 'role_duplicate'));
+                        parent::GetView('Admin/RoleDetails', array('role' => $role, 'notfound_user' => $this->notification_control->NotFound('Role Ait Kullanıcı Bulunamadı'), 'input_error' => 'role_duplicate'));
                     }
                 } else {
                     header('Location: ' . URL . '/AdminController/Roles');
@@ -2493,9 +2489,9 @@ class AdminController extends Controller
                 if (!empty($role)) {
                     $users_in_role = $this->model->GetUsersByRole($role['id']);
                     if (!empty($users_in_role)) {
-                        $this->GetView('Admin/RoleDetails', array('role' => $role, 'users' => $users_in_role, 'input_error' => $checked_inputs));
+                        parent::GetView('Admin/RoleDetails', array('role' => $role, 'users' => $users_in_role, 'input_error' => $checked_inputs));
                     } else {
-                        $this->GetView('Admin/RoleDetails', array('role' => $role, 'notfound_user' => $this->notification_control->NotFound(ucwords($role['role_name']) . ' Rolüne Ait Kullanıcı Bulunamadı'), 'input_error' => $checked_inputs));
+                        parent::GetView('Admin/RoleDetails', array('role' => $role, 'notfound_user' => $this->notification_control->NotFound(ucwords($role['role_name']) . ' Rolüne Ait Kullanıcı Bulunamadı'), 'input_error' => $checked_inputs));
                     }
                 } else {
                     header('Location: ' . URL . '/AdminController/Roles');
@@ -2523,10 +2519,10 @@ class AdminController extends Controller
                 if ($permission) {
                     $result = $this->RoleModel->DeleteRole($checked_id);
                     $result2 = $this->RoleModel->EmptyUserRoleColumn('user_role', $checked_id);
-                    $_SESSION[SESSION_NOTIFICATION] = ($result == 'Deleted' && $result2 == 'Updated') ? $this->notification_control->Success('Rol Başarıyla Silindi') : $this->notification_control->Danger('Rol Silme Başarısız');
+                    $_SESSION[SESSION_NOTIFICATION_NAME] = ($result == 'Deleted' && $result2 == 'Updated') ? $this->notification_control->SetNotification('SUCCESS', 'Rol Başarıyla Silindi') : $this->notification_control->Danger('Rol Silme Başarısız');
                     $roles = $this->RoleModel->GetAllRole();
                     !empty($roles) ? $data['roles'] = $roles : $data['notfound_role'] = $this->notification_control->NotFound('Kayıtlı Rol Yok');
-                    $this->GetView('Admin/Roles', $data);
+                    parent::GetView('Admin/Roles', $data);
                 } else {
                     header('Location: ' . URL . '/AdminController/Roles');
                 }
@@ -2544,7 +2540,7 @@ class AdminController extends Controller
         foreach ($user_infos as $key => $user_info) {
             $user_infos[$key]['email'] = $this->input_control->DecodeMail($user_info['email']);
         }
-        $this->GetView('Admin/AdvertisingInfos', array('user_infos' => $user_infos));
+        parent::GetView('Admin/AdvertisingInfos', array('user_infos' => $user_infos));
     }
 
     function Profile()
@@ -2564,13 +2560,13 @@ class AdminController extends Controller
                     $checked_inputs['input_datas']['email'] = isset($_POST['email']) ? $_POST['email'] : '';
                     $data['user'] = $checked_inputs['input_datas'];
                     $data['input_error_key'] = 'tel';
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Telefon Numarası Geçersiz');
+                    $this->notification_control->SetNotification('DANGER', 'Telefon Numarası Geçersiz');
                 } else {
                     $checked_inputs = $this->input_control->CheckPostedInputsForDb($checked_inputs['input_datas']);
                     $checked_inputs['tel'] = '90' . $checked_inputs['tel'];
                     $result = $this->UserModel->UpdateUser($checked_inputs);
-                    $_SESSION[SESSION_NOTIFICATION] = $result == 'Updated' ? $this->notification_control->Success('Yönetici Profili Başarıyla Güncellendi') : $this->notification_control->Danger('Yönetici Profilini Güncelleme Başarısız');
-                    $user = $this->UserModel->GetUserById('*', $this->authed_user['id']);
+                    $_SESSION[SESSION_NOTIFICATION_NAME] = $result == 'Updated' ? $this->notification_control->SetNotification('SUCCESS', 'Yönetici Profili Başarıyla Güncellendi') : $this->notification_control->Danger('Yönetici Profilini Güncelleme Başarısız');
+                    $user = $this->UserModel->GetUserById('*', $this->authenticated_user['id']);
                     if (!empty($user)) {
                         $user['email'] = $this->input_control->DecodeMail($user['email']);
                         $data['user'] = $user;
@@ -2582,7 +2578,7 @@ class AdminController extends Controller
                         //     'user_role' => $user['user_role']
                         // );
                         // $encrypted_data = $this->input_control->EncrypteData(json_encode($user_cookie), $this->key, 128);
-                        // Cookie::SetCookie(0, '/', COOKIE_AUTH_NAME, $encrypted_data);
+                        // Cookie::SetCookie(0, '/', COOKIE_AUTHENTICATION_NAME, $encrypted_data);
                     } else {
                         header('Location: ' . URL);
                     }
@@ -2591,10 +2587,10 @@ class AdminController extends Controller
                 $checked_inputs['input_datas']['email'] = isset($_POST['email']) ? $_POST['email'] : '';
                 $data['user'] = $checked_inputs['input_datas'];
                 $data['input_error_key'] = $checked_inputs['input_error_key'];
-                $_SESSION[SESSION_NOTIFICATION] = !empty($checked_inputs['input_error_length']) ? $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Ve ' . $checked_inputs['input_error_length'] . ' Karakterden Fazla Olamaz') : $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Olamaz');
+                $_SESSION[SESSION_NOTIFICATION_NAME] = !empty($checked_inputs['input_error_length']) ? $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Ve ' . $checked_inputs['input_error_length'] . ' Karakterden Fazla Olamaz') : $this->notification_control->Danger($checked_inputs['input_error_name'] . ' Boş Olamaz');
             }
         } else {
-            $user = $this->UserModel->GetUserById('*', $this->authed_user['id'], 0);
+            $user = $this->UserModel->GetUserById('*', $this->authenticated_user['id'], 0);
             if (!empty($user)) {
                 $user['email'] = $this->input_control->DecodeMail($user['email']);
                 $data['user'] = $user;
@@ -2602,7 +2598,7 @@ class AdminController extends Controller
                 header('Location: ' . URL);
             }
         }
-        $this->GetView('Admin/Profile', $data);
+        parent::GetView('Admin/Profile', $data);
     }
     function PasswordChange()
     {
@@ -2624,38 +2620,38 @@ class AdminController extends Controller
                 $verified_pwd = $this->input_control->VerifyPassword($new_peppered_repwd, $new_hashed_pwd);
                 if ($verified_pwd) {
                     $current_peppered_pwd = $this->input_control->PepperPassword($checked_inputs['input_datas']['current_password']);
-                    $user_password = $this->UserModel->GetUserPassword($this->authed_user['id']);
+                    $user_password = $this->UserModel->GetUserPassword($this->authenticated_user['id']);
                     $verified_pwd2 = $this->input_control->VerifyPassword($current_peppered_pwd, $user_password);
                     if ($verified_pwd2) {
                         $current_hashed_pwd = password_hash($current_peppered_pwd, PASSWORD_BCRYPT, $bcrypt_options);
-                        $result = $this->UserModel->UpdateUser(array('user_password' => $current_hashed_pwd, 'id' => $this->authed_user['id']));
-                        $_SESSION[SESSION_NOTIFICATION] = $result == 'Updated' ? $this->notification_control->Success('Yönetici Şifresi Başarıyla Güncellendi') : $this->notification_control->Danger('Yönetici Şifresi Güncelleme Başarısız');
+                        $result = $this->UserModel->UpdateUser(array('user_password' => $current_hashed_pwd, 'id' => $this->authenticated_user['id']));
+                        $_SESSION[SESSION_NOTIFICATION_NAME] = $result == 'Updated' ? $this->notification_control->SetNotification('SUCCESS', 'Yönetici Şifresi Başarıyla Güncellendi') : $this->notification_control->Danger('Yönetici Şifresi Güncelleme Başarısız');
                     } else {
                         $data['user'] = $checked_inputs;
                         $data['input_error_key'] = 'wrong_current_password';
-                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Güncel Şifre Yanlış');
+                        $this->notification_control->SetNotification('DANGER', 'Güncel Şifre Yanlış');
                     }
                 } else {
                     $data['user'] = $checked_inputs['input_datas'];
                     $data['input_error_key'] = 'password_not_match';
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Şifreler Uyuşmuyor');
+                    $this->notification_control->SetNotification('DANGER', 'Şifreler Uyuşmuyor');
                 }
             } else {
                 $data['user'] = $checked_inputs['input_datas'];
                 if ($checked_inputs['input_error_key'] == 'current_password') {
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Güncel Şifrenizi Girin');
+                    $this->notification_control->SetNotification('DANGER', 'Güncel Şifrenizi Girin');
                 } elseif ($checked_inputs['input_error_key'] == 'new_password') {
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Şifrenizi Girin');
+                    $this->notification_control->SetNotification('DANGER', 'Şifrenizi Girin');
                 } elseif (strlen($checked_inputs['input_datas']['new_password']) < 12) {
                     $checked_inputs['input_error_key'] = 'new_password';
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Şifre En Az 12 Karakterden Oluşmalıdır');
+                    $this->notification_control->SetNotification('DANGER', 'Şifre En Az 12 Karakterden Oluşmalıdır');
                 } elseif ($checked_inputs['input_error_key'] == 're_new_password') {
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger('Şifrenizi Tekrardan Girin');
+                    $this->notification_control->SetNotification('DANGER', 'Şifrenizi Tekrardan Girin');
                 }
                 $data['input_error_key'] = $checked_inputs['input_error_key'];
             }
         }
-        $this->GetView('Admin/PasswordChange', $data);
+        parent::GetView('Admin/PasswordChange', $data);
     }
     function ProfilePhotoChange()
     {
@@ -2671,7 +2667,7 @@ class AdminController extends Controller
                         $accepted_image_types = array('image/png', 'image/jpeg');
                         if (in_array($user_image['type'], $accepted_image_types)) {
                             $user_name = explode(".", $user_image['name']);
-                            $new_image_folder = USER_IMAGES_PATH . $this->authed_user['id'];
+                            $new_image_folder = USER_IMAGES_PATH . $this->authenticated_user['id'];
                             $filename = $user_image['tmp_name'];
                             if (!is_dir($new_image_folder)) {
                                 mkdir($new_image_folder, 0777, true);
@@ -2711,12 +2707,12 @@ class AdminController extends Controller
             if ($success) {
                 $checked_inputs = array();
                 $checked_inputs['profile_image'] = rtrim($user_images_db, '-');
-                $checked_inputs['id'] = $this->authed_user['id'];
+                $checked_inputs['id'] = $this->authenticated_user['id'];
                 $data_redirect = array();
                 $data_redirect['selected_link'] = 'ProfilePhotoChange';
                 $result = $this->UserModel->UpdateUser($checked_inputs);
-                $_SESSION[SESSION_NOTIFICATION] = $result == 'Updated' ? $this->notification_control->Success('Profil Fotoğrafı Başarıyla Güncellendi') : $this->notification_control->Danger('Profil Fotoğrafı Güncelleme Başarısız');
-                $user = $this->UserModel->GetUserById('*', $this->authed_user['id'], 0);
+                $_SESSION[SESSION_NOTIFICATION_NAME] = $result == 'Updated' ? $this->notification_control->SetNotification('SUCCESS', 'Profil Fotoğrafı Başarıyla Güncellendi') : $this->notification_control->Danger('Profil Fotoğrafı Güncelleme Başarısız');
+                $user = $this->UserModel->GetUserById('*', $this->authenticated_user['id'], 0);
                 if (!empty($user)) {
                     // $user_cookie = array(
                     //     'user_id' => $user['id'],
@@ -2726,21 +2722,21 @@ class AdminController extends Controller
                     //     'user_role' => $user['user_role']
                     // );
                     // $encrypted_data = $this->input_control->EncrypteData(json_encode($user_cookie), $this->key, 128);
-                    // Cookie::SetCookie(0, '/', COOKIE_AUTH_NAME, $encrypted_data);
-                    $this->GetView('Admin/ProfilePhotoChange', $data_redirect);
+                    // Cookie::SetCookie(0, '/', COOKIE_AUTHENTICATION_NAME, $encrypted_data);
+                    parent::GetView('Admin/ProfilePhotoChange', $data_redirect);
                 } else {
                     header('Location: ' . URL);
                 }
             } else {
                 $data['input_error_key'] = 'user_image_problem';
-                $this->GetView('Admin/ProfilePhotoChange', $data);
+                parent::GetView('Admin/ProfilePhotoChange', $data);
             }
         } else {
-            $this->GetView('Admin/ProfilePhotoChange', $data);
+            parent::GetView('Admin/ProfilePhotoChange', $data);
         }
     }
     function Settings()
     {
-        $this->GetView('Admin/Settings');
+        parent::GetView('Admin/Settings');
     }
 }

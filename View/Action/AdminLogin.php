@@ -227,9 +227,9 @@
 
 <body>
     <div class="notification">
-        <?php if (isset($_SESSION[SESSION_NOTIFICATION])) {
-            echo $_SESSION[SESSION_NOTIFICATION];
-            unset($_SESSION[SESSION_NOTIFICATION]);
+        <?php if (isset($_SESSION[SESSION_NOTIFICATION_NAME])) {
+            echo $_SESSION[SESSION_NOTIFICATION_NAME];
+            unset($_SESSION[SESSION_NOTIFICATION_NAME]);
         } ?>
     </div>
     <div class="notification-client"></div>

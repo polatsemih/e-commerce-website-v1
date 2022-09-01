@@ -8,23 +8,23 @@ class RoleModel extends Model
 
     function GetAllRole()
     {
-        return $this->db->GetAllWithColumnsBySimpleCondition(TABLE_ROLE, 'id,role_name,role_url,role_date_added,role_date_updated', 'ORDER BY role_date_added ASC');
+        return $this->database->GetAllWithColumnsBySimpleCondition(TABLE_ROLE, 'id,role_name,role_url,role_date_added,role_date_updated', 'ORDER BY role_date_added ASC');
     }
     function GetRoleById(string $role_id)
     {
-        return $this->db->GetWithAllColumnsByStringCondition(TABLE_ROLE, 'WHERE id=?', $role_id);
+        return $this->database->GetWithAllColumnsByStringCondition(TABLE_ROLE, 'WHERE id=?', $role_id);
     }
     function GetRoleByUrl(string $role_url)
     {
-        return $this->db->GetWithAllColumnsByStringCondition(TABLE_ROLE, 'WHERE role_url=?', $role_url);
+        return $this->database->GetWithAllColumnsByStringCondition(TABLE_ROLE, 'WHERE role_url=?', $role_url);
     }
     function GetRoleNameById(string $role_id)
     {
-        return $this->db->GetWithColumnsByStringCondition(TABLE_ROLE, 'role_name', 'WHERE id=?', $role_id);
+        return $this->database->GetWithColumnsByStringCondition(TABLE_ROLE, 'role_name', 'WHERE id=?', $role_id);
     }
     function GetAllRoleUrl()
     {
-        return $this->db->GetAllWithColumnNames(TABLE_ROLE, 'role_url');
+        return $this->database->GetAllWithColumnNames(TABLE_ROLE, 'role_url');
     }
     function CreateRole(array $inputs)
     {
@@ -44,10 +44,10 @@ class RoleModel extends Model
     }
     function GetRoleNamesAndId()
     {
-        return $this->db->GetAllWithColumnsBySimpleCondition(TABLE_ROLE, 'id,role_name', 'ORDER BY role_date_added DESC');
+        return $this->database->GetAllWithColumnsBySimpleCondition(TABLE_ROLE, 'id,role_name', 'ORDER BY role_date_added DESC');
     }
     function EmptyUserRoleColumn(string $column, string $data)
     {
-        return $this->db->EmptyColumData(TABLE_USER, $column, 'WHERE ' . $column . ' =?', $data);
+        return $this->database->EmptyColumData(TABLE_USER, $column, 'WHERE ' . $column . ' =?', $data);
     }
 }

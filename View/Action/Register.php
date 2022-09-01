@@ -2,37 +2,49 @@
 <html lang="tr">
 
 <head>
-    <title>Kayıt | <?php echo BRAND; ?></title>
-    <meta name="description" content="<?php echo BRAND; ?> kayıt ol" />
-    <meta name="keywords" content="blanck, basic, kayıt" />
-    <meta name="author" content="<?php echo BRAND; ?>" />
-    <?php require 'View/SharedHome/_home_head.php'; ?>
-    <link rel="stylesheet" href="<?php echo URL; ?>assets/css/captcha.css">
+    title>Kayıt | <?php echo BRAND; ?></title>
+    <meta name="robots" content="all" />
+    <meta name="description" content="<?php echo BRAND; ?> Kayıt" />
+    <meta name="keywords" content="blanck basic, blnckk" />
+    <?php require_once 'View/SharedHome/_home_head.php'; ?>
 </head>
 
-<body>
-    <div class="notification">
-        <?php if (isset($_SESSION[SESSION_NOTIFICATION])) {
-            echo $_SESSION[SESSION_NOTIFICATION];
-            unset($_SESSION[SESSION_NOTIFICATION]);
-        } ?>
-    </div>
+<body class="noscroll">
     <div class="notification-client"></div>
-    <?php require 'View/SharedCommon/_common_loader.php'; ?>
-    <header>
-        <div class="header-container">
-            <div class="container row-adjacent">
-                <div class="header-brand-container">
-                    <a class="header-brand" href="<?php echo URL; ?>"><?php echo BRAND; ?></a>
+    <?php require_once 'View/SharedHome/_home_body.php'; ?>
+    <main>
+        <div class="action-agreement-wrapper disable">
+            <div class="give-back-container">
+                <div class="action-agreement-exit-container">
+                    <div class="give-back-exit">
+                        <i class="fas fa-times give-back-exit-icon"></i>
+                    </div>
                 </div>
+                <h3 class="give-back-title">Gizlilik Sözleşmesi</h3>
+                <p class="give-back-text">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet? Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?</p>
+                <p class="give-back-text">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?</p>
+                <p class="give-back-text">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?</p>
+                <p class="give-back-text">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?</p>
             </div>
         </div>
-    </header>
-    <main>
+        <div class="action-agreement-2-wrapper disable">
+            <div class="give-back-container">
+                <div class="action-agreement-2-exit-container">
+                    <div class="give-back-exit">
+                        <i class="fas fa-times give-back-exit-icon"></i>
+                    </div>
+                </div>
+                <h3 class="give-back-title">Kullanım Şartları</h3>
+                <p class="give-back-text">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet? Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?</p>
+                <p class="give-back-text">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?</p>
+                <p class="give-back-text">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?</p>
+                <p class="give-back-text">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?</p>
+            </div>
+        </div>
         <section class="action-section">
             <div class="action-container">
                 <h1 class="action-title">Kayıt</h1>
-                <form action="<?php echo URL . URL_REGISTER; ?>" method="POST" id="form-home-register" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                <form id="form-register" action="<?php echo URL . URL_REGISTER; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
                     <?php if (!empty($web_data['csrf_token'])) : ?>
                         <input type="hidden" name="form_token" value="<?php echo $web_data['csrf_token']; ?>">
                     <?php endif; ?>
@@ -82,7 +94,7 @@
                             <input type="checkbox" class="checkbox" id="accept_terms" name="accept_terms">
                             <span class="checkmark-filter"></span>
                         </label>
-                        <span class="checkmark-text"><?php echo BRAND; ?> <a class="action-privacy-link" href="#">gizlilik sözleşmesi</a> ve <a class="action-privacy-link" href="#">kullanım şartlarını</a> okudum ve kabul ediyorum.</span>
+                        <span class="checkmark-text"><?php echo BRAND; ?> <button class="action-privacy-link" id="btn-agreement-privacy">gizlilik sözleşmesi</button> ve <button class="action-privacy-link" id="btn-agreement-2-privacy">kullanım şartlarını</button> okudum ve kabul ediyorum.</span>
                     </div>
                     <div class="captcha-popup">
                         <div class="captcha-container">
@@ -109,31 +121,12 @@
             </div>
         </section>
     </main>
-    <?php require 'View/SharedHome/_home_footer.php'; ?>
-    <script src="<?php echo URL; ?>assets/js/loader_notification_action.js"></script>
+    <?php require_once 'View/SharedHome/_home_footer.php'; ?>
     <script src="<?php echo URL; ?>assets/js/eyebtn.js"></script>
+    <?php if (!empty($web_data['cookie_cart'])) : ?>
+        <script src="<?php echo URL; ?>assets/js/header_cart.js"></script>
+    <?php endif; ?>
     <script>
-        const notificationClient = document.querySelector('.notification-client');
-        window.addEventListener('scroll', () => {
-            notificationClient.classList.toggle('sticky', window.scrollY > 0);
-        });
-        let notificationHidden = 0;
-        let notificationRemoved = 0;
-        function setClientNotification(notificationMessage) {
-            clearTimeout(notificationHidden);
-            clearTimeout(notificationRemoved);
-            notificationClient.innerHTML = '<div class="not not-danger"><span class="not-text">' + notificationMessage + '</span></div>';
-            if (notificationClient.classList.contains('hidden') && notificationClient.classList.contains('removed')) {
-                notificationClient.classList.remove('hidden');
-                notificationClient.classList.remove('removed');
-            }
-            notificationHidden = setTimeout(() => {
-                notificationClient.classList.add('hidden');
-                notificationRemoved = setTimeout(() => {
-                    notificationClient.classList.add('removed');
-                }, 1500);
-            }, 5000);
-        }
         let inputEmail = document.getElementById('input_email');
         let emailMessage = document.getElementById('email-message');
         let inputPassword = document.getElementById('input_password');
@@ -215,31 +208,212 @@
                 repasswordMessage.innerHTML = '';
             }
         });
-        document.querySelector('.close-popup').addEventListener('click', () => {
-            document.querySelectorAll('.action-container-1-5').forEach(element => {
-                element.classList.remove('disable');
+        // const actionAgreementWrapper = document.querySelector('.action-agreement-wrapper');
+        // document.getElementById('btn-agreement-privacy').addEventListener('click', (e) => {
+        //     e.preventDefault();
+        //     if (actionAgreementWrapper.classList.contains('disable')) {
+        //         actionAgreementWrapper.classList.remove('disable')
+        //     }
+        //     if (!body.classList.contains('noscroll')) {
+        //         body.classList.add('noscroll');
+        //     }
+        // });
+        // document.querySelector('.action-agreement-exit-container').addEventListener('click', (e) => {
+        //     e.preventDefault();
+        //     if (!actionAgreementWrapper.classList.contains('disable')) {
+        //         actionAgreementWrapper.classList.add('disable');
+        //     }
+        //     if (body.classList.contains('noscroll')) {
+        //         body.classList.remove('noscroll');
+        //     }
+        // });
+        // actionAgreementWrapper.addEventListener('mouseup', (e) => {
+        //     e.preventDefault();
+        //     if (e.target.classList == 'action-agreement-wrapper') {
+        //         if (!actionAgreementWrapper.classList.contains('disable')) {
+        //             actionAgreementWrapper.classList.add('disable');
+        //         }
+        //         if (body.classList.contains('noscroll')) {
+        //             body.classList.remove('noscroll');
+        //         }
+        //     }
+        // });
+        // const actionAgreementWrapper2 = document.querySelector('.action-agreement-2-wrapper');
+        // document.getElementById('btn-agreement-2-privacy').addEventListener('click', (e) => {
+        //     e.preventDefault();
+        //     if (actionAgreementWrapper2.classList.contains('disable')) {
+        //         actionAgreementWrapper2.classList.remove('disable')
+        //     }
+        //     if (!body.classList.contains('noscroll')) {
+        //         body.classList.add('noscroll');
+        //     }
+        // });
+        // document.querySelector('.action-agreement-2-exit-container').addEventListener('click', (e) => {
+        //     e.preventDefault();
+        //     if (!actionAgreementWrapper2.classList.contains('disable')) {
+        //         actionAgreementWrapper2.classList.add('disable');
+        //     }
+        //     if (body.classList.contains('noscroll')) {
+        //         body.classList.remove('noscroll');
+        //     }
+        // });
+        // actionAgreementWrapper2.addEventListener('mouseup', (e) => {
+        //     e.preventDefault();
+        //     if (e.target.classList == 'action-agreement-2-wrapper') {
+        //         if (!actionAgreementWrapper2.classList.contains('disable')) {
+        //             actionAgreementWrapper2.classList.add('disable');
+        //         }
+        //         if (body.classList.contains('noscroll')) {
+        //             body.classList.remove('noscroll');
+        //         }
+        //     }
+        // });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            var notificationClient = $('.notification-client');
+            var notificationHidden = 0;
+            var notificationRemoved = 0;
+            function setClientNotification(notificationMessage) {
+                clearTimeout(notificationHidden);
+                clearTimeout(notificationRemoved);
+                notificationClient.html(notificationMessage);
+                if (notificationClient.hasClass('hidden')) {
+                    notificationClient.removeClass('hidden');
+                }
+                if (notificationClient.hasClass('removed')) {
+                    notificationClient.removeClass('removed');
+                }
+                notificationHidden = setTimeout(() => {
+                    if (!notificationClient.hasClass('hidden')) {
+                        notificationClient.addClass('hidden');
+                    }
+                    notificationRemoved = setTimeout(() => {
+                        if (!notificationClient.hasClass('removed')) {
+                            notificationClient.addClass('removed');
+                        }
+                    }, 1500);
+                }, 10000);
+            }
+            $(window).scroll(function() {
+                if ($(window).scrollTop() > 0) {
+                    notificationClient.addClass('sticky');
+                } else {
+                    notificationClient.removeClass('sticky');
+                }
             });
-            document.querySelector('.action-link-container').classList.remove('disable');
-            document.querySelector('.action-container').classList.remove('invisible');
-            document.querySelector('.captcha-popup').classList.remove('active');
+            var request;
+            var requestUsable = true;
+            var inputSearch = $('#input-search');
+            var navSearch = $('.nav-search');
+            var navSearchPopular = $('.nav-search-popular');
+            inputSearch.on('input', function(e) {
+                e.preventDefault();
+                if (!$.trim(inputSearch.val())) {
+                    $('#nav-search-wrapper').remove();
+                    if (navSearchPopular.hasClass('hidden')) {
+                        navSearchPopular.removeClass('hidden');
+                    }
+                    if (!navSearch.hasClass('hidden')) {
+                        navSearch.addClass('hidden');
+                    }
+                } else if (requestUsable) {
+                    requestUsable = false;
+                    const formSearch = $('#form-search');
+                    const inputsformSearch = formSearch.find('input');
+                    request = $.ajax({
+                        url: '<?php echo URL . URL_SEARCH; ?>',
+                        type: 'POST',
+                        data: formSearch.serialize()
+                    });
+                    inputsformSearch.prop('disabled', true);
+                    request.done(function(response) {
+                        requestUsable = true;
+                        if (!navSearchPopular.hasClass('hidden')) {
+                            navSearchPopular.addClass('hidden');
+                        }
+                        if (navSearch.hasClass('hidden')) {
+                            navSearch.removeClass('hidden');
+                        }
+                        response = jQuery.parseJSON(response);
+                        if (response.hasOwnProperty('not_found_search_item')) {
+                            $('#nav-search-wrapper').remove();
+                            let ss1 = $("<div></div>").attr('id', 'nav-search-wrapper');
+                            let ss2 = $("<li></li>").addClass('search-item');
+                            ss1.append(ss2);
+                            let ss3 = $("<a></a>").addClass('not-found-search').text('Aranılan kriterde ürün bulunamadı');
+                            ss2.append(ss3);
+                            navSearch.append(ss1);
+                        } else if (response.hasOwnProperty('searched_items')) {
+                            $('#nav-search-wrapper').remove();
+                            let s1 = $("<div></div>").attr('id', 'nav-search-wrapper');
+                            $.each(response['searched_items'], function(key, searchitem) {
+                                let s2 = $("<li></li>").addClass('search-item');
+                                s1.append(s2);
+                                let s3 = $("<a></a>").addClass('search-link').attr('href', '<?php echo URL . URL_ITEM_DETAILS . '/' ?>' + searchitem['item_url']).text(searchitem['item_name']);
+                                s2.append(s3);
+                            });
+                            navSearch.append(s1);
+                        }
+                    });
+                    request.always(function() {
+                        inputsformSearch.prop('disabled', false);
+                        inputSearch.focus();
+                    });
+                }
+            });
+            const captchaPopup = $('.captcha-popup');
+            $('#btn-login').click(function(e) {
+                e.preventDefault();
+                const inputEmail = $('#input-email');
+                const inputPassword = $('#input-password');
+                if (inputEmail.val() == '') {
+                    inputEmail.focus();
+                    setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_EMPTY_EMAIL; ?></span></div>');
+                } else if (inputPassword.val() == '') {
+                    inputPassword.focus();
+                    setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_EMPTY_PASSWORD; ?></span></div>');
+                } else {
+                    clearTimeout(notificationHidden);
+                    clearTimeout(notificationRemoved);
+                    if (!notificationClient.hasClass('hidden')) {
+                        notificationClient.addClass('hidden');
+                    }
+                    if (!notificationClient.hasClass('removed')) {
+                        notificationClient.addClass('removed');
+                    }
+                    if (!captchaPopup.hasClass('active')) {
+                        captchaPopup.addClass('active');
+                    }
+                }
+            });
+            $('.close-popup').click(function(e) {
+                e.preventDefault();
+                if (captchaPopup.hasClass('active')) {
+                    captchaPopup.removeClass('active');
+                }
+            });
         });
     </script>
-    <script src="https://js.hcaptcha.com/1/api.js?onload=hCaptcha&render=explicit&hl=tr" async defer></script>
+    <script src="<?php echo CAPTCHA_SRC; ?>" async defer></script>
     <script type="text/javascript">
         var hCaptcha = function() {
             hcaptcha.render('captchaDiv', {
-                sitekey: '<?php echo SITE_KEY; ?>',
+                sitekey: '<?php echo CAPTCHA_SITE_KEY; ?>',
                 theme: 'dark',
                 'callback': 'hCaptchaCallback'
             });
         }
 
         function hCaptchaCallback() {
-            if (loader.classList.contains('disable') && loader.classList.contains('loading')) {
-                loader.classList.remove('disable');
-                loader.classList.remove('loading');
+            if (loaderWrapper.classList.contains('hidden')) {
+                loaderWrapper.classList.remove('hidden');
             }
-            document.getElementById('form-home-register').submit();
+            if (!bodyElement.classList.contains('noscroll')) {
+                bodyElement.classList.add('noscroll');
+            }
+            document.getElementById('form-register').submit();
         }
     </script>
 </body>

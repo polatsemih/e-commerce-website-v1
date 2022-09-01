@@ -1,5 +1,8 @@
 <?php
-define('EXPIRY_CSRF', 60 * 30);
+define('EXPIRY_CSRF_TOKEN', 60 * 30);
+define('EXPIRY_COOKIE_CART', 60 * 60 * 24 * 7);
+
+
 define('EXPIRY_TWO_FA_TOKEN', 60 * 10);
 define('EXPIRY_TWO_FA_TOKEN_MINUTE', 10);
 define('EXPIRY_CONFIRM_EMAIL_TOKEN', 60 * 30);
@@ -11,4 +14,3 @@ define('TIMEOUT_SHORT_CAPTCHA', 60 * 10);
 define('TIMEOUT_LONG_CAPTCHA', 60 * 60 * 24);
 define('EXPIRY_RESET_PWD_TOKEN', 60 * 30);
 define('EXPIRY_RESET_PWD_TOKEN_MINUTE', 30);
-define('EXPIRY_COOKIE_CART', 60 * 60 * 24 * 7);

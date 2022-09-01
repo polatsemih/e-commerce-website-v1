@@ -1,14 +1,21 @@
-<div class="header-search-container disable">
-    <div class="header-search">
-        <form class="form-search" action="" method="GET" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
-            <input class="input-search" type="text" placeholder="Ne Arıyorsunuz?">
-            <!-- <input class="btn-search" type="submit" title="Ara" value=""> -->
-            <i class="header-icon fas fa-search"></i>
+<div id="header-search-container" class="header-search-container">
+    <div class="container">
+        <form id="form-search">
+            <div class="search-row">
+                <input id="input-search" class="input-search" name="search_item" type="text" placeholder="Ne Arıyorsunuz?">
+            </div>
         </form>
-        <h2 class="header-search-title">Popüler Aramalar</h2>
-        <ul>
-            <li class="search-item"><a class="search-link" href="<?php echo URL; ?>HomeController/HomeItems/kadin">Kadın</a></li>
-            <li class="search-item"><a class="search-link" href="<?php echo URL; ?>HomeController/HomeItems/unisex">Unisex</a></li>
+        <ul class="nav-search hidden">
+            <h4 class="search-title">Arama Sonuçları</h4>
+            <div id="nav-search-wrapper"></div>
+        </ul>
+        <ul class="nav-search-popular">
+            <h4 class="search-title">Popüler Aramalar</h4>
+            <?php if (!empty($web_data['search_popular_items'])) : ?>
+                <?php foreach ($web_data['search_popular_items'] as $search_popular_item) : ?>
+                    <li class="search-item"><a class="search-link" href="<?php echo URL . URL_ITEM_DETAILS . '/' . $search_popular_item['item_url']; ?>"><?php echo $search_popular_item['item_name']; ?></a></li>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </ul>
     </div>
 </div>

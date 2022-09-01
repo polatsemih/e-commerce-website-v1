@@ -4,97 +4,118 @@ class ActionController extends Controller
     function __construct()
     {
         parent::__construct();
-        $this->GetModel('ActionModel');
-        if (isset($_SESSION[SESSION_AUTH])) {
-            if (strlen($_SESSION[SESSION_AUTH]) === 255) {
-                $session_auth_from_db = $this->ActionModel->GetSessionAuth(array($_SESSION[SESSION_AUTH], $_SERVER['REMOTE_ADDR']));
-                if (!empty($session_auth_from_db) && $session_auth_from_db['date_session_auth_expiry'] > date('Y-m-d H:i:s') && $session_auth_from_db['session_auth_is_logout'] == 0) {
-                    $this->input_control->Redirect();
+        // if (!empty($_SESSION[SESSION_AUTHENTICATION_NAME]) && !empty($_COOKIE[COOKIE_AUTHENTICATION_NAME])) {
+        //     if ($this->session_control->KillSession() && $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME)) {
+        //         $this->input_control->Redirect(URL_LOGIN);
+        //     } else {
+        //         parent::GetView('Error/NotResponse');
+        //     }
+        // }
+        // if (!empty($_SESSION[SESSION_AUTHENTICATION_NAME])) {
+        //     $checked_session_authentication_token = $this->input_control->CheckInputWithLength($_SESSION[SESSION_AUTHENTICATION_NAME], 255);
+        //     if (!is_null($checked_session_authentication_token)) {
+        //         $session_authentication_from_database = $this->ActionModel->GetSessionAuthentication(array($_SERVER['REMOTE_ADDR'], $checked_session_authentication_token));
+        //         if (!empty($session_authentication_from_database) && $session_authentication_from_database['date_session_authentication_expiry'] > date('Y-m-d H:i:s') && $session_authentication_from_database['session_authentication_is_logout'] == 0) {
+        //             $authenticated_user_from_database = $this->UserModel->GetUser('id', $session_authentication_from_database['user_id']);
+        //             if (!empty($authenticated_user_from_database)) {
+        //                 $this->input_control->Redirect();
+        //             }
+        //         }
+        //     }
+        //     if ($this->session_control->KillSession()) {
+        //         $this->input_control->Redirect(URL_LOGIN);
+        //     } else {
+        //         parent::GetView('Error/NotResponse');
+        //     }
+        // } elseif (!empty($_COOKIE[COOKIE_AUTHENTICATION_NAME])) {
+        //     $checked_cookie_authentication = $this->input_control->CheckInputWithLength($_COOKIE[COOKIE_AUTHENTICATION_NAME], 500);
+        //     if (!is_null($checked_cookie_authentication)) {
+        //         $cookie_authentication_from_database = $this->ActionModel->GetCookieAuthentication(array($_SERVER['REMOTE_ADDR'], substr($checked_cookie_authentication, 0, 247)));
+        //         if (!empty($cookie_authentication_from_database) && $cookie_authentication_from_database['date_cookie_authentication_expiry'] > date('Y-m-d H:i:s') && $cookie_authentication_from_database['cookie_authentication_is_logout'] == 0) {
+        //             try {
+        //                 $cookie_authentication_token1 = hash_hmac('SHA512', substr($checked_cookie_authentication, 247, 253), $cookie_authentication_from_database['cookie_authentication_salt'], false);
+        //                 if (hash_equals($cookie_authentication_from_database['cookie_authentication_token1'], $cookie_authentication_token1)) {
+        //                     $authenticated_user_from_database = $this->UserModel->GetUser('id', $cookie_authentication_from_database['user_id']);
+        //                     if (!empty($authenticated_user_from_database)) {
+        //                         $this->input_control->Redirect();
+        //                     }
+        //                 }
+        //             } catch (\Throwable $th) {
+        //                 // mail
+        //             }
+        //         }
+        //     }
+        //     if ($this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME)) {
+        //         $this->input_control->Redirect(URL_LOGIN);
+        //     } else {
+        //         parent::GetView('Error/NotResponse');
+        //     }
+        // }
+    }
+    function AdminLogin()
+    {
+        if ($_SERVER['REMOTE_ADDR'] === ADMIN_IP_ADDRESS) {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl();
+                parent::LogView('Action/AdminLogin');
+                $result_set_csrf_token = parent::SetCSRFToken('AdminLogin');
+                if ($result_set_csrf_token == false) {
+                    parent::GetView('Error/NotResponse');
+                } else {
+                    $this->web_data['form_token'] = $result_set_csrf_token;
+                    parent::GetView('Action/AdminLogin', $this->web_data);
                 }
+            } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
+                $this->LoginPost('admin');
             }
-            $this->session_control->KillSession();
-            $this->input_control->Redirect(URL_LOGIN);
-        } elseif (isset($_COOKIE[COOKIE_AUTH_NAME])) {
-            $cookie_auth = $this->cookie_control->GetCookie($_COOKIE[COOKIE_AUTH_NAME]);
-            if (!empty($cookie_auth) && (strlen($cookie_auth) === 500)) {
-                $cookie_auth_token2 = substr($cookie_auth, 0, 247);
-                $cookie_auth_from_db = $this->ActionModel->GetCookieAuth(array($cookie_auth_token2, $_SERVER['REMOTE_ADDR']));
-                if (!empty($cookie_auth_from_db) && $cookie_auth_from_db['date_cookie_auth_expiry'] > date('Y-m-d H:i:s') && $cookie_auth_from_db['cookie_auth_is_logout'] == 0) {
-                    $cookie_auth_token1 = hash_hmac('SHA512', substr($cookie_auth, 247, 253), $cookie_auth_from_db['cookie_auth_salt'], false);
-                    $is_cookie_auth_tokens_same = hash_equals($cookie_auth_from_db['cookie_auth_token1'], $cookie_auth_token1);
-                    if ($is_cookie_auth_tokens_same) {
-                        $this->input_control->Redirect();
-                    }
-                }
-            }
-            $this->cookie_control->EmptyCookie(COOKIE_AUTH_NAME);
-            $this->input_control->Redirect(URL_LOGIN);
         }
+        // if (isset($_SESSION[SESSION_NOTIFICATION_NAME])) {
+        //     unset($_SESSION[SESSION_NOTIFICATION_NAME]);
+        // }
+        $this->input_control->Redirect();
+    }
+    function Login()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            $this->input_control->CheckUrl();
+            parent::LogView('Action/Login');
+            $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
+            if (!empty($_GET['yonlendir'])) {
+                $checked_redirect_location = $this->input_control->CheckGETInput($_GET['yonlendir']);
+                if (!empty($checked_redirect_location)) {
+                    $this->web_data['redirect_location'] = $checked_redirect_location;
+                }
+            }
+            $result_set_csrf_token = parent::SetCSRFToken('Login');
+            if ($result_set_csrf_token == false) {
+                parent::GetView('Error/NotResponse');
+            } else {
+                $this->web_data['form_token'] = $result_set_csrf_token;
+                parent::GetView('Action/Login', $this->web_data);
+            }
+        } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $this->LoginPost('user');
+        }
+        $this->input_control->Redirect();
     }
 
-    function SetCSRFTokenAndGetView(string $csrf_redirect, string $csrf_page)
-    {
-        $csrf_token = $this->action_control->GenerateCSRFToken();
-        $csrf_token_success = false;
-        if (!empty($csrf_token) && strlen($csrf_token) == 150) {
-            $csrf_exist_in_db = $this->ActionModel->GetExistsLogCSRF($_SERVER['REMOTE_ADDR']);
-            if (!empty($csrf_exist_in_db)) {
-                $result_log_csrf_update = $this->ActionModel->UpdateLogCSRF(array(
-                    'csrf_token' => $csrf_token,
-                    'csrf_page' => $csrf_page,
-                    'date_csrf_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_CSRF)),
-                    'date_last_csrf_created' => date('Y-m-d H:i:s'),
-                    'is_csrf_used' => 0,
-                    'id' => $csrf_exist_in_db['id']
-                ));
-                if ($result_log_csrf_update == 'Updated') {
-                    $csrf_token_success = true;
-                }
-            } else {
-                $result_log_csrf_create = $this->ActionModel->CreateLogCSRF(array(
-                    'user_ip' => $_SERVER['REMOTE_ADDR'],
-                    'csrf_token' => $csrf_token,
-                    'csrf_page' => $csrf_page,
-                    'date_csrf_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_CSRF)),
-                    'date_last_csrf_created' => date('Y-m-d H:i:s'),
-                    'is_csrf_used' => 0
-                ));
-                if ($result_log_csrf_create['result'] == 'Created') {
-                    $csrf_token_success = true;
-                }
-            }
-        }
-        if ($csrf_token_success) {
-            $this->web_data['csrf_token'] = $csrf_token;
-            $this->GetView('Action/' . $csrf_redirect, $this->web_data);
-        } else {
-            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(SET_CSRF_ERROR);
-            $this->GetView('Action/' . $csrf_redirect);
-        }
-    }
-    function CheckCSRFToken(string $checked_csrf_token, string $get_log_csrf_data_type)
-    {
-        $log_csrf_from_db = $this->ActionModel->GetLogCSRF('id,csrf_token,date_csrf_expiry,is_csrf_used', array($get_log_csrf_data_type, $_SERVER['REMOTE_ADDR']));
-        if (!empty($log_csrf_from_db) && $checked_csrf_token === $log_csrf_from_db['csrf_token'] && $log_csrf_from_db['date_csrf_expiry'] > date('Y-m-d H:i:s') && $log_csrf_from_db['is_csrf_used'] == 0) {
-            $this->ActionModel->UpdateLogCSRF(array(
-                'is_csrf_used' => 1,
-                'date_csrf_used' => date('Y-m-d H:i:s'),
-                'id' => $log_csrf_from_db['id']
-            ));
-            return true;
-        } else {
-            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(ERROR_MESSAGE_EMPTY_CSRF);
-            return false;
-        }
-    }
+
+
+
+
+
+
+
+
+
     function LoginWithSession(string $login_session_user_id, string $login_session_auth)
     {
-        $session_auth_token = $this->session_control->GenerateSessionAuthToken();
+        $session_authentication_token = $this->session_control->GenerateSessionAuthToken();
         $result_session_auth = $this->ActionModel->CreateSessionAuth(array(
             'user_id' => $login_session_user_id,
             'user_ip' => $_SERVER['REMOTE_ADDR'],
-            'session_auth_token' => $session_auth_token,
-            'date_session_auth_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_SESSION_AUTH))
+            'session_authentication_token' => $session_authentication_token,
+            'date_session_authentication_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_SESSION_AUTH))
         ));
         $result_user_lastlogin = $this->ActionModel->UpdateUser(array(
             'date_last_login' => date('Y-m-d H:i:s'),
@@ -106,7 +127,7 @@ class ActionController extends Controller
             'login_success' => 1
         ));
         if ($result_session_auth['result'] == 'Created' && $result_user_lastlogin == 'Updated' && $result_log_login['result'] == 'Created') {
-            $_SESSION[SESSION_AUTH] = $session_auth_token;
+            $_SESSION[SESSION_AUTHENTICATION_NAME] = $session_authentication_token;
             if ($login_session_auth == 'admin') {
                 $this->input_control->Redirect(URL_ADMININDEX);
             } else {
@@ -115,7 +136,7 @@ class ActionController extends Controller
                     if (!empty($posted_redirect) && count($posted_redirect) == 2 && !empty($posted_redirect[0]) && !empty($posted_redirect[1])) {
                         $redirect_perm = in_array($posted_redirect[0], REDIRECT_PERMISSION);
                         if ($redirect_perm) {
-                            $redirect_login = $this->input_control->Check_GET_Input($posted_redirect[1]);
+                            $redirect_login = $this->input_control->CheckGETInput($posted_redirect[1]);
                             if (!is_null($redirect_login)) {
                                 $this->input_control->Redirect($posted_redirect[0] . '/' . $posted_redirect[1]);
                             }
@@ -125,7 +146,7 @@ class ActionController extends Controller
                 $this->input_control->Redirect();
             }
         } else {
-            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(DATABASE_ERROR);
+            $this->notification_control->SetNotification('DANGER', DATABASE_ERROR);
             if ($login_session_auth == 'admin') {
                 $this->input_control->Redirect(URL_ADMIN_LOGIN);
             } else {
@@ -136,16 +157,16 @@ class ActionController extends Controller
     function LoginWithCookie(string $login_cookie_user_id)
     {
         $cookie_token = $this->cookie_control->GenerateCookieAuthToken();
-        $cookie_auth_salt = $this->cookie_control->GenerateCookieSalt();
-        $cookie_auth_token1 = hash_hmac('SHA512', substr($cookie_token, 247, 253), $cookie_auth_salt, false);
-        $cookie_auth_token2 = substr($cookie_token, 0, 247);
+        $cookie_authentication_salt = $this->cookie_control->GenerateCookieSalt();
+        $cookie_authentication_token1 = hash_hmac('SHA512', substr($cookie_token, 247, 253), $cookie_authentication_salt, false);
+        $cookie_authentication_token2 = substr($cookie_token, 0, 247);
         $result_cookie_auth = $this->ActionModel->CreateCookieAuth(array(
             'user_id' => $login_cookie_user_id,
             'user_ip' => $_SERVER['REMOTE_ADDR'],
-            'cookie_auth_token1' => $cookie_auth_token1,
-            'cookie_auth_token2' => $cookie_auth_token2,
-            'cookie_auth_salt' => $cookie_auth_salt,
-            'date_cookie_auth_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_COOKIE_AUTH))
+            'cookie_authentication_token1' => $cookie_authentication_token1,
+            'cookie_authentication_token2' => $cookie_authentication_token2,
+            'cookie_authentication_salt' => $cookie_authentication_salt,
+            'date_cookie_authentication_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_COOKIE_AUTH))
         ));
         $result_user_lastlogin = $this->ActionModel->UpdateUser(array(
             'date_last_login' => date('Y-m-d H:i:s'),
@@ -157,14 +178,14 @@ class ActionController extends Controller
             'login_success' => 1
         ));
         if ($result_cookie_auth['result'] == 'Created' && $result_user_lastlogin == 'Updated' && $result_log_login['result'] == 'Created') {
-            $result_auth_cookie_set = $this->cookie_control->SetCookie(COOKIE_AUTH_NAME, $cookie_token, time() + (EXPIRY_COOKIE_AUTH), '/', DOMAIN, SECURE, HTTP_ONLY, SAMESITE);
+            $result_auth_cookie_set = $this->cookie_control->SetCookie(COOKIE_AUTHENTICATION_NAME, $cookie_token, time() + (EXPIRY_COOKIE_AUTH), SESSION_PATH, SESSION_DOMAIN, SESSION_SECURE, SESSION_HTTP_ONLY, SESSION_SAMESITE);
             if ($result_auth_cookie_set) {
                 if (isset($_POST['redirect_location'])) {
                     $posted_redirect = explode('/', $_POST['redirect_location']);
                     if (!empty($posted_redirect) && count($posted_redirect) == 2 && !empty($posted_redirect[0]) && !empty($posted_redirect[1])) {
                         $redirect_perm = in_array($posted_redirect[0], REDIRECT_PERMISSION);
                         if ($redirect_perm) {
-                            $redirect_login = $this->input_control->Check_GET_Input($posted_redirect[1]);
+                            $redirect_login = $this->input_control->CheckGETInput($posted_redirect[1]);
                             if (!is_null($redirect_login)) {
                                 $this->input_control->Redirect($posted_redirect[0] . '/' . $posted_redirect[1]);
                             }
@@ -174,7 +195,7 @@ class ActionController extends Controller
                 $this->input_control->Redirect();
             }
         }
-        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(DATABASE_ERROR);
+        $this->notification_control->SetNotification('DANGER', DATABASE_ERROR);
         $this->input_control->Redirect(URL_LOGIN);
     }
     function SendVerifyTokenWithEmail($verify_token_user_id, $verify_token_user_email, $verify_token_type, $verify_token_auth, $verify_token_email_type, $verify_token_remember_me = 0)
@@ -202,7 +223,7 @@ class ActionController extends Controller
         ));
         if ($result_verify_token_create['result'] == 'Created' && !is_null($checked_email)) {
             if ($verify_token_type == 'two_fa') {
-                $result_email = $this->action_control->SendMail($checked_email, BRAND . ' İki Aşamalı Doğrulama', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>' . BRAND . ' İki Aşamalı Doğrulama</title><style>* {margin: 0;padding: 0;border: 0;box-sizing: border-box;}html {font-size: 10px;}body {font-family: sans-serif;background-color: #aaaaaa;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.logo {border-width: 3px;border-style: solid;border-color: #ffffff;border-radius: 50%;padding: 10px;margin-bottom: 20px;}.main-title {font-size: 18px;color: #ffffff;letter-spacing: 1px;margin-bottom: 20px;}.main-text {font-size: 14px;color: #ffffff;margin-bottom: 20px;}.confirm-container {width: 100%;text-align: center;}.confirm {display: inline-block;font-size: 20px;text-align: center;border-width: 2px;border-style: solid;border-color: #000000;background-color: #ffffff;color: #000000;width: 12%;padding-top: 20px;padding-bottom: 20px;}.main-text-2 {font-size: 14px;color: #ffffff;margin-top: 20px;}.footer {padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;background-color: #5155d3;}.footer-text {font-size: 13px;color: #000000;text-align: center;margin-bottom: 20px;}.footer-link {font-size: 13px;color: #aaaaaa !important;}.footer-url {font-size: 12px;color: #ffffff !important;float: left;}.footer-date {color: #ffffff;font-size: 12px;float: right;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}.confirm {width: 10%;}}</style></head><body><div class="container"><div class="header"><img class="logo" src="' . URL . LOGO_PATH_PRIMARY . '" alt="' . BRAND . '"><h1 class="main-title">' . BRAND . ' İki Aşamalı Doğrulama</h1><p class="main-text">Giriş yapmak için alttaki kodu girin.</p><div class="confirm-container"><span class="confirm">' . $random_tokens[2] . '</span><span class="confirm">' . $random_tokens[4] . '</span><span class="confirm">' . $random_tokens[0] . '</span><span class="confirm">' . $random_tokens[7] . '</span><span class="confirm">' . $random_tokens[1] . '</span><span class="confirm">' . $random_tokens[3] . '</span><span class="confirm">' . $random_tokens[6] . '</span><span class="confirm">' . $random_tokens[5] . '</span><p class="main-text-2">Doğrulama kodunun kullanım süresi ' . EXPIRY_TWO_FA_TOKEN_MINUTE . ' dakikadır.</p></div></div><div class="footer"><p class="footer-text">Bu işlemi siz gerçekleştirmediyseniz, hemen ' . BRAND . ' hesabınızın şifresini değiştirin.</p><a class="footer-url" href="' . URL . '">' . URL . '</a><span class="footer-date">' . date('d-m-Y H:i:s') . '</span></div></div></body></html>');
+                $result_email = $this->action_control->SendMail($checked_email, BRAND . ' İki Aşamalı Doğrulama', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>' . BRAND . ' İki Aşamalı Doğrulama</title><style>* {margin: 0;padding: 0;border: 0;box-sizing: border-box;}html {font-size: 10px;}body {font-family: sans-serif;background-color: #aaaaaa;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.logo {border-width: 3px;border-style: solid;border-color: #ffffff;border-radius: 50%;padding: 10px;margin-bottom: 20px;}.main-title {font-size: 18px;color: #ffffff;letter-spacing: 1px;margin-bottom: 20px;}.main-text {font-size: 14px;color: #ffffff;margin-bottom: 20px;}.confirm-container {width: 100%;text-align: center;}.confirm {display: inline-block;font-size: 20px;text-align: center;border-width: 2px;border-style: solid;border-color: #000000;background-color: #ffffff;color: #000000;width: 12%;padding-top: 20px;padding-bottom: 20px;}.main-text-2 {font-size: 14px;color: #ffffff;margin-top: 20px;}.footer {padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;background-color: #5155d3;}.footer-text {font-size: 13px;color: #000000;text-align: center;margin-bottom: 20px;}.footer-link {font-size: 13px;color: #aaaaaa !important;}.footer-url {font-size: 12px;color: #ffffff !important;float: left;}.footer-date {color: #ffffff;font-size: 12px;float: right;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}.confirm {width: 10%;}}</style></head><body><div class="container"><div class="header"><img class="logo" src="' . URL . '" alt="' . BRAND . '"><h1 class="main-title">' . BRAND . ' İki Aşamalı Doğrulama</h1><p class="main-text">Giriş yapmak için alttaki kodu girin.</p><div class="confirm-container"><span class="confirm">' . $random_tokens[2] . '</span><span class="confirm">' . $random_tokens[4] . '</span><span class="confirm">' . $random_tokens[0] . '</span><span class="confirm">' . $random_tokens[7] . '</span><span class="confirm">' . $random_tokens[1] . '</span><span class="confirm">' . $random_tokens[3] . '</span><span class="confirm">' . $random_tokens[6] . '</span><span class="confirm">' . $random_tokens[5] . '</span><p class="main-text-2">Doğrulama kodunun kullanım süresi ' . EXPIRY_TWO_FA_TOKEN_MINUTE . ' dakikadır.</p></div></div><div class="footer"><p class="footer-text">Bu işlemi siz gerçekleştirmediyseniz, hemen ' . BRAND . ' hesabınızın şifresini değiştirin.</p><a class="footer-url" href="' . URL . '">' . URL . '</a><span class="footer-date">' . date('d-m-Y H:i:s') . '</span></div></div></body></html>');
             } elseif ($verify_token_type == 'confirm_email') {
                 if ($verify_token_email_type == 'RegisterConfirmEmail') {
                     $cancel_register_token = $this->action_control->GenerateCancelRegisterToken();
@@ -215,12 +236,12 @@ class ActionController extends Controller
                         'is_verify_link_used' => 0
                     ));
                     if ($result_verify_link_created['result'] == 'Created') {
-                        $result_email = $this->action_control->SendMail($checked_email, BRAND . ' Üyelik Aktifleştirme', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>' . BRAND . ' Üyelik Aktifleştirme</title><style>* {margin: 0;padding: 0;border: 0;box-sizing: border-box;}html {font-size: 10px;}body {font-family: sans-serif;background-color: #aaaaaa;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.logo {border-width: 3px;border-style: solid;border-color: #ffffff;border-radius: 50%;padding: 10px;margin-bottom: 20px;}.main-title {font-size: 18px;color: #ffffff;letter-spacing: 1px;margin-bottom: 20px;}.main-text {font-size: 14px;color: #ffffff;margin-bottom: 20px;}.confirm-container {width: 100%;text-align: center;}.confirm {display: inline-block;font-size: 20px;text-align: center;border-width: 2px;border-style: solid;border-color: #000000;background-color: #ffffff;color: #000000;width: 12%;padding-top: 20px;padding-bottom: 20px;}.main-text-2 {font-size: 14px;color: #ffffff;margin-top: 20px;}.footer {padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;background-color: #5155d3;}.footer-text {font-size: 13px;color: #000000;text-align: center;margin-bottom: 20px;}.footer-text-url{font-size: 13px;color: #ffffff!important;}.footer-link {font-size: 13px;color: #aaaaaa !important;}.footer-url {font-size: 12px;color: #ffffff !important;float: left;}.footer-date {color: #ffffff;font-size: 12px;float: right;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}.confirm {width: 10%;}}</style></head><body><div class="container"><div class="header"><img class="logo" src="' . URL . LOGO_PATH_PRIMARY . '" alt="' . BRAND . '"><h1 class="main-title">' . BRAND . ' Hesabınızı Doğrulayın</h1><p class="main-text">Üyeliğinizi aktif etmek için alttaki kodu girin.</p><div class="confirm-container"><span class="confirm">' . $random_tokens[2] . '</span><span class="confirm">' . $random_tokens[4] . '</span><span class="confirm">' . $random_tokens[0] . '</span><span class="confirm">' . $random_tokens[7] . '</span><span class="confirm">' . $random_tokens[1] . '</span><span class="confirm">' . $random_tokens[3] . '</span><span class="confirm">' . $random_tokens[6] . '</span><span class="confirm">' . $random_tokens[5] . '</span><p class="main-text-2">Doğrulama kodunun kullanım süresi ' . EXPIRY_CONFIRM_EMAIL_TOKEN_MINUTE . ' dakikadır.</p></div></div><div class="footer"><p class="footer-text">Bu işlemi siz gerçekleştirmediyseniz, üyelik işlemini iptal etmek için <a class="footer-text-url" href="' . URL . URL_VERIFY_LINK . '?cr=' . $cancel_register_token . '">tıklayınız.</a></p><a class="footer-url" href="' . URL . '">' . URL . '</a><span class="footer-date">' . date('d-m-Y H:i:s') . '</span></div></div></body></html>');
+                        $result_email = $this->action_control->SendMail($checked_email, BRAND . ' Üyelik Aktifleştirme', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>' . BRAND . ' Üyelik Aktifleştirme</title><style>* {margin: 0;padding: 0;border: 0;box-sizing: border-box;}html {font-size: 10px;}body {font-family: sans-serif;background-color: #aaaaaa;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.logo {border-width: 3px;border-style: solid;border-color: #ffffff;border-radius: 50%;padding: 10px;margin-bottom: 20px;}.main-title {font-size: 18px;color: #ffffff;letter-spacing: 1px;margin-bottom: 20px;}.main-text {font-size: 14px;color: #ffffff;margin-bottom: 20px;}.confirm-container {width: 100%;text-align: center;}.confirm {display: inline-block;font-size: 20px;text-align: center;border-width: 2px;border-style: solid;border-color: #000000;background-color: #ffffff;color: #000000;width: 12%;padding-top: 20px;padding-bottom: 20px;}.main-text-2 {font-size: 14px;color: #ffffff;margin-top: 20px;}.footer {padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;background-color: #5155d3;}.footer-text {font-size: 13px;color: #000000;text-align: center;margin-bottom: 20px;}.footer-text-url{font-size: 13px;color: #ffffff!important;}.footer-link {font-size: 13px;color: #aaaaaa !important;}.footer-url {font-size: 12px;color: #ffffff !important;float: left;}.footer-date {color: #ffffff;font-size: 12px;float: right;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}.confirm {width: 10%;}}</style></head><body><div class="container"><div class="header"><img class="logo" src="' . URL  . '" alt="' . BRAND . '"><h1 class="main-title">' . BRAND . ' Hesabınızı Doğrulayın</h1><p class="main-text">Üyeliğinizi aktif etmek için alttaki kodu girin.</p><div class="confirm-container"><span class="confirm">' . $random_tokens[2] . '</span><span class="confirm">' . $random_tokens[4] . '</span><span class="confirm">' . $random_tokens[0] . '</span><span class="confirm">' . $random_tokens[7] . '</span><span class="confirm">' . $random_tokens[1] . '</span><span class="confirm">' . $random_tokens[3] . '</span><span class="confirm">' . $random_tokens[6] . '</span><span class="confirm">' . $random_tokens[5] . '</span><p class="main-text-2">Doğrulama kodunun kullanım süresi ' . EXPIRY_CONFIRM_EMAIL_TOKEN_MINUTE . ' dakikadır.</p></div></div><div class="footer"><p class="footer-text">Bu işlemi siz gerçekleştirmediyseniz, üyelik işlemini iptal etmek için <a class="footer-text-url" href="' . URL . URL_VERIFY_LINK . '?cr=' . $cancel_register_token . '">tıklayınız.</a></p><a class="footer-url" href="' . URL . '">' . URL . '</a><span class="footer-date">' . date('d-m-Y H:i:s') . '</span></div></div></body></html>');
                     } else {
                         $result_email = null;
                     }
                 } else {
-                    $result_email = $this->action_control->SendMail($checked_email, BRAND . ' Üyelik Aktifleştirme', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>' . BRAND . ' Üyelik Aktifleştirme</title><style>* {margin: 0;padding: 0;border: 0;box-sizing: border-box;}html {font-size: 10px;}body {font-family: sans-serif;background-color: #aaaaaa;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.logo {border-width: 3px;border-style: solid;border-color: #ffffff;border-radius: 50%;padding: 10px;margin-bottom: 20px;}.main-title {font-size: 18px;color: #ffffff;letter-spacing: 1px;margin-bottom: 20px;}.main-text {font-size: 14px;color: #ffffff;margin-bottom: 20px;}.confirm-container {width: 100%;text-align: center;}.confirm {display: inline-block;font-size: 20px;text-align: center;border-width: 2px;border-style: solid;border-color: #000000;background-color: #ffffff;color: #000000;width: 12%;padding-top: 20px;padding-bottom: 20px;}.main-text-2 {font-size: 14px;color: #ffffff;margin-top: 20px;}.footer {padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;background-color: #5155d3;}.footer-link {font-size: 13px;color: #aaaaaa !important;}.footer-url {font-size: 12px;color: #ffffff !important;float: left;}.footer-date {color: #ffffff;font-size: 12px;float: right;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}.confirm {width: 10%;}}</style></head><body><div class="container"><div class="header"><img class="logo" src="' . URL . LOGO_PATH_PRIMARY . '" alt="' . BRAND . '"><h1 class="main-title">' . BRAND . ' Hesabınızı Doğrulayın</h1><p class="main-text">Üyeliğinizi aktif etmek için alttaki kodu girin.</p><div class="confirm-container"><span class="confirm">' . $random_tokens[2] . '</span><span class="confirm">' . $random_tokens[4] . '</span><span class="confirm">' . $random_tokens[0] . '</span><span class="confirm">' . $random_tokens[7] . '</span><span class="confirm">' . $random_tokens[1] . '</span><span class="confirm">' . $random_tokens[3] . '</span><span class="confirm">' . $random_tokens[6] . '</span><span class="confirm">' . $random_tokens[5] . '</span><p class="main-text-2">Doğrulama kodunun kullanım süresi ' . EXPIRY_CONFIRM_EMAIL_TOKEN_MINUTE . ' dakikadır.</p></div></div><div class="footer"><a class="footer-url" href="' . URL . '">' . URL . '</a><span class="footer-date">' . date('d-m-Y H:i:s') . '</span></div></div></body></html>');
+                    $result_email = $this->action_control->SendMail($checked_email, BRAND . ' Üyelik Aktifleştirme', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>' . BRAND . ' Üyelik Aktifleştirme</title><style>* {margin: 0;padding: 0;border: 0;box-sizing: border-box;}html {font-size: 10px;}body {font-family: sans-serif;background-color: #aaaaaa;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.logo {border-width: 3px;border-style: solid;border-color: #ffffff;border-radius: 50%;padding: 10px;margin-bottom: 20px;}.main-title {font-size: 18px;color: #ffffff;letter-spacing: 1px;margin-bottom: 20px;}.main-text {font-size: 14px;color: #ffffff;margin-bottom: 20px;}.confirm-container {width: 100%;text-align: center;}.confirm {display: inline-block;font-size: 20px;text-align: center;border-width: 2px;border-style: solid;border-color: #000000;background-color: #ffffff;color: #000000;width: 12%;padding-top: 20px;padding-bottom: 20px;}.main-text-2 {font-size: 14px;color: #ffffff;margin-top: 20px;}.footer {padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;background-color: #5155d3;}.footer-link {font-size: 13px;color: #aaaaaa !important;}.footer-url {font-size: 12px;color: #ffffff !important;float: left;}.footer-date {color: #ffffff;font-size: 12px;float: right;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}.confirm {width: 10%;}}</style></head><body><div class="container"><div class="header"><img class="logo" src="' . URL  . '" alt="' . BRAND . '"><h1 class="main-title">' . BRAND . ' Hesabınızı Doğrulayın</h1><p class="main-text">Üyeliğinizi aktif etmek için alttaki kodu girin.</p><div class="confirm-container"><span class="confirm">' . $random_tokens[2] . '</span><span class="confirm">' . $random_tokens[4] . '</span><span class="confirm">' . $random_tokens[0] . '</span><span class="confirm">' . $random_tokens[7] . '</span><span class="confirm">' . $random_tokens[1] . '</span><span class="confirm">' . $random_tokens[3] . '</span><span class="confirm">' . $random_tokens[6] . '</span><span class="confirm">' . $random_tokens[5] . '</span><p class="main-text-2">Doğrulama kodunun kullanım süresi ' . EXPIRY_CONFIRM_EMAIL_TOKEN_MINUTE . ' dakikadır.</p></div></div><div class="footer"><a class="footer-url" href="' . URL . '">' . URL . '</a><span class="footer-date">' . date('d-m-Y H:i:s') . '</span></div></div></body></html>');
                 }
             }
             if (!is_null($result_email)) {
@@ -233,7 +254,7 @@ class ActionController extends Controller
                 $this->input_control->Redirect(URL_VERIFY_TOKEN);
             }
         }
-        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(DATABASE_ERROR);
+        $this->notification_control->SetNotification('DANGER', DATABASE_ERROR);
         $this->input_control->Redirect(URL_LOGIN);
     }
     function VerifyToken()
@@ -244,10 +265,10 @@ class ActionController extends Controller
                 $this->web_data['verify_token'] = $this->action_control->GenerateBaitToken();
                 $this->web_data['verify_token_type'] = $verify_token_from_db['verify_token_type'];
                 $this->web_data['token_time_remain'] = (strtotime($verify_token_from_db['date_verify_token_expiry']) - strtotime(date('Y-m-d H:i:s'))) / 60;
-                $this->SetCSRFTokenAndGetView('VerifyToken', 'VerifyToken' . $verify_token_from_db['verify_token_csrf_type']);
+                // $this->SetCSRFTokenAndGetView('VerifyToken', 'VerifyToken' . $verify_token_from_db['verify_token_csrf_type']);
             } else {
                 unset($_SESSION[SESSION_VERIFY_TOKEN]);
-                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(VERIFY_TOKEN_TIMEOUT_ERROR);
+                $this->notification_control->SetNotification('DANGER', VERIFY_TOKEN_TIMEOUT_ERROR);
                 $this->input_control->Redirect(URL_LOGIN);
             }
         } elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['verify_token-submit']) && !empty($_SESSION[SESSION_VERIFY_TOKEN])) {
@@ -302,18 +323,18 @@ class ActionController extends Controller
                                     if ($result_email_confirm == 'Updated') {
                                         $_SESSION[SESSION_MASSAGE] = CONFIRM_EMAIL_SUCCESS;
                                     } else {
-                                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(DATABASE_ERROR);
+                                        $this->notification_control->SetNotification('DANGER', DATABASE_ERROR);
                                     }
                                 }
                             } else {
-                                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(VERIFY_TOKEN_ERROR);
+                                $this->notification_control->SetNotification('DANGER', VERIFY_TOKEN_ERROR);
                             }
                         } else {
-                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(VERIFY_TOKEN_WRONG_TOKEN_ERROR);
+                            $this->notification_control->SetNotification('DANGER', VERIFY_TOKEN_WRONG_TOKEN_ERROR);
                         }
                     }
                 } else {
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
                 if ($verify_token_from_db['verify_token_auth'] == 'admin') {
                     $this->input_control->Redirect(URL_ADMIN_LOGIN);
@@ -321,7 +342,7 @@ class ActionController extends Controller
                     $this->input_control->Redirect(URL_LOGIN);
                 }
             } else {
-                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(VERIFY_TOKEN_TIMEOUT_ERROR);
+                $this->notification_control->SetNotification('DANGER', VERIFY_TOKEN_TIMEOUT_ERROR);
                 $this->input_control->Redirect(URL_LOGIN);
             }
         }
@@ -361,7 +382,7 @@ class ActionController extends Controller
                         } else {
                             $this->web_data['verify_link_msg'] = CANCEL_REGISTER_NOT_FOUND;
                         }
-                        $this->GetView('Action/VerifyLink', $this->web_data);
+                        parent::GetView('Action/VerifyLink', $this->web_data);
                     }
                 }
             }
@@ -400,17 +421,17 @@ class ActionController extends Controller
                 $captcha_timeout_error = false;
                 if ($captcha_timeout_from_db['captcha_banned'] == 1) {
                     $captcha_timeout_error = true;
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(CAPTCHA_BANNES_ERROR);
+                    $this->notification_control->SetNotification('DANGER', CAPTCHA_BANNES_ERROR);
                 } elseif ($captcha_timeout_from_db['captcha_total_error_count'] > 15) {
                     $captcha_timeout_error = true;
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(CAPTCHA_BANNES_ERROR);
+                    $this->notification_control->SetNotification('DANGER', CAPTCHA_BANNES_ERROR);
                 } elseif ($captcha_timeout_from_db['date_captcha_timeout_expiry'] > date('Y-m-d H:i:s')) {
                     $captcha_timeout_error = true;
                     $captcha_remain_timeout = (int)((strtotime($captcha_timeout_from_db['date_captcha_timeout_expiry']) - strtotime(date('Y-m-d H:i:s'))) / 60);
                     if ($captcha_remain_timeout == 0) {
                         $captcha_remain_timeout = 1;
                     }
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(CAPTCHA_TIMEOUT_1 . $captcha_remain_timeout . CAPTCHA_TIMEOUT_2);
+                    $this->notification_control->SetNotification('DANGER', CAPTCHA_TIMEOUT_1 . $captcha_remain_timeout . CAPTCHA_TIMEOUT_2);
                 }
                 if ($captcha_timeout_error) {
                     if ($login_type == 'admin') {
@@ -454,7 +475,7 @@ class ActionController extends Controller
                             ));
                         }
                     }
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(CAPTCHA_ERROR);
+                    $this->notification_control->SetNotification('DANGER', CAPTCHA_ERROR);
                     if ($login_type == 'admin') {
                         $this->input_control->Redirect(URL_ADMIN_LOGIN);
                     } else {
@@ -499,12 +520,12 @@ class ActionController extends Controller
                                 if ($user_from_db['two_fa_enable'] == 1) {
                                     $this->SendVerifyTokenWithEmail($user_from_db['id'], $email, 'two_fa', 'admin', 'AdminLoginTwoFA');
                                 } else {
-                                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(TWO_FA_NOT_ENABLE_ERROR);
+                                    $this->notification_control->SetNotification('DANGER', TWO_FA_NOT_ENABLE_ERROR);
                                 }
                                 $this->input_control->Redirect(URL_ADMIN_LOGIN);
                             } else {
                                 if ($user_from_db['user_role'] == ADMIN_ROLE_ID) {
-                                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(LOGIN_WITH_ADMIN_LOGIN);
+                                    $this->notification_control->SetNotification('DANGER', LOGIN_WITH_ADMIN_LOGIN);
                                     $this->input_control->Redirect(URL_ADMIN_LOGIN);
                                 } elseif ($user_from_db['email_confirmed'] == 1) {
                                     if (isset($_POST['remember_me'])) {
@@ -542,7 +563,7 @@ class ActionController extends Controller
                     $count_fail_login_from_db = $this->ActionModel->GetCountFailLogin($_SERVER['REMOTE_ADDR']);
                     if (!empty($count_fail_login_from_db)) {
                         if ($count_fail_login_from_db['ip_fail_login_count'] >= 1000) {
-                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(COUNT_FAIL_LOGIN_ERROR);
+                            $this->notification_control->SetNotification('DANGER', COUNT_FAIL_LOGIN_ERROR);
                             $this->input_control->Redirect(URL_ADMIN_LOGIN);
                         } else {
                             $this->ActionModel->UpdateCountFailLogin(array(
@@ -556,7 +577,7 @@ class ActionController extends Controller
                             'ip_fail_login_count' => 1
                         ));
                     }
-                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(LOGIN_ERROR);
+                    $this->notification_control->SetNotification('DANGER', LOGIN_ERROR);
                     if ($login_type == 'admin') {
                         $this->input_control->Redirect(URL_ADMIN_LOGIN);
                     } else {
@@ -564,53 +585,27 @@ class ActionController extends Controller
                     }
                 }
             } else {
-                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(CAPTCHA_ERROR);
+                $this->notification_control->SetNotification('DANGER', CAPTCHA_ERROR);
             }
         } else {
-            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
+            $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
         }
         if ($login_type == 'admin') {
-            $this->SetCSRFTokenAndGetView('AdminLogin', 'AdminLogin');
+            // $this->SetCSRFTokenAndGetView('AdminLogin', 'AdminLogin');
         } else {
             if (isset($_POST['redirect_location'])) {
                 $this->web_data['redirect_location'] = $_POST['redirect_location'];
             }
             $this->web_data['email'] = $email;
             $this->web_data['password'] = $password;
-            $this->SetCSRFTokenAndGetView('Login', 'Login');
-        }
-        $this->input_control->Redirect();
-    }
-    function AdminLogin()
-    {
-        if ($_SERVER['REMOTE_ADDR'] === ADMIN_IP) {
-            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-                $this->SetCSRFTokenAndGetView('AdminLogin', 'AdminLogin');
-            } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
-                $this->LoginPost('admin');
-            }
-        }
-        if (isset($_SESSION[SESSION_NOTIFICATION])) {
-            unset($_SESSION[SESSION_NOTIFICATION]);
-        }
-        $this->input_control->Redirect();
-    }
-    function Login()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            if (isset($_GET['yonlendir'])) {
-                $this->web_data['redirect_location'] = $_GET['yonlendir'];
-            }
-            $this->SetCSRFTokenAndGetView('Login', 'Login');
-        } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $this->LoginPost('user');
+            // $this->SetCSRFTokenAndGetView('Login', 'Login');
         }
         $this->input_control->Redirect();
     }
     function Register()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            $this->SetCSRFTokenAndGetView('Register', 'Register');
+            // $this->SetCSRFTokenAndGetView('Register', 'Register');
         } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $email = isset($_POST['email']) ? $_POST['email'] : '';
             $password = isset($_POST['password']) ? $_POST['password'] : '';
@@ -644,17 +639,17 @@ class ActionController extends Controller
                                 $captcha_timeout_error = false;
                                 if ($captcha_timeout_from_db['captcha_banned'] == 1) {
                                     $captcha_timeout_error = true;
-                                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(CAPTCHA_BANNES_ERROR);
+                                    $this->notification_control->SetNotification('DANGER', CAPTCHA_BANNES_ERROR);
                                 } elseif ($captcha_timeout_from_db['captcha_total_error_count'] > 15) {
                                     $captcha_timeout_error = true;
-                                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(CAPTCHA_BANNES_ERROR);
+                                    $this->notification_control->SetNotification('DANGER', CAPTCHA_BANNES_ERROR);
                                 } elseif ($captcha_timeout_from_db['date_captcha_timeout_expiry'] > date('Y-m-d H:i:s')) {
                                     $captcha_timeout_error = true;
                                     $captcha_remain_timeout = (int)((strtotime($captcha_timeout_from_db['date_captcha_timeout_expiry']) - strtotime(date('Y-m-d H:i:s'))) / 60);
                                     if ($captcha_remain_timeout == 0) {
                                         $captcha_remain_timeout = 1;
                                     }
-                                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(CAPTCHA_TIMEOUT_1 . $captcha_remain_timeout . CAPTCHA_TIMEOUT_2);
+                                    $this->notification_control->SetNotification('DANGER', CAPTCHA_TIMEOUT_1 . $captcha_remain_timeout . CAPTCHA_TIMEOUT_2);
                                 }
                                 if ($captcha_timeout_error) {
                                     $this->input_control->Redirect(URL_REGISTER);
@@ -694,7 +689,7 @@ class ActionController extends Controller
                                             ));
                                         }
                                     }
-                                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(CAPTCHA_ERROR);
+                                    $this->notification_control->SetNotification('DANGER', CAPTCHA_ERROR);
                                     $this->input_control->Redirect(URL_REGISTER);
                                 } elseif ($result_captcha === true) {
                                     if (!empty($captcha_timeout_from_db)) {
@@ -729,35 +724,35 @@ class ActionController extends Controller
                                             $this->SendVerifyTokenWithEmail($created_user['id'], $email, 'confirm_email', 'user', 'RegisterConfirmEmail');
                                         }
                                     } else {
-                                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(DATABASE_ERROR);
+                                        $this->notification_control->SetNotification('DANGER', DATABASE_ERROR);
                                     }
                                 }
                             } else {
-                                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(CAPTCHA_ERROR);
+                                $this->notification_control->SetNotification('DANGER', CAPTCHA_ERROR);
                             }
                         } else {
-                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(ERROR_MESSAGE_EMPTY_ACCEPT_REGISTER_TERMS);
+                            $this->notification_control->SetNotification('DANGER', ERROR_MESSAGE_EMPTY_ACCEPT_REGISTER_TERMS);
                         }
                     } else {
-                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(PASSWORDS_NOT_SAME);
+                        $this->notification_control->SetNotification('DANGER', PASSWORDS_NOT_SAME);
                     }
                 } else {
                     $this->input_control->Redirect(URL_REGISTER);
                 }
             } else {
-                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
+                $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
             }
             $this->web_data['email'] = $email;
             $this->web_data['password'] = $password;
             $this->web_data['repassword'] = $repassword;
-            $this->SetCSRFTokenAndGetView('Register', 'Register');
+            // $this->SetCSRFTokenAndGetView('Register', 'Register');
         }
         $this->input_control->Redirect();
     }
     function ForgotPassword()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            $this->SetCSRFTokenAndGetView('ForgotPassword', 'ForgotPassword');
+            // $this->SetCSRFTokenAndGetView('ForgotPassword', 'ForgotPassword');
         } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $email = isset($_POST['email']) ? $_POST['email'] : '';
             $checked_inputs = $this->input_control->CheckPostedInputs(array(
@@ -778,17 +773,17 @@ class ActionController extends Controller
                         $captcha_timeout_error = false;
                         if ($captcha_timeout_from_db['captcha_banned'] == 1) {
                             $captcha_timeout_error = true;
-                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(CAPTCHA_BANNES_ERROR);
+                            $this->notification_control->SetNotification('DANGER', CAPTCHA_BANNES_ERROR);
                         } elseif ($captcha_timeout_from_db['captcha_total_error_count'] > 15) {
                             $captcha_timeout_error = true;
-                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(CAPTCHA_BANNES_ERROR);
+                            $this->notification_control->SetNotification('DANGER', CAPTCHA_BANNES_ERROR);
                         } elseif ($captcha_timeout_from_db['date_captcha_timeout_expiry'] > date('Y-m-d H:i:s')) {
                             $captcha_timeout_error = true;
                             $captcha_remain_timeout = (int)((strtotime($captcha_timeout_from_db['date_captcha_timeout_expiry']) - strtotime(date('Y-m-d H:i:s'))) / 60);
                             if ($captcha_remain_timeout == 0) {
                                 $captcha_remain_timeout = 1;
                             }
-                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(CAPTCHA_TIMEOUT_1 . $captcha_remain_timeout . CAPTCHA_TIMEOUT_2);
+                            $this->notification_control->SetNotification('DANGER', CAPTCHA_TIMEOUT_1 . $captcha_remain_timeout . CAPTCHA_TIMEOUT_2);
                         }
                         if ($captcha_timeout_error) {
                             $this->input_control->Redirect(URL_FORGOT_PASSWORD);
@@ -828,7 +823,7 @@ class ActionController extends Controller
                                     ));
                                 }
                             }
-                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(CAPTCHA_ERROR);
+                            $this->notification_control->SetNotification('DANGER', CAPTCHA_ERROR);
                             $this->input_control->Redirect(URL_FORGOT_PASSWORD);
                         } elseif ($result_captcha === true) {
                             if (!empty($captcha_timeout_from_db)) {
@@ -850,7 +845,7 @@ class ActionController extends Controller
                                         'is_reset_pwd_used' => 0
                                     ));
                                     if ($result_reset_pwd['result'] == 'Created') {
-                                        $result_email = $this->action_control->SendMail($checked_email, BRAND . ' Şifre Sıfırlama', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>' . BRAND . ' Şifre Sıfırlama</title><style>* {margin: 0;padding: 0;border: 0;box-sizing: border-box;}html {font-size: 10px;}body {font-family: sans-serif;background-color: #aaaaaa;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.logo {border-width: 3px;border-style: solid;border-color: #ffffff;border-radius: 50%;padding: 10px;margin-bottom: 20px;}.main-title {font-size: 18px;color: #ffffff;letter-spacing: 1px;margin-bottom: 20px;}.main-text {font-size: 14px;color: #ffffff;margin-bottom: 20px;}.main-link {font-size: 14px;color: #5155d3;}.main-text-2 {font-size: 14px;color: #ffffff;margin-top: 20px;}.footer {padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;background-color: #5155d3;}.footer-text {font-size: 13px;color: #000000;text-align: center;margin-bottom: 20px;}.footer-link {font-size: 13px;color: #aaaaaa !important;}.footer-url {font-size: 12px;color: #ffffff !important;float: left;}.footer-date {color: #ffffff;font-size: 12px;float: right;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}}</style></head><body><div class="container"><div class="header"><img class="logo" src="' . URL . LOGO_PATH_PRIMARY . '" alt="' . BRAND . '"><h1 class="main-title">' . BRAND . ' Şifre Sıfırlama</h1><p class="main-text">Şifrenizi sıfırlamak için linke <a class="main-link" href="' . URL . URL_RESET_PASSWORD . '?resetpwd=' . $resetpwd_token . '">tıklayın.</a></p><p class="main-text-2">Şifre sıfırlama linkinin kullanım süresi ' . EXPIRY_RESET_PWD_TOKEN_MINUTE . ' dakikadır.</p></div><div class="footer"><p class="footer-text">Bu işlemi siz gerçekleştirmediyseniz bu emaili önemsemeyin.</p><a class="footer-url" href="' . URL . '">' . URL . '</a><span class="footer-date">' . date('d-m-Y H:i:s') . '</span></div></div></body></html>');
+                                        $result_email = $this->action_control->SendMail($checked_email, BRAND . ' Şifre Sıfırlama', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>' . BRAND . ' Şifre Sıfırlama</title><style>* {margin: 0;padding: 0;border: 0;box-sizing: border-box;}html {font-size: 10px;}body {font-family: sans-serif;background-color: #aaaaaa;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.logo {border-width: 3px;border-style: solid;border-color: #ffffff;border-radius: 50%;padding: 10px;margin-bottom: 20px;}.main-title {font-size: 18px;color: #ffffff;letter-spacing: 1px;margin-bottom: 20px;}.main-text {font-size: 14px;color: #ffffff;margin-bottom: 20px;}.main-link {font-size: 14px;color: #5155d3;}.main-text-2 {font-size: 14px;color: #ffffff;margin-top: 20px;}.footer {padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;background-color: #5155d3;}.footer-text {font-size: 13px;color: #000000;text-align: center;margin-bottom: 20px;}.footer-link {font-size: 13px;color: #aaaaaa !important;}.footer-url {font-size: 12px;color: #ffffff !important;float: left;}.footer-date {color: #ffffff;font-size: 12px;float: right;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}}</style></head><body><div class="container"><div class="header"><img class="logo" src="' . URL  . '" alt="' . BRAND . '"><h1 class="main-title">' . BRAND . ' Şifre Sıfırlama</h1><p class="main-text">Şifrenizi sıfırlamak için linke <a class="main-link" href="' . URL . URL_RESET_PASSWORD . '?resetpwd=' . $resetpwd_token . '">tıklayın.</a></p><p class="main-text-2">Şifre sıfırlama linkinin kullanım süresi ' . EXPIRY_RESET_PWD_TOKEN_MINUTE . ' dakikadır.</p></div><div class="footer"><p class="footer-text">Bu işlemi siz gerçekleştirmediyseniz bu emaili önemsemeyin.</p><a class="footer-url" href="' . URL . '">' . URL . '</a><span class="footer-date">' . date('d-m-Y H:i:s') . '</span></div></div></body></html>');
                                         if (!is_null($result_email)) {
                                             $this->ActionModel->CreateLogEmailSent(array(
                                                 'user_id' => $user_forgot_pwd_from_db['id'],
@@ -861,26 +856,26 @@ class ActionController extends Controller
                                             $this->input_control->Redirect(URL_LOGIN);
                                         }
                                     }
-                                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(DATABASE_ERROR);
+                                    $this->notification_control->SetNotification('DANGER', DATABASE_ERROR);
                                     $this->input_control->Redirect(URL_FORGOT_PASSWORD);
                                 } else {
-                                    $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(FORGOT_PASSWORD_NO_EMAIL);
+                                    $this->notification_control->SetNotification('DANGER', FORGOT_PASSWORD_NO_EMAIL);
                                     $this->input_control->Redirect(URL_FORGOT_PASSWORD);
                                 }
                             } else {
-                                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(ERROR_NOT_VALID_EMAIL);
+                                $this->notification_control->SetNotification('DANGER', ERROR_NOT_VALID_EMAIL);
                             }
                         }
                     } else {
-                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(CAPTCHA_ERROR);
+                        $this->notification_control->SetNotification('DANGER', CAPTCHA_ERROR);
                     }
                 } else {
                     $this->input_control->Redirect(URL_FORGOT_PASSWORD);
                 }
             } else {
-                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
+                $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
             }
-            $this->SetCSRFTokenAndGetView('ForgotPassword', 'ForgotPassword');
+            // $this->SetCSRFTokenAndGetView('ForgotPassword', 'ForgotPassword');
         }
         $this->input_control->Redirect();
     }
@@ -900,7 +895,7 @@ class ActionController extends Controller
                     ));
                     $_SESSION[SESSION_RESET_PWD] = $reset_pwd_post_token;
                     $this->web_data['reset_pwd_token'] = $this->action_control->GenerateBaitToken();
-                    $this->SetCSRFTokenAndGetView('ResetPassword', 'ResetPassword');
+                    // $this->SetCSRFTokenAndGetView('ResetPassword', 'ResetPassword');
                 }
             }
         } elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_SESSION[SESSION_RESET_PWD])) {
@@ -939,26 +934,26 @@ class ActionController extends Controller
                                 $_SESSION[SESSION_MASSAGE] = RESET_PWD_SUCCESS;
                                 $this->input_control->Redirect(URL_LOGIN);
                             } else {
-                                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(DATABASE_ERROR);
+                                $this->notification_control->SetNotification('DANGER', DATABASE_ERROR);
                             }
                         } else {
-                            $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(RESET_PWD_ERROR);
+                            $this->notification_control->SetNotification('DANGER', RESET_PWD_ERROR);
                         }
                     } else {
-                        $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger(PASSWORDS_NOT_SAME);
+                        $this->notification_control->SetNotification('DANGER', PASSWORDS_NOT_SAME);
                         $go_reset_pwd = true;
                     }
                 } else {
                     $this->input_control->Redirect(URL_FORGOT_PASSWORD);
                 }
             } else {
-                $_SESSION[SESSION_NOTIFICATION] = $this->notification_control->Danger($checked_inputs['error_message']);
+                $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 $go_reset_pwd = true;
             }
             if ($go_reset_pwd) {
                 $this->web_data['password'] = $password;
                 $this->web_data['repassword'] = $repassword;
-                $this->SetCSRFTokenAndGetView('ResetPassword', 'ResetPassword');
+                // $this->SetCSRFTokenAndGetView('ResetPassword', 'ResetPassword');
             } else {
                 $this->session_control->KillSession();
                 $this->input_control->Redirect(URL_FORGOT_PASSWORD);

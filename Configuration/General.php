@@ -1,12 +1,21 @@
 <?php
 define('BRAND', 'Blanck Basic');
-define('URL', 'http://blanckbasic.com/');
-define('LOGO_PATH_PRIMARY', 'assets/images/logos/brand-white.png');
-define('LOGO_PATH_SECONDRY', 'assets/images/logos/brand-black.png');
-define('REDIRECT_PERMISSION', array('urun'));
-define('GIVE_BACK_POLICY', 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse laboriosam aut exercitationem quisquam aperiam inventore quo, similique nobis quis cupiditate delectus iusto quam eaque labore voluptatum. Dolores nihil nemo ipsum! Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse laboriosam aut exercitationem quisquam aperiam inventore quo, similique nobis quis cupiditate delectus iusto quam eaque labore voluptatum. Dolores nihil nemo ipsum! Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse laboriosam aut exercitationem quisquam aperiam inventore quo, similique nobis quis cupiditate delectus iusto quam eaque labore voluptatum. Dolores nihil nemo ipsum! Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse laboriosam aut exercitationem quisquam aperiam inventore quo, similique nobis quis cupiditate delectus iusto quam eaque labore voluptatum. Dolores nihil nemo ipsum! Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse laboriosam aut exercitationem quisquam aperiam inventore quo, similique nobis quis cupiditate delectus iusto quam eaque labore voluptatum. Dolores nihil nemo ipsum! Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse laboriosam aut exercitationem quisquam aperiam inventore quo, similique nobis quis cupiditate delectus iusto quam eaque labore voluptatum. Dolores nihil nemo ipsum! Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse laboriosam aut exercitationem quisquam aperiam inventore quo, similique nobis quis cupiditate delectus iusto quam eaque labore voluptatum. Dolores nihil nemo ipsum! Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse laboriosam aut exercitationem quisquam aperiam inventore quo, similique nobis quis cupiditate delectus iusto quam eaque labore voluptatum. Dolores nihil nemo ipsum! Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse laboriosam aut exercitationem quisquam aperiam inventore quo, similique nobis quis cupiditate delectus iusto quam eaque labore voluptatum. Dolores nihil nemo ipsum! Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse laboriosam aut exercitationem quisquam aperiam inventore quo, similique nobis quis cupiditate delectus iusto quam eaque labore voluptatum. Dolores nihil nemo ipsum! Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse laboriosam aut exercitationem quisquam aperiam inventore quo, similique nobis quis cupiditate delectus iusto quam eaque labore voluptatum. Dolores nihil nemo ipsum! Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse laboriosam aut exercitationem quisquam aperiam inventore quo, similique nobis quis cupiditate delectus iusto quam eaque labore voluptatum. Dolores nihil nemo ipsum! Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse laboriosam aut exercitationem quisquam aperiam inventore quo, similique nobis quis cupiditate delectus iusto quam eaque labore voluptatum. Dolores nihil nemo ipsum! Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse laboriosam aut exercitationem quisquam aperiam inventore quo, similique nobis quis cupiditate delectus iusto quam eaque labore voluptatum. Dolores nihil nemo ipsum! Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse laboriosam aut exercitationem quisquam aperiam inventore quo, similique nobis quis cupiditate delectus iusto quam eaque labore voluptatum. Dolores nihil nemo ipsum!');
-
+define('URL', 'http://blanckbasic.com/'); // change => https://blanckbasic.com/
+define('META_TAG_AUTHOR', 'Semih Polat');
+define('ADMIN_IP_ADDRESS', '127.0.0.1');
 define('ADMIN_ROLE_ID', '25f50245e318a207bb70');
+define('SHOPPING_PERMISSION', true);
+define('BRAND_INSTAGRAM', '#');
+define('BRAND_TWITTER', '#');
+
+
+
+
+
+
+
+
+define('REDIRECT_PERMISSION', array('urun'));
 
 
 
