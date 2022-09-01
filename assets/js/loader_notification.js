@@ -16,3 +16,6 @@ window.onload = function () {
         }, 1500);
     }, 10000);
 };
+window.addEventListener('scroll', () => {
+    notification.classList.toggle('sticky', window.scrollY > 0);
+});

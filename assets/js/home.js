@@ -1,29 +1,160 @@
-const body = document.querySelector('body');
-const loader = document.querySelector('.loader');
-window.addEventListener('load', () => {
-    loader.classList.add('loading');
-});
-const notification = document.querySelector('.notification');
+const bodyElement = document.querySelector('body');
+const loaderWrapper = document.querySelector('.loader-wrapper');
+const notificationWrapper = document.querySelector('.notification-wrapper');
 window.onload = function () {
-    body.style.overflowY = 'visible';
+    if (bodyElement.classList.contains('noscroll')) {
+        bodyElement.classList.remove('noscroll');
+    }
+    if (!loaderWrapper.classList.contains('hidden')) {
+        loaderWrapper.classList.add('hidden');
+    }
     setTimeout(() => {
-        loader.classList.add('disable');
-    }, 100);
-    setTimeout(() => {
-        notification.classList.add('hidden');
+        if (!notificationWrapper.classList.contains('hidden')) {
+            notificationWrapper.classList.add('hidden');
+        }
         setTimeout(() => {
-            notification.classList.add('removed');
+            notificationWrapper.remove();
         }, 1500);
     }, 10000);
 };
-
-// Back To Top Settings
-const btnBackToTop = document.querySelector('.footer-back-to-top');
+const actionOptions = document.getElementById('action-options');
+const btnBackToTop = document.getElementById('back-to-top');
 window.addEventListener('scroll', () => {
-    notification.classList.toggle('sticky', window.scrollY > 0);
+    notificationWrapper.classList.toggle('sticky', window.scrollY > 0);
+    document.querySelector('.header-wrapper').classList.toggle('sticky', window.scrollY > 0);
+    actionOptions.classList.toggle('sticky', window.scrollY > 0);
     btnBackToTop.classList.toggle("active", window.scrollY > 500);
 });
-btnBackToTop.addEventListener('click', () => {
+btnBackToTop.addEventListener('click', (e) => {
+    e.preventDefault();
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
+});
+const headerSearchContainer = document.getElementById('header-search-container');
+const headerNav = document.getElementById('header-nav');
+document.getElementById('toggler-icon').addEventListener('click', (e) => {
+    e.preventDefault();
+    if (!headerNav.classList.contains('active')) {
+        if (headerSearchContainer.classList.contains('active')) {
+            closeSearch();
+        }
+        if (!bodyElement.classList.contains('noscroll')) {
+            bodyElement.classList.add('noscroll');
+        }
+        if (!headerNav.classList.contains('active')) {
+            headerNav.classList.add('active');
+        }
+    } else {
+        if (bodyElement.classList.contains('noscroll')) {
+            bodyElement.classList.remove('noscroll');
+        }
+        if (headerNav.classList.contains('active')) {
+            headerNav.classList.remove('active')
+        }
+    }
+});
+const actionOpenIcon = document.getElementById('action-open-icon');
+const actionTriangle = document.getElementById('action-triangle');
+actionOpenIcon.addEventListener('mouseover', (e) => {
+    e.preventDefault();
+    if (!actionOptions.classList.contains('active')) {
+        actionOptions.classList.add('active');
+    }
+    if (!actionTriangle.classList.contains('active')) {
+        actionTriangle.classList.add('active');
+    }
+    if (!actionOpenIcon.classList.contains('scaled')) {
+        actionOpenIcon.classList.add('scaled');
+    }
+});
+actionOpenIcon.addEventListener('mouseleave', (e) => {
+    e.preventDefault();
+    if (actionOptions.classList.contains('active')) {
+        actionOptions.classList.remove('active');
+    }
+    if (actionTriangle.classList.contains('active')) {
+        actionTriangle.classList.remove('active');
+    }
+    if (actionOpenIcon.classList.contains('scaled')) {
+        actionOpenIcon.classList.remove('scaled');
+    }
+});
+actionOptions.addEventListener('mouseover', (e) => {
+    e.preventDefault();
+    if (!actionOptions.classList.contains('active')) {
+        actionOptions.classList.add('active');
+    }
+    if (!actionTriangle.classList.contains('active')) {
+        actionTriangle.classList.add('active');
+    }
+    if (!actionOpenIcon.classList.contains('scaled')) {
+        actionOpenIcon.classList.add('scaled');
+    }
+});
+actionOptions.addEventListener('mouseleave', (e) => {
+    e.preventDefault();
+    if (actionOptions.classList.contains('active')) {
+        actionOptions.classList.remove('active');
+    }
+    if (actionTriangle.classList.contains('active')) {
+        actionTriangle.classList.remove('active');
+    }
+    if (actionOpenIcon.classList.contains('scaled')) {
+        actionOpenIcon.classList.remove('scaled');
+    }
+});
+const searchIconPrimary = document.getElementById('header-search-icon');
+const purgatoryIcons = document.querySelectorAll('.purgatory-icon');
+function openSearch() {
+    if (!bodyElement.classList.contains('noscroll')) {
+        bodyElement.classList.add('noscroll');
+    }
+    if (headerNav.classList.contains('active')) {
+        headerNav.classList.remove('active');
+    }
+    if (!searchIconPrimary.classList.contains('fa-times') && !searchIconPrimary.classList.contains('search-close-icon') && searchIconPrimary.classList.contains('fa-search')) {
+        searchIconPrimary.classList.add('fa-times', 'search-close-icon');
+        searchIconPrimary.classList.remove('fa-search');
+        searchIconPrimary.setAttribute('title', 'Kapat');
+    }
+    purgatoryIcons.forEach(purgatoryIcon => {
+        if (!purgatoryIcon.classList.contains('disable')) {
+            purgatoryIcon.classList.add('disable');
+        }
+    });
+    if (!headerSearchContainer.classList.contains('active')) {
+        headerSearchContainer.classList.add('active');
+    }
+    setTimeout(() => {
+        document.getElementById('input-search').focus();
+    }, 300);
+};
+function closeSearch() {
+    if (bodyElement.classList.contains('noscroll')) {
+        bodyElement.classList.remove('noscroll');
+    }
+    if (headerNav.classList.contains('active')) {
+        headerNav.classList.remove('active');
+    }
+    if (searchIconPrimary.classList.contains('fa-times') && searchIconPrimary.classList.contains('search-close-icon') && !searchIconPrimary.classList.contains('fa-search')) {
+        searchIconPrimary.classList.remove('fa-times', 'search-close-icon');
+        searchIconPrimary.classList.add('fa-search');
+        searchIconPrimary.setAttribute('title', 'Ara');
+    }
+    purgatoryIcons.forEach(purgatoryIcon => {
+        if (purgatoryIcon.classList.contains('disable')) {
+            purgatoryIcon.classList.remove('disable');
+        }
+    });
+    if (headerSearchContainer.classList.contains('active')) {
+        headerSearchContainer.classList.remove('active');
+    }
+};
+searchIconPrimary.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (!headerSearchContainer.classList.contains('active')) {
+        openSearch();
+    } else {
+        closeSearch();
+    }
 });

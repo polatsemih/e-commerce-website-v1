@@ -29,6 +29,9 @@ window.onload = function () {
         }
     });
 };
+window.addEventListener('scroll', () => {
+    notification.classList.toggle('sticky', window.scrollY > 0);
+});
 actionInputs.forEach(actionInput => {
     actionInput.addEventListener(('focusin'), () => {
         actionInput.parentElement.lastElementChild.classList.add('active');
