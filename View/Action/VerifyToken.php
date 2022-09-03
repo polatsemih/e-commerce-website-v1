@@ -3,308 +3,217 @@
 
 <head>
     <title>Doğrulama | <?php echo BRAND; ?></title>
-    <?php require 'View/SharedCommon/_common_meta.php'; ?>
     <meta name="robots" content="none" />
-    <?php require 'View/SharedCommon/_common_favicon.php'; ?>
-    <link rel="stylesheet" href="<?php echo URL; ?>assets/css/home.css">
-    <style>
-        .verify-token-popup {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .verify-token-container {
-            width: 100%;
-            background-color: #ffffff;
-            border-radius: 5px;
-            display: flex;
-            flex-direction: column;
-            padding: 2rem;
-        }
-
-        .verify-token-title {
-            font-size: 1.7rem;
-            color: #028565;
-            line-height: 1.4;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        .verify-token-text {
-            font-size: 1.4rem;
-            color: #000000;
-        }
-
-        .verify-token-text.green {
-            color: #00b487 !important;
-        }
-
-        .verify_token-form {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .verify-token-input {
-            width: 12%;
-            height: 6rem;
-            font-size: 2.5rem;
-            text-align: center;
-            border-width: 3px;
-            border-style: solid;
-            border-color: #000000;
-        }
-
-        .verify-token-input:not(:last-child) {
-            margin-right: 1%;
-        }
-
-        .verify-token-input:focus {
-            outline: 0;
-            border-width: 3px;
-            border-style: solid;
-            border-color: #5155d3;
-        }
-
-        .verify_token-submit,
-        .go-back-login {
-            background-color: #5155d3;
-            color: #ffffff;
-            border-radius: 5px;
-            padding: 1rem;
-            cursor: pointer;
-            margin-top: 3rem;
-            font-size: 1.5rem;
-            border: none;
-        }
-
-        .verify_token-submit.disable {
-            display: none !important;
-        }
-
-        .verify_token-submit:hover {
-            background-color: #5155d3da;
-        }
-
-        .go-back-login {
-            display: none;
-        }
-
-        .go-back-login.active {
-            display: block !important;
-        }
-
-        .go-back-login:hover {
-            background-color: #5155d3da;
-        }
-
-        .counter-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 2rem;
-        }
-
-        .counter {
-            margin-left: auto;
-        }
-
-        .counter-text,
-        .counter-remain {
-            font-size: 1.4rem;
-            color: #000000;
-            font-weight: 700;
-        }
-
-        .counter-text.timeout {
-            color: #ca0101 !important;
-        }
-
-        @media only screen and (min-width: 576px) {
-            .verify-token-container {
-                width: 70%;
-            }
-
-            .verify-token-title {
-                text-align: left;
-            }
-        }
-
-        @media only screen and (min-width: 768px) {
-            .verify-token-container {
-                width: 60%;
-            }
-
-            .verify-token-title {
-                margin-bottom: 0px;
-            }
-
-            .verify-token-input {
-                font-size: 4rem;
-                height: 8rem;
-            }
-
-            .verify-token-title {
-                margin-bottom: 2rem;
-            }
-
-            .verify_token-submit {
-                margin-top: 4rem;
-            }
-        }
-
-        @media only screen and (min-width: 992px) {
-            .verify-token-container {
-                width: 50%;
-            }
-        }
-
-        @media only screen and (min-width: 1200px) {
-            .verify-token-container {
-                width: 40%;
-            }
-        }
-    </style>
+    <?php require_once 'View/SharedHome/_home_head.php'; ?>
 </head>
 
 <body>
-    <?php require 'View/SharedCommon/_common_loader.php'; ?>
-    <header>
-        <div class="header-container">
-            <div class="container row-adjacent">
-                <div class="header-brand-container">
-                    <a class="header-brand" href="<?php echo URL; ?>"><?php echo BRAND; ?></a>
-                </div>
-            </div>
-        </div>
-    </header>
+    <?php require_once 'View/SharedHome/_home_body.php'; ?>
     <main>
         <section class="action-section">
-            <div class="verify-token-popup">
-                <div class="verify-token-container">
-                    <?php if (!empty($web_data['verify_token_type'])) : ?>
-                        <?php if ($web_data['verify_token_type'] == 'two_fa') {
-                            $token_time_remain = !empty($web_data['token_time_remain']) ? (int)$web_data['token_time_remain'] : EXPIRY_TWO_FA_TOKEN_MINUTE;
-                            echo '<h1 class="verify-token-title">Email kutunuza gelen doğrulama kodunu alt bölüme girerek giriş yapabilirsiniz.</h1>';
-                        } elseif ($web_data['verify_token_type'] == 'confirm_email') {
-                            $token_time_remain = !empty($web_data['token_time_remain']) ? (int)$web_data['token_time_remain'] : EXPIRY_CONFIRM_EMAIL_TOKEN_MINUTE;
-                            echo '<h1 class="verify-token-title">Email kutunuza gelen doğrulama kodunu alt bölüme girerek üyeliğinizi aktif edebilirsniz.</h1>';
-                        } ?>
-                        <div style="width: 100%; height: 3px; background-color: #000000; margin-bottom: 10px;"></div>
-                        <div class="counter-container">
-                            <div class="counter">
-                                <span class="counter-text">Kalan Süre:</span>
-                                <span class="counter-remain counter-remain-m"><?php echo $token_time_remain; ?></span>
-                                <span class="counter-remain counter-remain-dot">.</span>
-                                <span class="counter-remain counter-remain-s">00</span>
-                            </div>
-                        </div>
-                        <form class="verify_token-form" action="<?php echo URL . URL_VERIFY_TOKEN; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
-                            <div class="row">
-                                <?php if (!empty($web_data['csrf_token'])) : ?>
-                                    <input type="hidden" name="form_token" value="<?php echo $web_data['csrf_token']; ?>">
-                                <?php endif; ?>
-                                <?php if (!empty($web_data['verify_token'])) : ?>
-                                    <input type="hidden" name="verify_token" value="<?php echo $web_data['verify_token']; ?>">
-                                <?php endif; ?>
-                                <input class="verify-token-input" type="text" name="token_1" maxlength="1" autofocus>
-                                <input class="verify-token-input" type="text" name="token_2" maxlength="1">
-                                <input class="verify-token-input" type="text" name="token_3" maxlength="1">
-                                <input class="verify-token-input" type="text" name="token_4" maxlength="1">
-                                <input class="verify-token-input" type="text" name="token_5" maxlength="1">
-                                <input class="verify-token-input" type="text" name="token_6" maxlength="1">
-                                <input class="verify-token-input" type="text" name="token_7" maxlength="1">
-                                <input class="verify-token-input" type="text" name="token_8" maxlength="1">
-                            </div>
-                            <?php if (!empty($web_data['verify_token_type'])) : ?>
-                                <?php if ($web_data['verify_token_type'] == 'two_fa') : ?>
-                                    <input class="verify_token-submit" type="submit" name="verify_token-submit" value="Giriş Yap" title="Giriş Yap">
-                                <?php elseif ($web_data['verify_token_type'] == 'confirm_email') : ?>
-                                    <input class="verify_token-submit" type="submit" name="verify_token-submit" value="Doğrula" title="Email Adresimi Doğrula">
-                                <?php endif; ?>
-                            <?php endif; ?>
-                            <a class="go-back-login" href="<?php echo URL . URL_ADMIN_LOGIN; ?>">Giriş Ekranına Dön</a>
-                        </form>
-                    <?php endif; ?>
+            <div class="verify-token-container">
+                <h1 class="verify-token-title">
+                    <?php if ($web_data['verify_token_type'] == 'two_fa') {
+                        echo 'Email kutunuza gelen doğrulama kodunu alt bölüme girerek giriş yapabilirsiniz.';
+                    } elseif ($web_data['verify_token_type'] == 'confirm_email') {
+                        echo 'Email kutunuza gelen doğrulama kodunu alt bölüme girerek üyeliğinizi aktif edebilirsniz.';
+                    } ?>
+                </h1>
+                <div class="counter-container">
+                    <div class="right">
+                        <span class="counter-text">Kalan Süre:</span>
+                        <span id="counter-remain-m" class="counter-text"></span>
+                        <span id="counter-remain-dot" class="counter-text">.</span>
+                        <span id="counter-remain-s" class="counter-text"></span>
+                    </div>
                 </div>
+                <form id="form-verify-token" action="<?php echo URL . URL_VERIFY_TOKEN; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                    <div class="row">
+                        <?php if (!empty($web_data['form_token'])) : ?>
+                            <input type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
+                        <?php endif; ?>
+                        <?php if (!empty($web_data['verify_token'])) : ?>
+                            <input type="hidden" name="verify_token" value="<?php echo $web_data['verify_token']; ?>">
+                        <?php endif; ?>
+                        <input class="verify-token-input" type="text" name="token_1" maxlength="1" autofocus>
+                        <input class="verify-token-input" type="text" name="token_2" maxlength="1">
+                        <input class="verify-token-input" type="text" name="token_3" maxlength="1">
+                        <input class="verify-token-input" type="text" name="token_4" maxlength="1">
+                        <input class="verify-token-input" type="text" name="token_5" maxlength="1">
+                        <input class="verify-token-input" type="text" name="token_6" maxlength="1">
+                        <input class="verify-token-input" type="text" name="token_7" maxlength="1">
+                        <input class="verify-token-input" type="text" name="token_8" maxlength="1">
+                    </div>
+                    <div class="row-center">
+                        <?php if ($web_data['verify_token_type'] == 'two_fa') : ?>
+                            <button class="verify-token-submit" title="Giriş Yap">Giriş Yap</button>
+                        <?php elseif ($web_data['verify_token_type'] == 'confirm_email') : ?>
+                            <button class="verify-token-submit" title="Email Adresimi Doğrula">Doğrula</button>
+                        <?php endif; ?>
+                        <a class="go-back-login" href="<?php echo URL . URL_LOGIN; ?>">Giriş Ekranına Dön</a>
+                    </div>
+                </form>
             </div>
         </section>
     </main>
-    <?php require 'View/SharedHome/_home_footer.php'; ?>
-    <script src="<?php echo URL; ?>assets/js/loader.js"></script>
+    <?php require_once 'View/SharedHome/_home_footer.php'; ?>
+    <?php if (!empty($web_data['cookie_cart'])) : ?>
+        <script src="<?php echo URL; ?>assets/js/header_cart.js"></script>
+    <?php endif; ?>
+    <script>
+        $(document).ready(function() {
+            var request;
+            var requestUsable = true;
+            var inputSearch = $('#input-search');
+            var navSearch = $('.nav-search');
+            var navSearchPopular = $('.nav-search-popular');
+            inputSearch.on('input', function(e) {
+                e.preventDefault();
+                if (!$.trim(inputSearch.val())) {
+                    $('#nav-search-wrapper').remove();
+                    if (navSearchPopular.hasClass('hidden')) {
+                        navSearchPopular.removeClass('hidden');
+                    }
+                    if (!navSearch.hasClass('hidden')) {
+                        navSearch.addClass('hidden');
+                    }
+                } else if (requestUsable) {
+                    requestUsable = false;
+                    const formSearch = $('#form-search');
+                    const inputsformSearch = formSearch.find('input');
+                    request = $.ajax({
+                        url: '<?php echo URL . URL_SEARCH; ?>',
+                        type: 'POST',
+                        data: formSearch.serialize()
+                    });
+                    inputsformSearch.prop('disabled', true);
+                    request.done(function(response) {
+                        requestUsable = true;
+                        if (!navSearchPopular.hasClass('hidden')) {
+                            navSearchPopular.addClass('hidden');
+                        }
+                        if (navSearch.hasClass('hidden')) {
+                            navSearch.removeClass('hidden');
+                        }
+                        response = jQuery.parseJSON(response);
+                        if (response.hasOwnProperty('not_found_search_item')) {
+                            $('#nav-search-wrapper').remove();
+                            let ss1 = $("<div></div>").attr('id', 'nav-search-wrapper');
+                            let ss2 = $("<li></li>").addClass('search-item');
+                            ss1.append(ss2);
+                            let ss3 = $("<a></a>").addClass('not-found-search').text('Aranılan kriterde ürün bulunamadı');
+                            ss2.append(ss3);
+                            navSearch.append(ss1);
+                        } else if (response.hasOwnProperty('searched_items')) {
+                            $('#nav-search-wrapper').remove();
+                            let s1 = $("<div></div>").attr('id', 'nav-search-wrapper');
+                            $.each(response['searched_items'], function(key, searchitem) {
+                                let s2 = $("<li></li>").addClass('search-item');
+                                s1.append(s2);
+                                let s3 = $("<a></a>").addClass('search-link').attr('href', '<?php echo URL . URL_ITEM_DETAILS . '/' ?>' + searchitem['item_url']).text(searchitem['item_name']);
+                                s2.append(s3);
+                            });
+                            navSearch.append(s1);
+                        }
+                    });
+                    request.always(function() {
+                        inputsformSearch.prop('disabled', false);
+                        inputSearch.focus();
+                    });
+                }
+            });
+        });
+    </script>
     <script>
         const emailConfirmInputs = document.querySelectorAll('.verify-token-input');
         for (let index = 0; index < emailConfirmInputs.length; index++) {
             emailConfirmInputs[index].addEventListener('keyup', (e) => {
-                if ((e.keyCode >= 48 && e.keyCode <= 90) || e.keyCode == 39) {
+                if (/^[a-z]$/i.test(e.key) || /^[0-9]$/i.test(event.key)) {
                     if (emailConfirmInputs.length > index + 1) {
                         emailConfirmInputs[index + 1].focus();
                     } else if (emailConfirmInputs.length == index + 1) {
                         emailConfirmInputs[index].blur();
                     }
-                } else if (e.keyCode == 8 || e.keyCode == 37) {
-                    if (index + 1 > 1) {
-                        emailConfirmInputs[index - 1].focus();
-                    }
+                } else {
+                    emailConfirmInputs[index].value = '';
                 }
             });
         }
-        const verifyTokenSubmit = document.querySelector('.verify_token-submit');
-        const counterRemainM = document.querySelector('.counter-remain-m');
-        const counterRemainS = document.querySelector('.counter-remain-s');
-        var startSec = 59;
-        var startMin = <?php echo $token_time_remain - 1; ?>;
+        const verifyTokenSubmit = document.querySelector('.verify-token-submit');
+        const goBackLogin = document.querySelector('.go-back-login');
+        const counterRemainM = document.getElementById('counter-remain-m');
+        const counterRemainS = document.getElementById('counter-remain-s');
+        const counterText = document.querySelector('.counter-text');
+        var startMin = <?php echo $web_data['token_time_remain_minute']; ?>;
+        var startSec = <?php echo $web_data['token_time_remain_second']; ?>;
+        if (startMin < 10) {
+            counterRemainM.innerHTML = '0' + startMin;
+        } else {
+            counterRemainM.innerHTML = startMin;
+        }
+        if (startSec < 10) {
+            counterRemainS.innerHTML = '0' + startSec;
+        } else {
+            counterRemainS.innerHTML = startSec;
+        }
         var interval;
-
         function counter() {
-            if (counterRemainM.innerHTML == <?php echo $token_time_remain; ?>) {
-                counterRemainM.innerHTML = <?php echo $token_time_remain - 1; ?>;
-                counterRemainS.innerHTML = '59';
-            }
             if (startSec == 0) {
                 startSec = 59;
-                counterRemainS.innerHTML = startSec;
                 if (startMin == 0) {
                     clearInterval(interval);
                     counterRemainM.innerHTML = '';
                     counterRemainS.innerHTML = '';
-                    document.querySelector('.counter-remain-dot').innerHTML = '';
-                    document.querySelector('.counter-text').classList.add('timeout');
-                    document.querySelector('.counter-text').innerHTML = 'Süre doldu. Giriş ekranından tekrar giriş yapın.';
-                    document.querySelector('.go-back-login').classList.add('active');
-                    verifyTokenSubmit.classList.add('disable');
+                    document.getElementById('counter-remain-dot').innerHTML = '';
+                    if (!verifyTokenSubmit.classList.contains('disable')) {
+                        verifyTokenSubmit.classList.add('disable');
+                    }
+                    if (!counterText.classList.contains('timeout')) {
+                        counterText.classList.add('timeout');
+                    }
+                    counterText.innerHTML = 'Süre doldu. Devam etmek için giriş ekranından, tekrar giriş yapın.';
+                    if (!goBackLogin.classList.contains('active')) {
+                        goBackLogin.classList.add('active')
+                    }
                     verifyTokenSubmit.disabled = true;
-                    verifyTokenSubmit.setAttribute('value', 'Süre Doldu');
-                    verifyTokenSubmit.setAttribute('title', 'Giriş ekranından tekrar giriş yapın');
                 } else if (startMin < 10) {
                     startMin--;
                     counterRemainM.innerHTML = '0' + startMin;
+                    counterRemainS.innerHTML = startSec;
                 } else {
                     startMin--;
                     counterRemainM.innerHTML = startMin;
+                    counterRemainS.innerHTML = startSec;
                 }
             } else {
+                startSec--;
                 if (startSec < 10) {
                     counterRemainS.innerHTML = '0' + startSec;
                 } else {
                     counterRemainS.innerHTML = startSec;
                 }
-                startSec--;
             }
         }
         interval = setInterval(counter, 1000);
-        document.querySelector('.verify_token-form').addEventListener('submit', () => {
-            verifyTokenSubmit.classList.add('disable');
-            if (loader.classList.contains('disable') && loader.classList.contains('loading')) {
-                loader.classList.remove('disable');
-                loader.classList.remove('loading');
+        verifyTokenSubmit.addEventListener('click', (e) => {
+            e.preventDefault();
+            let emptyInput = true;
+            emailConfirmInputs.forEach(emailConfirmInput => {
+                if (emailConfirmInput.value == '') {
+                    emptyInput = false;
+                }
+            });
+            if (emptyInput) {
+                if (!verifyTokenSubmit.classList.contains('disable')) {
+                    verifyTokenSubmit.classList.add('disable');
+                }
+                if (loaderWrapper.classList.contains('hidden')) {
+                    loaderWrapper.classList.remove('hidden');
+                }
+                if (!bodyElement.classList.contains('noscroll')) {
+                    bodyElement.classList.add('noscroll');
+                }
+                document.getElementById('form-verify-token').submit();
             }
         });
     </script>

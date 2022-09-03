@@ -2,31 +2,44 @@
 <html lang="tr">
 
 <head>
-    <title>Giriş | <?php echo BRAND; ?> - Yönetim Paneli</title>
-    <?php require 'View/SharedCommon/_common_meta.php'; ?>
+    <title>Giriş - Yönetim Paneli | <?php echo BRAND; ?></title>
     <meta name="robots" content="none" />
-    <?php require 'View/SharedCommon/_common_favicon.php'; ?>
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.3/css/all.css">
-    <link rel="stylesheet" href="<?php echo URL; ?>assets/css/home.css">
-    <link rel="stylesheet" href="<?php echo URL; ?>assets/css/captcha.css">
+    <?php require_once 'View/SharedHome/_home_head.php'; ?>
     <style>
-        .admin-login-container {
-            width: 100vw;
-            height: 100vh;
-            background-color: #000000;
+        .captcha-popup {
+            z-index: 20 !important;
         }
 
-        .form-admin {
+        .action-container.black {
+            background-color: #000000 !important;
+            padding-top: 0 !important;
+            padding-right: 0 !important;
+            padding-left: 0 !important;
+        }
+
+        .admin-login-title {
+            font-size: 2rem;
+            color: #ffffff;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            border-width: 1px;
+            border-style: solid;
+            border-color: #ffffff;
+            border-radius: 1rem;
+        }
+
+        .admin-login-row {
             width: 100%;
-            height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
         }
 
         .input-admin-login {
-            width: 90%;
+            width: 100%;
             height: 6rem;
             border-width: 3px;
             border-style: solid;
@@ -35,7 +48,7 @@
             -webkit-box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
             -moz-box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-            border-radius: 0.5rem;
+            border-radius: 1rem;
             font-size: 1.6rem;
             color: #ffffff;
             text-align: center;
@@ -71,10 +84,6 @@
             opacity: 0.6;
         }
 
-        .input-admin-login.disable {
-            display: none !important;
-        }
-
         .input-admin-login-submit {
             z-index: 10;
             position: absolute;
@@ -102,7 +111,7 @@
 
         .submit-container {
             position: relative;
-            width: 90%;
+            width: 100%;
             height: 6rem;
             border-width: 3px;
             border-style: solid;
@@ -110,7 +119,7 @@
             -webkit-box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
             -moz-box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-            border-radius: 0.5rem;
+            border-radius: 1rem;
         }
 
         .submit-container.disable {
@@ -180,158 +189,191 @@
         .submit-container:hover .submit-left-hover {
             width: 50% !important;
         }
-
-        @media only screen and (min-width: 576px) {
-            .input-admin-login {
-                width: 50%;
-            }
-
-            .submit-container {
-                width: 50%;
-            }
-        }
-
-        @media only screen and (min-width: 768px) {
-            .input-admin-login {
-                width: 40%;
-            }
-
-            .submit-container {
-                width: 40%;
-            }
-        }
-
-        @media only screen and (min-width: 992px) {
-            .input-admin-login {
-                width: 30%;
-                height: 7rem;
-            }
-
-            .submit-container {
-                width: 30%;
-                height: 7rem;
-            }
-        }
-
-        @media only screen and (min-width: 1650px) {
-            .input-admin-login {
-                height: 8rem;
-            }
-
-            .submit-container {
-                height: 8rem;
-            }
-        }
     </style>
 </head>
 
 <body>
-    <div class="notification">
-        <?php if (isset($_SESSION[SESSION_NOTIFICATION_NAME])) {
-            echo $_SESSION[SESSION_NOTIFICATION_NAME];
-            unset($_SESSION[SESSION_NOTIFICATION_NAME]);
-        } ?>
-    </div>
     <div class="notification-client"></div>
-    <?php require 'View/SharedCommon/_common_loader.php'; ?>
-    <div class="admin-login-container">
-        <form action="<?php echo URL . URL_ADMIN_LOGIN; ?>" method="POST" class="form-admin" id="form-admin-login" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
-            <?php if (!empty($web_data['csrf_token'])) : ?>
-                <input type="hidden" name="form_token" value="<?php echo $web_data['csrf_token']; ?>">
-            <?php endif; ?>
-            <?php if (!empty($web_data['email'])) : ?>
-                <input class="input-admin-login" id="input_email" type="email" name="email" placeholder="Email" value="<?php echo $web_data['email']; ?>">
-                <input class="input-admin-login" id="input_password" type="password" name="password" placeholder="Şifre" <?php echo !empty($web_data['password']) ? 'value="' . $web_data['password'] . '"' : 'autofocus' ?>>
-            <?php else : ?>
-                <input class="input-admin-login" id="input_email" type="email" name="email" placeholder="Email" autofocus>
-                <input class="input-admin-login" id="input_password" type="password" name="password" placeholder="Şifre" <?php echo !empty($web_data['password']) ? 'value="' . $web_data['password'] . '"' : '' ?>>
-            <?php endif; ?>
-            <div class="captcha-popup">
-                <div class="captcha-container">
-                    <div class="captcha-title-container">
-                        <h1 class="captcha-title">Ben Bir İnsanım Testi</h1>
+    <?php require_once 'View/SharedHome/_home_body.php'; ?>
+    <main>
+        <section class="action-section">
+            <div class="action-container black">
+                <h1 class="admin-login-title">Yönetici Giriş</h1>
+                <form id="form-admin-login" action="<?php echo URL . URL_ADMIN_LOGIN; ?>" method="POST" class="admin-login-row" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                    <?php if (!empty($web_data['form_token'])) : ?>
+                        <input type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
+                    <?php endif; ?>
+                    <input class="input-admin-login" id="input-email" type="email" name="email" placeholder="Email" autofocus>
+                    <input class="input-admin-login" id="input-password" type="password" name="password" placeholder="Şifre">
+                    <div class="captcha-popup">
+                        <div class="captcha-container">
+                            <h2 class="captcha-title">Ben Bir İnsanım Testi</h2>
+                            <div class="captcha-form-container">
+                                <span class="text">Lütfen aşağıdaki testi çözerek insan olduğunuzu doğrulayın</span>
+                                <div id="captchaDiv"></div>
+                            </div>
+                            <div class="close-popup">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        </div>
                     </div>
-                    <div class="captcha-form-container">
-                        <span class="captcha-text">Lütfen aşağıdaki testi çözerek insan olduğunuzu doğrulayın.</span>
-                        <div id="captchaDiv"></div>
+                    <div class="submit-container">
+                        <div class="submit-left-hover"></div>
+                        <button id="btn-admin-login" class="input-admin-login-submit">Giriş</button>
+                        <div class="submit-right-hover"></div>
                     </div>
-                    <div class="close-popup">
-                        <i class="fas fa-times close-popup-icon"></i>
-                    </div>
-                </div>
+                </form>
             </div>
-            <div class="submit-container">
-                <div class="submit-left-hover"></div>
-                <input class="input-admin-login-submit" type="submit" value="Giriş">
-                <div class="submit-right-hover"></div>
-            </div>
-        </form>
-    </div>
-    <script src="<?php echo URL; ?>assets/js/loader_notification.js"></script>
+        </section>
+    </main>
+    <?php require_once 'View/SharedHome/_home_footer.php'; ?>
+    <script src="<?php echo URL; ?>assets/js/eyebtn.js"></script>
+    <?php if (!empty($web_data['cookie_cart'])) : ?>
+        <script src="<?php echo URL; ?>assets/js/header_cart.js"></script>
+    <?php endif; ?>
     <script>
-        const notificationClient = document.querySelector('.notification-client');
-        window.addEventListener('scroll', () => {
-            notificationClient.classList.toggle('sticky', window.scrollY > 0);
-        });
-        let notificationHidden = 0;
-        let notificationRemoved = 0;
-        function setClientNotification(notificationMessage) {
-            clearTimeout(notificationHidden);
-            clearTimeout(notificationRemoved);
-            notificationClient.innerHTML = '<div class="not not-danger"><span class="not-text">' + notificationMessage + '</span></div>';
-            if (notificationClient.classList.contains('hidden') && notificationClient.classList.contains('removed')) {
-                notificationClient.classList.remove('hidden');
-                notificationClient.classList.remove('removed');
+        $(document).ready(function() {
+            var notificationClient = $('.notification-client');
+            var notificationHidden = 0;
+            var notificationRemoved = 0;
+
+            function setClientNotification(notificationMessage) {
+                clearTimeout(notificationHidden);
+                clearTimeout(notificationRemoved);
+                notificationClient.html(notificationMessage);
+                if (notificationClient.hasClass('hidden')) {
+                    notificationClient.removeClass('hidden');
+                }
+                if (notificationClient.hasClass('removed')) {
+                    notificationClient.removeClass('removed');
+                }
+                notificationHidden = setTimeout(() => {
+                    if (!notificationClient.hasClass('hidden')) {
+                        notificationClient.addClass('hidden');
+                    }
+                    notificationRemoved = setTimeout(() => {
+                        if (!notificationClient.hasClass('removed')) {
+                            notificationClient.addClass('removed');
+                        }
+                    }, 1500);
+                }, 10000);
             }
-            notificationHidden = setTimeout(() => {
-                notificationClient.classList.add('hidden');
-                notificationRemoved = setTimeout(() => {
-                    notificationClient.classList.add('removed');
-                }, 1500);
-            }, 5000);
-        }
-        document.querySelector('.input-admin-login-submit').addEventListener('click', (e) => {
-            e.preventDefault();
-            notification.classList.add('hidden');
-            notification.classList.add('removed');
-            let inputEmail = document.getElementById('input_email');
-            let inputPassword = document.getElementById('input_password');
-            if (inputEmail.value.trim() == '') {
-                inputEmail.focus();
-                setClientNotification('<?php echo ERROR_MESSAGE_EMPTY_EMAIL; ?>');
-            } else if (inputPassword.value.trim() == '') {
-                inputPassword.focus();
-                setClientNotification('<?php echo ERROR_MESSAGE_EMPTY_PASSWORD; ?>');
-            } else {
-                document.querySelectorAll('.input-admin-login').forEach(element => {
-                    element.classList.add('disable');
-                });
-                document.querySelector('.submit-container').classList.add('disable');
-                document.querySelector('.captcha-popup').classList.add('active');
-            }
-        });
-        document.querySelector('.close-popup').addEventListener('click', () => {
-            document.querySelectorAll('.input-admin-login').forEach(element => {
-                element.classList.remove('disable');
+            $(window).scroll(function() {
+                if ($(window).scrollTop() > 0) {
+                    notificationClient.addClass('sticky');
+                } else {
+                    notificationClient.removeClass('sticky');
+                }
             });
-            document.querySelector('.submit-container').classList.remove('disable');
-            document.querySelector('.captcha-popup').classList.remove('active');
+            var request;
+            var requestUsable = true;
+            var inputSearch = $('#input-search');
+            var navSearch = $('.nav-search');
+            var navSearchPopular = $('.nav-search-popular');
+            inputSearch.on('input', function(e) {
+                e.preventDefault();
+                if (!$.trim(inputSearch.val())) {
+                    $('#nav-search-wrapper').remove();
+                    if (navSearchPopular.hasClass('hidden')) {
+                        navSearchPopular.removeClass('hidden');
+                    }
+                    if (!navSearch.hasClass('hidden')) {
+                        navSearch.addClass('hidden');
+                    }
+                } else if (requestUsable) {
+                    requestUsable = false;
+                    const formSearch = $('#form-search');
+                    const inputsformSearch = formSearch.find('input');
+                    request = $.ajax({
+                        url: '<?php echo URL . URL_SEARCH; ?>',
+                        type: 'POST',
+                        data: formSearch.serialize()
+                    });
+                    inputsformSearch.prop('disabled', true);
+                    request.done(function(response) {
+                        requestUsable = true;
+                        if (!navSearchPopular.hasClass('hidden')) {
+                            navSearchPopular.addClass('hidden');
+                        }
+                        if (navSearch.hasClass('hidden')) {
+                            navSearch.removeClass('hidden');
+                        }
+                        response = jQuery.parseJSON(response);
+                        if (response.hasOwnProperty('not_found_search_item')) {
+                            $('#nav-search-wrapper').remove();
+                            let ss1 = $("<div></div>").attr('id', 'nav-search-wrapper');
+                            let ss2 = $("<li></li>").addClass('search-item');
+                            ss1.append(ss2);
+                            let ss3 = $("<a></a>").addClass('not-found-search').text('Aranılan kriterde ürün bulunamadı');
+                            ss2.append(ss3);
+                            navSearch.append(ss1);
+                        } else if (response.hasOwnProperty('searched_items')) {
+                            $('#nav-search-wrapper').remove();
+                            let s1 = $("<div></div>").attr('id', 'nav-search-wrapper');
+                            $.each(response['searched_items'], function(key, searchitem) {
+                                let s2 = $("<li></li>").addClass('search-item');
+                                s1.append(s2);
+                                let s3 = $("<a></a>").addClass('search-link').attr('href', '<?php echo URL . URL_ITEM_DETAILS . '/' ?>' + searchitem['item_url']).text(searchitem['item_name']);
+                                s2.append(s3);
+                            });
+                            navSearch.append(s1);
+                        }
+                    });
+                    request.always(function() {
+                        inputsformSearch.prop('disabled', false);
+                        inputSearch.focus();
+                    });
+                }
+            });
+            const captchaPopup = $('.captcha-popup');
+            $('#btn-admin-login').click(function(e) {
+                e.preventDefault();
+                const inputEmail = $('#input-email');
+                const inputPassword = $('#input-password');
+                if (inputEmail.val() == '') {
+                    inputEmail.focus();
+                    setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_EMPTY_EMAIL; ?></span></div>');
+                } else if (inputPassword.val() == '') {
+                    inputPassword.focus();
+                    setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_EMPTY_PASSWORD; ?></span></div>');
+                } else {
+                    clearTimeout(notificationHidden);
+                    clearTimeout(notificationRemoved);
+                    if (!notificationClient.hasClass('hidden')) {
+                        notificationClient.addClass('hidden');
+                    }
+                    if (!notificationClient.hasClass('removed')) {
+                        notificationClient.addClass('removed');
+                    }
+                    if (!captchaPopup.hasClass('active')) {
+                        captchaPopup.addClass('active');
+                    }
+                }
+            });
+            $('.close-popup').click(function(e) {
+                e.preventDefault();
+                if (captchaPopup.hasClass('active')) {
+                    captchaPopup.removeClass('active');
+                }
+            });
         });
     </script>
-    <script src="https://js.hcaptcha.com/1/api.js?onload=hCaptcha&render=explicit&hl=tr" async defer></script>
+    <script src="<?php echo CAPTCHA_SRC; ?>" async defer></script>
     <script type="text/javascript">
         var hCaptcha = function() {
             hcaptcha.render('captchaDiv', {
-                sitekey: '<?php echo SITE_KEY; ?>',
+                sitekey: '<?php echo CAPTCHA_SITE_KEY; ?>',
                 theme: 'dark',
                 'callback': 'hCaptchaCallback'
             });
         }
 
         function hCaptchaCallback() {
-            if (loader.classList.contains('disable') && loader.classList.contains('loading')) {
-                loader.classList.remove('disable');
-                loader.classList.remove('loading');
+            if (loaderWrapper.classList.contains('hidden')) {
+                loaderWrapper.classList.remove('hidden');
+            }
+            if (!bodyElement.classList.contains('noscroll')) {
+                bodyElement.classList.add('noscroll');
             }
             document.getElementById('form-admin-login').submit();
         }

@@ -14,7 +14,6 @@
     --hover-danger: #ca0101c7;
     --hover-warning: #beab00ce;
     --hover-success: #10b68dd7;
-    --nav-mobile-background: #221d1d;
 }
 
 ::selection {
@@ -579,6 +578,7 @@ a {
 }
 
 .header-wrapper .show-profile .profile-icon {
+    color: var(--color-primary-dark);
     font-size: 1.8rem;
 }
 
@@ -3987,6 +3987,10 @@ a {
     color: var(--color-secondary-theme);
 }
 
+.action-section .action-link-container .text-2.m-right {
+    margin-right: 0.5rem;
+}
+
 .captcha-popup {
     position: absolute;
     top: 0;
@@ -4074,53 +4078,22 @@ a {
     font-size: 2.5rem;
 }
 
-
-
-
-
-
-
-
-
-
-.action-container-1-5:not(:last-child) {
-    margin-bottom: 1.5rem;
-}
-
-.action-container-1-5.disable {
-    display: none !important;
-}
-
-.input-message {
+.action-section .input-message {
     font-size: 1.3rem;
     font-weight: 600;
     color: var(--danger);
 }
 
-.label-checkbox {
-    cursor: pointer;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    user-select: none;
-}
-
-.action-privacy-link {
+.action-section .action-privacy-link {
+    font-size: 1.3rem;
     cursor: pointer;
     background-color: transparent;
     border: none;
-    color: var(--color-primary-theme) !important;
+    color: var(--color-secondary-theme) !important;
+    text-decoration: underline;
 }
 
-.forgot-password-title {
-    font-size: 1.6rem;
-    color: var(--color-primary-dark);
-    margin-bottom: 4rem;
-    text-align: center;
-}
-
-/* Action Agreements Settings */
-.action-agreement-wrapper,
-.action-agreement-2-wrapper {
+.action-section #popup-wrapper {
     z-index: 9997;
     position: fixed;
     top: 0;
@@ -4133,23 +4106,21 @@ a {
     align-items: center;
 }
 
-.action-agreement-wrapper.disable,
-.action-agreement-2-wrapper.disable {
+.action-section #popup-wrapper.disable {
     display: none !important;
 }
 
-.give-back-container {
+.action-section #popup-wrapper .popup-container {
     position: relative;
     background-color: var(--color-primary-light);
-    box-shadow: 0px 4px 12px rgb(0 0 0 / 12%), 0px 0px 2px rgb(0 0 0 / 8%);
+    box-shadow: var(--box-shadow-primary);
     width: 95%;
-    height: 60%;
+    height: 70%;
     border-radius: 1rem;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
-.action-agreement-exit-container,
-.action-agreement-2-exit-container {
+.action-section #popup-wrapper .popup-exit {
     position: absolute;
     top: 0;
     right: 0;
@@ -4158,7 +4129,7 @@ a {
     cursor: pointer;
 }
 
-.give-back-exit {
+.action-section #popup-wrapper .popup-exit .exit {
     position: fixed;
     width: 3rem;
     height: 3rem;
@@ -4169,28 +4140,194 @@ a {
     align-items: center;
 }
 
-.give-back-exit-icon {
+.action-section #popup-wrapper .popup-exit .fa-times {
     color: var(--color-primary-light);
     font-size: 1.4rem;
 }
 
-.give-back-title {
+.action-section #popup-wrapper .title {
     font-size: 1.6rem;
-    color: #000000;
-    padding-top: 2rem;
+    line-height: 1.4;
+    color: var(--color-primary-dark);
+    padding-top: 3rem;
     padding-left: 1rem;
     padding-right: 1rem;
     margin-bottom: 2rem;
 }
 
-.give-back-text {
-    color: #000000;
+.action-section #popup-wrapper .text {
+    color: var(--color-primary-dark);
     font-size: 1.2rem;
     line-height: 1.4;
+    margin-bottom: 1rem;
     padding-left: 1rem;
     padding-right: 1rem;
     text-align: justify;
-    margin-bottom: 1rem;
+}
+
+.action-section .checkmark.register {
+    width: 3rem !important;
+}
+
+.action-section .forgot-password-title {
+    font-size: 1.6rem;
+    color: var(--color-primary-dark);
+    margin-bottom: 4rem;
+    text-align: center;
+}
+
+.verify-link-row {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.verify-link-text {
+    font-size: 1.8rem;
+    color: var(--color-primary-dark);
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.verify-link-btn {
+    display: block;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    background-color: var(--success);
+    color: var(--color-primary-light);
+    font-size: 1.6rem;
+    border: none;
+    border-radius: 1rem;
+    -webkit-transition-property: background-color;
+    -moz-transition-property: background-color;
+    -o-transition-property: background-color;
+    transition-property: background-color;
+    -webkit-transition-duration: 0.3s;
+    -moz-transition-duration: 0.3s;
+    -o-transition-duration: 0.3s;
+    transition-duration: 0.3s;
+    -webkit-transition-timing-function: ease;
+    -moz-transition-timing-function: ease;
+    -o-transition-timing-function: ease;
+    transition-timing-function: ease;
+}
+
+.verify-link-btn:hover {
+    cursor: pointer;
+    background-color: var(--hover-success);
+}
+
+.verify-token-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background-color: var(--bg-primary-light);
+    box-shadow: var(--box-shadow-primary);
+}
+
+.verify-token-container .verify-token-title {
+    font-size: 1.7rem;
+    color: var(--color-primary-dark);
+    line-height: 1.4;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    padding-right: 1rem;
+    padding-left: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom-width: 3px;
+    border-bottom-style: solid;
+    border-bottom-color: var(--color-primary-dark);
+}
+
+.verify-token-container .counter-container {
+    display: flex;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.verify-token-container .counter-container .right {
+    margin-left: auto;
+}
+
+.verify-token-container .counter-container .counter-text {
+    font-size: 1.4rem;
+    color: var(--color-primary-dark);
+    font-weight: 700;
+}
+
+.verify-token-container .counter-container .counter-text.timeout {
+    color: var(--danger) !important;
+}
+
+.verify-token-container .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.verify-token-container .verify-token-input {
+    width: 11%;
+    height: 6rem;
+    font-size: 2.5rem;
+    text-align: center;
+    border-width: 3px;
+    border-style: solid;
+    border-color: var(--color-primary-dark);
+}
+
+.verify-token-container .verify-token-input:focus {
+    outline: 0;
+    border-width: 3px;
+    border-style: solid;
+    border-color: var(--color-secondary-theme);
+}
+
+.verify-token-container .row-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.verify-token-container .verify-token-submit,
+.verify-token-container .go-back-login {
+    background-color: var(--color-secondary-theme);
+    color: var(--color-primary-light);
+    border-radius: 1rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    padding-right: 2rem;
+    padding-left: 2rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    font-size: 1.6rem;
+    border: none;
+}
+
+.verify-token-container .verify-token-submit:hover,
+.verify-token-container .go-back-login {
+    background-color: #5155d3da;
+    cursor: pointer;
+}
+
+.verify-token-submit.disable {
+    display: none !important;
+}
+
+.verify-token-container .go-back-login {
+    display: none;
+}
+
+.verify-token-container .go-back-login.active {
+    display: block !important;
 }
 
 /* Media Settings */
@@ -4212,7 +4349,8 @@ a {
         padding-left: 2rem;
     }
 
-    .captcha-popup .captcha-container {
+    .captcha-popup .captcha-container,
+    .verify-token-container {
         width: 60%;
     }
 }
@@ -4688,9 +4826,19 @@ a {
 
     /* Action Settings */
     .action-section .action-container,
-    .captcha-popup .captcha-container {
+    .captcha-popup .captcha-container,
+    .verify-token-container {
         width: 55%;
-    }    
+    }
+    
+    .action-section #popup-wrapper .popup-container {
+        width: 75%;
+    }
+
+    .verify-token-container .verify-token-input {
+        height: 8rem;
+        font-size: 4rem;
+    }
 }
 
 @media only screen and (max-width: 992px) {
@@ -4868,6 +5016,12 @@ a {
     .profile-section .profile-container .form-row .textarea {
         font-size: 1.4rem;
     }
+
+    /* Action Settings */
+    .action-details-main #popup-wrapper .popup-container {
+        width: 55%;
+        height: 80%;
+    }
 }
 
 @media only screen and (min-width: 1200px) {
@@ -4911,8 +5065,13 @@ a {
 
     /* Action Settings */
     .action-section .action-container,
-    .captcha-popup .captcha-container {
+    .captcha-popup .captcha-container,
+    .verify-token-container {
         width: 35%;
+    }
+
+    .action-section #popup-wrapper .popup-container {
+        width: 45%;
     }
 }
 

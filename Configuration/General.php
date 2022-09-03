@@ -1,5 +1,6 @@
 <?php
 define('BRAND', 'Blanck Basic');
+define('PURE_URL', 'http://blanckbasic.com'); // change => https://blanckbasic.com/
 define('URL', 'http://blanckbasic.com/'); // change => https://blanckbasic.com/
 define('META_TAG_AUTHOR', 'Semih Polat');
 define('ADMIN_IP_ADDRESS', '127.0.0.1');

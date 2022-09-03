@@ -58,6 +58,7 @@ class ActionController extends Controller
             if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $this->input_control->CheckUrl();
                 parent::LogView('Action/AdminLogin');
+                $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
                 $result_set_csrf_token = parent::SetCSRFToken('AdminLogin');
                 if ($result_set_csrf_token == false) {
                     parent::GetView('Error/NotResponse');
@@ -98,8 +99,301 @@ class ActionController extends Controller
         }
         $this->input_control->Redirect();
     }
-
-
+    function Register()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            $this->input_control->CheckUrl();
+            parent::LogView('Action/Register');
+            $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
+            $result_set_csrf_token = parent::SetCSRFToken('Register');
+            if ($result_set_csrf_token == false) {
+                parent::GetView('Error/NotResponse');
+            } else {
+                $this->web_data['form_token'] = $result_set_csrf_token;
+                parent::GetView('Action/Register', $this->web_data);
+            }
+        } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $email = isset($_POST['email']) ? $_POST['email'] : '';
+            $password = isset($_POST['password']) ? $_POST['password'] : '';
+            $repassword = isset($_POST['repassword']) ? $_POST['repassword'] : '';
+            $accept_terms = isset($_POST['accept_terms']) ? 'true' : 'false';
+            $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                'email' => array('input' => $email, 'error_message_empty' => ERROR_MESSAGE_EMPTY_EMAIL, 'no_white_space' => true, 'error_message_no_white_space' => ERROR_NOT_VALID_EMAIL, 'is_email' => true, 'error_message_is_email' => ERROR_NOT_VALID_EMAIL, 'length_control' => true, 'max_length' => EMAIL_LIMIT, 'error_message_max_length' => ERROR_MAX_LENGTH_EMAIL, 'preventxss' => true, 'length_limit' => EMAIL_LIMIT_DB),
+                'password' => array('input' => $password, 'error_message_empty' => ERROR_MESSAGE_EMPTY_PASSWORD, 'no_white_space' => true, 'error_message_no_white_space' => ERROR_PASSWORD_WHITE_SPACE, 'length_control' => true, 'min_length' => PASSWORD_MIN_LIMIT, 'error_message_min_length' => ERROR_MAX_LENGTH_PASSWORD, 'is_password' => true, 'error_message_is_password' => ERROR_NOT_VALID_PASSWORD, 'preventxss' => true),
+                'repassword' => array('input' => $repassword, 'error_message_empty' => ERROR_MESSAGE_EMPTY_REPASSWORD, 'no_white_space' => true, 'error_message_no_white_space' => ERROR_REPASSWORD_WHITE_SPACE, 'length_control' => true, 'min_length' => PASSWORD_MIN_LIMIT, 'error_message_min_length' => ERROR_MAX_LENGTH_REPASSWORD, 'is_password' => true, 'error_message_is_password' => ERROR_NOT_VALID_PASSWORD, 'preventxss' => true),
+                'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => ERROR_MESSAGE_EMPTY_CSRF, 'preventxss' => true),
+                'accept_terms' => array('input' => $accept_terms, 'error_message_empty' => ERROR_MESSAGE_EMPTY_ACCEPT_REGISTER_TERMS)
+            ));
+            if (empty($checked_inputs['error_message'])) {
+                $result_check_csrf_token = $this->CheckCSRFToken($checked_inputs['csrf_token'], 'Register');
+                if ($result_check_csrf_token == true) {
+                    $pwd_salt = strtr(sodium_bin2base64(random_bytes(75), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING), array('-' => '2', '_' => '4'));
+                    $salted_pwd = hash_hmac('sha512', $pwd_salt . str_replace("\0", "", $checked_inputs['password']), SECRET_KEY_PWD, true);
+                    $salted_repwd = hash_hmac('sha512', $pwd_salt . str_replace("\0", "", $checked_inputs['repassword']), SECRET_KEY_PWD, true);
+                    $hashed_pwd = password_hash($salted_pwd, PASSWORD_BCRYPT, $this->password_control->BcryptOptions());
+                    $verified_pwd = password_verify($salted_repwd, $hashed_pwd);
+                    if ($verified_pwd) {
+                        if ($checked_inputs['accept_terms'] == 'true') {
+                            $captcha_timeout_from_db = $this->ActionModel->GetCaptchaTimeOut($_SERVER['REMOTE_ADDR']);
+                            if (empty($captcha_timeout_from_db)) {
+                                $this->ActionModel->CreateCaptchaTimeOut(array(
+                                    'user_ip' => $_SERVER['REMOTE_ADDR'],
+                                    'captcha_error_count' => 0,
+                                    'captcha_total_error_count' => 0
+                                ));
+                            } else {
+                                $captcha_timeout_error = false;
+                                if ($captcha_timeout_from_db['captcha_banned'] == 1) {
+                                    $captcha_timeout_error = true;
+                                    $this->notification_control->SetNotification('DANGER', CAPTCHA_BANNES_ERROR);
+                                } elseif ($captcha_timeout_from_db['captcha_total_error_count'] > 15) {
+                                    $captcha_timeout_error = true;
+                                    $this->notification_control->SetNotification('DANGER', CAPTCHA_BANNES_ERROR);
+                                } elseif ($captcha_timeout_from_db['date_captcha_timeout_expiry'] > date('Y-m-d H:i:s')) {
+                                    $captcha_timeout_error = true;
+                                    $captcha_remain_timeout = (int)((strtotime($captcha_timeout_from_db['date_captcha_timeout_expiry']) - strtotime(date('Y-m-d H:i:s'))) / 60);
+                                    if ($captcha_remain_timeout == 0) {
+                                        $captcha_remain_timeout = 1;
+                                    }
+                                    $this->notification_control->SetNotification('DANGER', CAPTCHA_TIMEOUT_1 . $captcha_remain_timeout . CAPTCHA_TIMEOUT_2);
+                                }
+                                if ($captcha_timeout_error) {
+                                    $this->input_control->Redirect(URL_REGISTER);
+                                }
+                            }
+                            $captcha_respone = isset($_POST['h-captcha-response']) ? $_POST['h-captcha-response'] : '';
+                            if (!empty($captcha_respone)) {
+                                $result_captcha = $this->action_control->CheckCaptcha($captcha_respone);
+                                if ($result_captcha === false) {
+                                    if (!empty($captcha_timeout_from_db)) {
+                                        if ($captcha_timeout_from_db['captcha_error_count'] < 1) {
+                                            $this->ActionModel->UpdateCaptchaTimeOut(array(
+                                                'captcha_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
+                                                'captcha_total_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
+                                                'id' => $captcha_timeout_from_db['id']
+                                            ));
+                                        } elseif ($captcha_timeout_from_db['captcha_error_count'] == 1) {
+                                            $this->ActionModel->UpdateCaptchaTimeOut(array(
+                                                'captcha_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
+                                                'captcha_total_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
+                                                'date_captcha_timeout_expiry' => date('Y-m-d H:i:s', time() + (TIMEOUT_SHORT_CAPTCHA)),
+                                                'id' => $captcha_timeout_from_db['id']
+                                            ));
+                                        } elseif ($captcha_timeout_from_db['captcha_error_count'] >= 9) {
+                                            $this->ActionModel->UpdateCaptchaTimeOut(array(
+                                                'captcha_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
+                                                'captcha_total_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
+                                                'captcha_banned' => 1,
+                                                'id' => $captcha_timeout_from_db['id']
+                                            ));
+                                        } elseif ($captcha_timeout_from_db['captcha_error_count'] >= 4) {
+                                            $this->ActionModel->UpdateCaptchaTimeOut(array(
+                                                'captcha_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
+                                                'captcha_total_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
+                                                'date_captcha_timeout_expiry' => date('Y-m-d H:i:s', time() + (TIMEOUT_LONG_CAPTCHA)),
+                                                'id' => $captcha_timeout_from_db['id']
+                                            ));
+                                        }
+                                    }
+                                    $this->notification_control->SetNotification('DANGER', CAPTCHA_ERROR);
+                                    $this->input_control->Redirect(URL_REGISTER);
+                                } elseif ($result_captcha === true) {
+                                    if (!empty($captcha_timeout_from_db)) {
+                                        $this->ActionModel->UpdateCaptchaTimeOut(array(
+                                            'captcha_error_count' => 0,
+                                            'id' => $captcha_timeout_from_db['id']
+                                        ));
+                                    }
+                                    $email_accounts = $this->ActionModel->GetUsersByEmail('is_user_deleted', $checked_inputs['email']);
+                                    if (!empty($email_accounts)) {
+                                        $is_email_not_unique = false;
+                                        foreach ($email_accounts as $email_account) {
+                                            if ($email_account['is_user_deleted'] == 0) {
+                                                $is_email_not_unique = true;
+                                                break;
+                                            }
+                                        }
+                                        if ($is_email_not_unique) {
+                                            $_SESSION[SESSION_MASSAGE] = EMAIL_HAS_REGISTERED;
+                                            $this->input_control->Redirect(URL_LOGIN);
+                                        }
+                                    }
+                                    $encrypted_hashed_pwd = $this->input_control->EncrypteData($hashed_pwd, PEPPER);
+                                    $result = $this->ActionModel->CreateUser(array(
+                                        'email' => $checked_inputs['email'],
+                                        'password' => $encrypted_hashed_pwd,
+                                        'password_salt' => $pwd_salt
+                                    ));
+                                    if ($result['result'] == 'Created') {
+                                        $created_user = $this->ActionModel->GetUserByEmail('id', $checked_inputs['email']);
+                                        if (!empty($created_user['id'])) {
+                                            $this->SendVerifyTokenWithEmail($created_user['id'], $email, 'confirm_email', 'user', 'RegisterConfirmEmail');
+                                        }
+                                    } else {
+                                        $this->notification_control->SetNotification('DANGER', DATABASE_ERROR);
+                                    }
+                                }
+                            } else {
+                                $this->notification_control->SetNotification('DANGER', CAPTCHA_ERROR);
+                            }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', ERROR_MESSAGE_EMPTY_ACCEPT_REGISTER_TERMS);
+                        }
+                    } else {
+                        $this->notification_control->SetNotification('DANGER', PASSWORDS_NOT_SAME);
+                    }
+                } else {
+                    $this->input_control->Redirect(URL_REGISTER);
+                }
+            } else {
+                $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+            }
+            $this->web_data['email'] = $email;
+            $this->web_data['password'] = $password;
+            $this->web_data['repassword'] = $repassword;
+            // $this->SetCSRFTokenAndGetView('Register', 'Register');
+        }
+        $this->input_control->Redirect();
+    }
+    function ForgotPassword()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            $this->input_control->CheckUrl();
+            parent::LogView('Action/ForgotPassword');
+            $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
+            $result_set_csrf_token = parent::SetCSRFToken('ForgotPassword');
+            if ($result_set_csrf_token == false) {
+                parent::GetView('Error/NotResponse');
+            } else {
+                $this->web_data['form_token'] = $result_set_csrf_token;
+                parent::GetView('Action/ForgotPassword', $this->web_data);
+            }
+        } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $email = isset($_POST['email']) ? $_POST['email'] : '';
+            $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                'email' => array('input' => $email, 'error_message_empty' => ERROR_MESSAGE_EMPTY_EMAIL, 'preventxss' => true),
+                'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => ERROR_MESSAGE_EMPTY_CSRF, 'preventxss' => true)
+            ));
+            if (empty($checked_inputs['error_message'])) {
+                $result_check_csrf_token = $this->CheckCSRFToken($checked_inputs['csrf_token'], 'ForgotPassword');
+                if ($result_check_csrf_token == true) {
+                    $captcha_timeout_from_db = $this->ActionModel->GetCaptchaTimeOut($_SERVER['REMOTE_ADDR']);
+                    if (empty($captcha_timeout_from_db)) {
+                        $this->ActionModel->CreateCaptchaTimeOut(array(
+                            'user_ip' => $_SERVER['REMOTE_ADDR'],
+                            'captcha_error_count' => 0,
+                            'captcha_total_error_count' => 0
+                        ));
+                    } else {
+                        $captcha_timeout_error = false;
+                        if ($captcha_timeout_from_db['captcha_banned'] == 1) {
+                            $captcha_timeout_error = true;
+                            $this->notification_control->SetNotification('DANGER', CAPTCHA_BANNES_ERROR);
+                        } elseif ($captcha_timeout_from_db['captcha_total_error_count'] > 15) {
+                            $captcha_timeout_error = true;
+                            $this->notification_control->SetNotification('DANGER', CAPTCHA_BANNES_ERROR);
+                        } elseif ($captcha_timeout_from_db['date_captcha_timeout_expiry'] > date('Y-m-d H:i:s')) {
+                            $captcha_timeout_error = true;
+                            $captcha_remain_timeout = (int)((strtotime($captcha_timeout_from_db['date_captcha_timeout_expiry']) - strtotime(date('Y-m-d H:i:s'))) / 60);
+                            if ($captcha_remain_timeout == 0) {
+                                $captcha_remain_timeout = 1;
+                            }
+                            $this->notification_control->SetNotification('DANGER', CAPTCHA_TIMEOUT_1 . $captcha_remain_timeout . CAPTCHA_TIMEOUT_2);
+                        }
+                        if ($captcha_timeout_error) {
+                            $this->input_control->Redirect(URL_FORGOT_PASSWORD);
+                        }
+                    }
+                    $captcha_respone = isset($_POST['h-captcha-response']) ? $_POST['h-captcha-response'] : '';
+                    if (!empty($captcha_respone)) {
+                        $result_captcha = $this->action_control->CheckCaptcha($captcha_respone);
+                        if ($result_captcha === false) {
+                            if (!empty($captcha_timeout_from_db)) {
+                                if ($captcha_timeout_from_db['captcha_error_count'] < 1) {
+                                    $this->ActionModel->UpdateCaptchaTimeOut(array(
+                                        'captcha_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
+                                        'captcha_total_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
+                                        'id' => $captcha_timeout_from_db['id']
+                                    ));
+                                } elseif ($captcha_timeout_from_db['captcha_error_count'] == 1) {
+                                    $this->ActionModel->UpdateCaptchaTimeOut(array(
+                                        'captcha_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
+                                        'captcha_total_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
+                                        'date_captcha_timeout_expiry' => date('Y-m-d H:i:s', time() + (TIMEOUT_SHORT_CAPTCHA)),
+                                        'id' => $captcha_timeout_from_db['id']
+                                    ));
+                                } elseif ($captcha_timeout_from_db['captcha_error_count'] >= 9) {
+                                    $this->ActionModel->UpdateCaptchaTimeOut(array(
+                                        'captcha_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
+                                        'captcha_total_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
+                                        'captcha_banned' => 1,
+                                        'id' => $captcha_timeout_from_db['id']
+                                    ));
+                                } elseif ($captcha_timeout_from_db['captcha_error_count'] >= 4) {
+                                    $this->ActionModel->UpdateCaptchaTimeOut(array(
+                                        'captcha_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
+                                        'captcha_total_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
+                                        'date_captcha_timeout_expiry' => date('Y-m-d H:i:s', time() + (TIMEOUT_LONG_CAPTCHA)),
+                                        'id' => $captcha_timeout_from_db['id']
+                                    ));
+                                }
+                            }
+                            $this->notification_control->SetNotification('DANGER', CAPTCHA_ERROR);
+                            $this->input_control->Redirect(URL_FORGOT_PASSWORD);
+                        } elseif ($result_captcha === true) {
+                            if (!empty($captcha_timeout_from_db)) {
+                                $this->ActionModel->UpdateCaptchaTimeOut(array(
+                                    'captcha_error_count' => 0,
+                                    'id' => $captcha_timeout_from_db['id']
+                                ));
+                            }
+                            $checked_email = $this->input_control->CheckEmail($email);
+                            if (!is_null($checked_email)) {
+                                $user_forgot_pwd_from_db = $this->ActionModel->GetUserByEmail('id', $checked_inputs['email']);
+                                if (!empty($user_forgot_pwd_from_db)) {
+                                    $resetpwd_token = $this->action_control->GenerateResetPwdToken();
+                                    $result_reset_pwd = $this->ActionModel->CreateResetPassword(array(
+                                        'user_id' => $user_forgot_pwd_from_db['id'],
+                                        'user_ip' => $_SERVER['REMOTE_ADDR'],
+                                        'reset_pwd_token' => $resetpwd_token,
+                                        'date_reset_pwd_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_RESET_PWD_TOKEN)),
+                                        'is_reset_pwd_used' => 0
+                                    ));
+                                    if ($result_reset_pwd['result'] == 'Created') {
+                                        $result_email = $this->action_control->SendMail($checked_email, BRAND . ' Şifre Sıfırlama', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>' . BRAND . ' Şifre Sıfırlama</title><style>* {margin: 0;padding: 0;border: 0;box-sizing: border-box;}html {font-size: 10px;}body {font-family: sans-serif;background-color: #aaaaaa;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.logo {border-width: 3px;border-style: solid;border-color: #ffffff;border-radius: 50%;padding: 10px;margin-bottom: 20px;}.main-title {font-size: 18px;color: #ffffff;letter-spacing: 1px;margin-bottom: 20px;}.main-text {font-size: 14px;color: #ffffff;margin-bottom: 20px;}.main-link {font-size: 14px;color: #5155d3;}.main-text-2 {font-size: 14px;color: #ffffff;margin-top: 20px;}.footer {padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;background-color: #5155d3;}.footer-text {font-size: 13px;color: #000000;text-align: center;margin-bottom: 20px;}.footer-link {font-size: 13px;color: #aaaaaa !important;}.footer-url {font-size: 12px;color: #ffffff !important;float: left;}.footer-date {color: #ffffff;font-size: 12px;float: right;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}}</style></head><body><div class="container"><div class="header"><img class="logo" src="' . URL  . '" alt="' . BRAND . '"><h1 class="main-title">' . BRAND . ' Şifre Sıfırlama</h1><p class="main-text">Şifrenizi sıfırlamak için linke <a class="main-link" href="' . URL . URL_RESET_PASSWORD . '?resetpwd=' . $resetpwd_token . '">tıklayın.</a></p><p class="main-text-2">Şifre sıfırlama linkinin kullanım süresi ' . EXPIRY_RESET_PWD_TOKEN_MINUTE . ' dakikadır.</p></div><div class="footer"><p class="footer-text">Bu işlemi siz gerçekleştirmediyseniz bu emaili önemsemeyin.</p><a class="footer-url" href="' . URL . '">' . URL . '</a><span class="footer-date">' . date('d-m-Y H:i:s') . '</span></div></div></body></html>');
+                                        if (!is_null($result_email)) {
+                                            $this->ActionModel->CreateLogEmailSent(array(
+                                                'user_id' => $user_forgot_pwd_from_db['id'],
+                                                'user_ip' => $_SERVER['REMOTE_ADDR'],
+                                                'email_type' => 'ForgotPassword'
+                                            ));
+                                            $_SESSION[SESSION_MASSAGE] = FORGOT_PASSWORD_RESULT;
+                                            $this->input_control->Redirect(URL_LOGIN);
+                                        }
+                                    }
+                                    $this->notification_control->SetNotification('DANGER', DATABASE_ERROR);
+                                    $this->input_control->Redirect(URL_FORGOT_PASSWORD);
+                                } else {
+                                    $this->notification_control->SetNotification('DANGER', FORGOT_PASSWORD_NO_EMAIL);
+                                    $this->input_control->Redirect(URL_FORGOT_PASSWORD);
+                                }
+                            } else {
+                                $this->notification_control->SetNotification('DANGER', ERROR_NOT_VALID_EMAIL);
+                            }
+                        }
+                    } else {
+                        $this->notification_control->SetNotification('DANGER', CAPTCHA_ERROR);
+                    }
+                } else {
+                    $this->input_control->Redirect(URL_FORGOT_PASSWORD);
+                }
+            } else {
+                $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+            }
+            // $this->SetCSRFTokenAndGetView('ForgotPassword', 'ForgotPassword');
+        }
+        $this->input_control->Redirect();
+    }
 
 
 
@@ -266,12 +560,14 @@ class ActionController extends Controller
                 $this->web_data['verify_token_type'] = $verify_token_from_db['verify_token_type'];
                 $this->web_data['token_time_remain'] = (strtotime($verify_token_from_db['date_verify_token_expiry']) - strtotime(date('Y-m-d H:i:s'))) / 60;
                 // $this->SetCSRFTokenAndGetView('VerifyToken', 'VerifyToken' . $verify_token_from_db['verify_token_csrf_type']);
+                // $web_data['token_time_remain_minute'] = 1;
+                // $web_data['token_time_remain_second'] = 10;
             } else {
                 unset($_SESSION[SESSION_VERIFY_TOKEN]);
                 $this->notification_control->SetNotification('DANGER', VERIFY_TOKEN_TIMEOUT_ERROR);
                 $this->input_control->Redirect(URL_LOGIN);
             }
-        } elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['verify_token-submit']) && !empty($_SESSION[SESSION_VERIFY_TOKEN])) {
+        } elseif ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_verify_token']) && !empty($_SESSION[SESSION_VERIFY_TOKEN])) {
             $verify_token_from_db = $this->ActionModel->GetVerifyToken(array($_SESSION[SESSION_VERIFY_TOKEN], $_SERVER['REMOTE_ADDR']));
             unset($_SESSION[SESSION_VERIFY_TOKEN]);
             if (!empty($verify_token_from_db) && $verify_token_from_db['date_verify_token_expiry'] > date('Y-m-d H:i:s') && $verify_token_from_db['is_verify_token_used'] == 0) {
@@ -357,7 +653,6 @@ class ActionController extends Controller
                 $verify_link_from_db = $this->ActionModel->GetVerifyLink(array(urlencode($cancel_register_url), $_SERVER['REMOTE_ADDR']));
                 if (!empty($verify_link_from_db) && $verify_link_from_db['verify_link_expiry_date'] > date('Y-m-d H:i:s') && $verify_link_from_db['is_verify_link_used'] == 0) {
                     if ($verify_link_from_db['verify_link_type'] == 'CancelRegister') {
-                        $web_data['verify_link_title'] = CANCEL_REGISTER_TITLE;
                         $verify_link_user_from_db = $this->ActionModel->GetUserById('id,is_shopped', $verify_link_from_db['user_id']);
                         if (!empty($verify_link_user_from_db)) {
                             $this->ActionModel->UpdateVerifyLink(array(
@@ -382,6 +677,7 @@ class ActionController extends Controller
                         } else {
                             $this->web_data['verify_link_msg'] = CANCEL_REGISTER_NOT_FOUND;
                         }
+                        $web_data['verify_link_title'] = CANCEL_REGISTER_TITLE;
                         parent::GetView('Action/VerifyLink', $this->web_data);
                     }
                 }
@@ -602,283 +898,6 @@ class ActionController extends Controller
         }
         $this->input_control->Redirect();
     }
-    function Register()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            // $this->SetCSRFTokenAndGetView('Register', 'Register');
-        } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $email = isset($_POST['email']) ? $_POST['email'] : '';
-            $password = isset($_POST['password']) ? $_POST['password'] : '';
-            $repassword = isset($_POST['repassword']) ? $_POST['repassword'] : '';
-            $accept_terms = isset($_POST['accept_terms']) ? 'true' : 'false';
-            $checked_inputs = $this->input_control->CheckPostedInputs(array(
-                'email' => array('input' => $email, 'error_message_empty' => ERROR_MESSAGE_EMPTY_EMAIL, 'no_white_space' => true, 'error_message_no_white_space' => ERROR_NOT_VALID_EMAIL, 'is_email' => true, 'error_message_is_email' => ERROR_NOT_VALID_EMAIL, 'length_control' => true, 'max_length' => EMAIL_LIMIT, 'error_message_max_length' => ERROR_MAX_LENGTH_EMAIL, 'preventxss' => true, 'length_limit' => EMAIL_LIMIT_DB),
-                'password' => array('input' => $password, 'error_message_empty' => ERROR_MESSAGE_EMPTY_PASSWORD, 'no_white_space' => true, 'error_message_no_white_space' => ERROR_PASSWORD_WHITE_SPACE, 'length_control' => true, 'min_length' => PASSWORD_LIMIT, 'error_message_min_length' => ERROR_MAX_LENGTH_PASSWORD, 'is_password' => true, 'error_message_is_password' => ERROR_NOT_VALID_PASSWORD, 'preventxss' => true),
-                'repassword' => array('input' => $repassword, 'error_message_empty' => ERROR_MESSAGE_EMPTY_REPASSWORD, 'no_white_space' => true, 'error_message_no_white_space' => ERROR_REPASSWORD_WHITE_SPACE, 'length_control' => true, 'min_length' => PASSWORD_LIMIT, 'error_message_min_length' => ERROR_MAX_LENGTH_REPASSWORD, 'is_password' => true, 'error_message_is_password' => ERROR_NOT_VALID_PASSWORD, 'preventxss' => true),
-                'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => ERROR_MESSAGE_EMPTY_CSRF, 'preventxss' => true),
-                'accept_terms' => array('input' => $accept_terms, 'error_message_empty' => ERROR_MESSAGE_EMPTY_ACCEPT_REGISTER_TERMS)
-            ));
-            if (empty($checked_inputs['error_message'])) {
-                $result_check_csrf_token = $this->CheckCSRFToken($checked_inputs['csrf_token'], 'Register');
-                if ($result_check_csrf_token == true) {
-                    $pwd_salt = strtr(sodium_bin2base64(random_bytes(75), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING), array('-' => '2', '_' => '4'));
-                    $salted_pwd = hash_hmac('sha512', $pwd_salt . str_replace("\0", "", $checked_inputs['password']), SECRET_KEY_PWD, true);
-                    $salted_repwd = hash_hmac('sha512', $pwd_salt . str_replace("\0", "", $checked_inputs['repassword']), SECRET_KEY_PWD, true);
-                    $hashed_pwd = password_hash($salted_pwd, PASSWORD_BCRYPT, $this->password_control->BcryptOptions());
-                    $verified_pwd = password_verify($salted_repwd, $hashed_pwd);
-                    if ($verified_pwd) {
-                        if ($checked_inputs['accept_terms'] == 'true') {
-                            $captcha_timeout_from_db = $this->ActionModel->GetCaptchaTimeOut($_SERVER['REMOTE_ADDR']);
-                            if (empty($captcha_timeout_from_db)) {
-                                $this->ActionModel->CreateCaptchaTimeOut(array(
-                                    'user_ip' => $_SERVER['REMOTE_ADDR'],
-                                    'captcha_error_count' => 0,
-                                    'captcha_total_error_count' => 0
-                                ));
-                            } else {
-                                $captcha_timeout_error = false;
-                                if ($captcha_timeout_from_db['captcha_banned'] == 1) {
-                                    $captcha_timeout_error = true;
-                                    $this->notification_control->SetNotification('DANGER', CAPTCHA_BANNES_ERROR);
-                                } elseif ($captcha_timeout_from_db['captcha_total_error_count'] > 15) {
-                                    $captcha_timeout_error = true;
-                                    $this->notification_control->SetNotification('DANGER', CAPTCHA_BANNES_ERROR);
-                                } elseif ($captcha_timeout_from_db['date_captcha_timeout_expiry'] > date('Y-m-d H:i:s')) {
-                                    $captcha_timeout_error = true;
-                                    $captcha_remain_timeout = (int)((strtotime($captcha_timeout_from_db['date_captcha_timeout_expiry']) - strtotime(date('Y-m-d H:i:s'))) / 60);
-                                    if ($captcha_remain_timeout == 0) {
-                                        $captcha_remain_timeout = 1;
-                                    }
-                                    $this->notification_control->SetNotification('DANGER', CAPTCHA_TIMEOUT_1 . $captcha_remain_timeout . CAPTCHA_TIMEOUT_2);
-                                }
-                                if ($captcha_timeout_error) {
-                                    $this->input_control->Redirect(URL_REGISTER);
-                                }
-                            }
-                            $captcha_respone = isset($_POST['h-captcha-response']) ? $_POST['h-captcha-response'] : '';
-                            if (!empty($captcha_respone)) {
-                                $result_captcha = $this->action_control->CheckCaptcha($captcha_respone);
-                                if ($result_captcha === false) {
-                                    if (!empty($captcha_timeout_from_db)) {
-                                        if ($captcha_timeout_from_db['captcha_error_count'] < 1) {
-                                            $this->ActionModel->UpdateCaptchaTimeOut(array(
-                                                'captcha_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
-                                                'captcha_total_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
-                                                'id' => $captcha_timeout_from_db['id']
-                                            ));
-                                        } elseif ($captcha_timeout_from_db['captcha_error_count'] == 1) {
-                                            $this->ActionModel->UpdateCaptchaTimeOut(array(
-                                                'captcha_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
-                                                'captcha_total_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
-                                                'date_captcha_timeout_expiry' => date('Y-m-d H:i:s', time() + (TIMEOUT_SHORT_CAPTCHA)),
-                                                'id' => $captcha_timeout_from_db['id']
-                                            ));
-                                        } elseif ($captcha_timeout_from_db['captcha_error_count'] >= 9) {
-                                            $this->ActionModel->UpdateCaptchaTimeOut(array(
-                                                'captcha_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
-                                                'captcha_total_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
-                                                'captcha_banned' => 1,
-                                                'id' => $captcha_timeout_from_db['id']
-                                            ));
-                                        } elseif ($captcha_timeout_from_db['captcha_error_count'] >= 4) {
-                                            $this->ActionModel->UpdateCaptchaTimeOut(array(
-                                                'captcha_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
-                                                'captcha_total_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
-                                                'date_captcha_timeout_expiry' => date('Y-m-d H:i:s', time() + (TIMEOUT_LONG_CAPTCHA)),
-                                                'id' => $captcha_timeout_from_db['id']
-                                            ));
-                                        }
-                                    }
-                                    $this->notification_control->SetNotification('DANGER', CAPTCHA_ERROR);
-                                    $this->input_control->Redirect(URL_REGISTER);
-                                } elseif ($result_captcha === true) {
-                                    if (!empty($captcha_timeout_from_db)) {
-                                        $this->ActionModel->UpdateCaptchaTimeOut(array(
-                                            'captcha_error_count' => 0,
-                                            'id' => $captcha_timeout_from_db['id']
-                                        ));
-                                    }
-                                    $email_accounts = $this->ActionModel->GetUsersByEmail('is_user_deleted', $checked_inputs['email']);
-                                    if (!empty($email_accounts)) {
-                                        $is_email_not_unique = false;
-                                        foreach ($email_accounts as $email_account) {
-                                            if ($email_account['is_user_deleted'] == 0) {
-                                                $is_email_not_unique = true;
-                                                break;
-                                            }
-                                        }
-                                        if ($is_email_not_unique) {
-                                            $_SESSION[SESSION_MASSAGE] = EMAIL_HAS_REGISTERED;
-                                            $this->input_control->Redirect(URL_LOGIN);
-                                        }
-                                    }
-                                    $encrypted_hashed_pwd = $this->input_control->EncrypteData($hashed_pwd, PEPPER);
-                                    $result = $this->ActionModel->CreateUser(array(
-                                        'email' => $checked_inputs['email'],
-                                        'password' => $encrypted_hashed_pwd,
-                                        'password_salt' => $pwd_salt
-                                    ));
-                                    if ($result['result'] == 'Created') {
-                                        $created_user = $this->ActionModel->GetUserByEmail('id', $checked_inputs['email']);
-                                        if (!empty($created_user['id'])) {
-                                            $this->SendVerifyTokenWithEmail($created_user['id'], $email, 'confirm_email', 'user', 'RegisterConfirmEmail');
-                                        }
-                                    } else {
-                                        $this->notification_control->SetNotification('DANGER', DATABASE_ERROR);
-                                    }
-                                }
-                            } else {
-                                $this->notification_control->SetNotification('DANGER', CAPTCHA_ERROR);
-                            }
-                        } else {
-                            $this->notification_control->SetNotification('DANGER', ERROR_MESSAGE_EMPTY_ACCEPT_REGISTER_TERMS);
-                        }
-                    } else {
-                        $this->notification_control->SetNotification('DANGER', PASSWORDS_NOT_SAME);
-                    }
-                } else {
-                    $this->input_control->Redirect(URL_REGISTER);
-                }
-            } else {
-                $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
-            }
-            $this->web_data['email'] = $email;
-            $this->web_data['password'] = $password;
-            $this->web_data['repassword'] = $repassword;
-            // $this->SetCSRFTokenAndGetView('Register', 'Register');
-        }
-        $this->input_control->Redirect();
-    }
-    function ForgotPassword()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            // $this->SetCSRFTokenAndGetView('ForgotPassword', 'ForgotPassword');
-        } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $email = isset($_POST['email']) ? $_POST['email'] : '';
-            $checked_inputs = $this->input_control->CheckPostedInputs(array(
-                'email' => array('input' => $email, 'error_message_empty' => ERROR_MESSAGE_EMPTY_EMAIL, 'preventxss' => true),
-                'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => ERROR_MESSAGE_EMPTY_CSRF, 'preventxss' => true)
-            ));
-            if (empty($checked_inputs['error_message'])) {
-                $result_check_csrf_token = $this->CheckCSRFToken($checked_inputs['csrf_token'], 'ForgotPassword');
-                if ($result_check_csrf_token == true) {
-                    $captcha_timeout_from_db = $this->ActionModel->GetCaptchaTimeOut($_SERVER['REMOTE_ADDR']);
-                    if (empty($captcha_timeout_from_db)) {
-                        $this->ActionModel->CreateCaptchaTimeOut(array(
-                            'user_ip' => $_SERVER['REMOTE_ADDR'],
-                            'captcha_error_count' => 0,
-                            'captcha_total_error_count' => 0
-                        ));
-                    } else {
-                        $captcha_timeout_error = false;
-                        if ($captcha_timeout_from_db['captcha_banned'] == 1) {
-                            $captcha_timeout_error = true;
-                            $this->notification_control->SetNotification('DANGER', CAPTCHA_BANNES_ERROR);
-                        } elseif ($captcha_timeout_from_db['captcha_total_error_count'] > 15) {
-                            $captcha_timeout_error = true;
-                            $this->notification_control->SetNotification('DANGER', CAPTCHA_BANNES_ERROR);
-                        } elseif ($captcha_timeout_from_db['date_captcha_timeout_expiry'] > date('Y-m-d H:i:s')) {
-                            $captcha_timeout_error = true;
-                            $captcha_remain_timeout = (int)((strtotime($captcha_timeout_from_db['date_captcha_timeout_expiry']) - strtotime(date('Y-m-d H:i:s'))) / 60);
-                            if ($captcha_remain_timeout == 0) {
-                                $captcha_remain_timeout = 1;
-                            }
-                            $this->notification_control->SetNotification('DANGER', CAPTCHA_TIMEOUT_1 . $captcha_remain_timeout . CAPTCHA_TIMEOUT_2);
-                        }
-                        if ($captcha_timeout_error) {
-                            $this->input_control->Redirect(URL_FORGOT_PASSWORD);
-                        }
-                    }
-                    $captcha_respone = isset($_POST['h-captcha-response']) ? $_POST['h-captcha-response'] : '';
-                    if (!empty($captcha_respone)) {
-                        $result_captcha = $this->action_control->CheckCaptcha($captcha_respone);
-                        if ($result_captcha === false) {
-                            if (!empty($captcha_timeout_from_db)) {
-                                if ($captcha_timeout_from_db['captcha_error_count'] < 1) {
-                                    $this->ActionModel->UpdateCaptchaTimeOut(array(
-                                        'captcha_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
-                                        'captcha_total_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
-                                        'id' => $captcha_timeout_from_db['id']
-                                    ));
-                                } elseif ($captcha_timeout_from_db['captcha_error_count'] == 1) {
-                                    $this->ActionModel->UpdateCaptchaTimeOut(array(
-                                        'captcha_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
-                                        'captcha_total_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
-                                        'date_captcha_timeout_expiry' => date('Y-m-d H:i:s', time() + (TIMEOUT_SHORT_CAPTCHA)),
-                                        'id' => $captcha_timeout_from_db['id']
-                                    ));
-                                } elseif ($captcha_timeout_from_db['captcha_error_count'] >= 9) {
-                                    $this->ActionModel->UpdateCaptchaTimeOut(array(
-                                        'captcha_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
-                                        'captcha_total_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
-                                        'captcha_banned' => 1,
-                                        'id' => $captcha_timeout_from_db['id']
-                                    ));
-                                } elseif ($captcha_timeout_from_db['captcha_error_count'] >= 4) {
-                                    $this->ActionModel->UpdateCaptchaTimeOut(array(
-                                        'captcha_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
-                                        'captcha_total_error_count' => $captcha_timeout_from_db['captcha_error_count'] + 1,
-                                        'date_captcha_timeout_expiry' => date('Y-m-d H:i:s', time() + (TIMEOUT_LONG_CAPTCHA)),
-                                        'id' => $captcha_timeout_from_db['id']
-                                    ));
-                                }
-                            }
-                            $this->notification_control->SetNotification('DANGER', CAPTCHA_ERROR);
-                            $this->input_control->Redirect(URL_FORGOT_PASSWORD);
-                        } elseif ($result_captcha === true) {
-                            if (!empty($captcha_timeout_from_db)) {
-                                $this->ActionModel->UpdateCaptchaTimeOut(array(
-                                    'captcha_error_count' => 0,
-                                    'id' => $captcha_timeout_from_db['id']
-                                ));
-                            }
-                            $checked_email = $this->input_control->CheckEmail($email);
-                            if (!is_null($checked_email)) {
-                                $user_forgot_pwd_from_db = $this->ActionModel->GetUserByEmail('id', $checked_inputs['email']);
-                                if (!empty($user_forgot_pwd_from_db)) {
-                                    $resetpwd_token = $this->action_control->GenerateResetPwdToken();
-                                    $result_reset_pwd = $this->ActionModel->CreateResetPassword(array(
-                                        'user_id' => $user_forgot_pwd_from_db['id'],
-                                        'user_ip' => $_SERVER['REMOTE_ADDR'],
-                                        'reset_pwd_token' => $resetpwd_token,
-                                        'date_reset_pwd_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_RESET_PWD_TOKEN)),
-                                        'is_reset_pwd_used' => 0
-                                    ));
-                                    if ($result_reset_pwd['result'] == 'Created') {
-                                        $result_email = $this->action_control->SendMail($checked_email, BRAND . ' Şifre Sıfırlama', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>' . BRAND . ' Şifre Sıfırlama</title><style>* {margin: 0;padding: 0;border: 0;box-sizing: border-box;}html {font-size: 10px;}body {font-family: sans-serif;background-color: #aaaaaa;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.logo {border-width: 3px;border-style: solid;border-color: #ffffff;border-radius: 50%;padding: 10px;margin-bottom: 20px;}.main-title {font-size: 18px;color: #ffffff;letter-spacing: 1px;margin-bottom: 20px;}.main-text {font-size: 14px;color: #ffffff;margin-bottom: 20px;}.main-link {font-size: 14px;color: #5155d3;}.main-text-2 {font-size: 14px;color: #ffffff;margin-top: 20px;}.footer {padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;background-color: #5155d3;}.footer-text {font-size: 13px;color: #000000;text-align: center;margin-bottom: 20px;}.footer-link {font-size: 13px;color: #aaaaaa !important;}.footer-url {font-size: 12px;color: #ffffff !important;float: left;}.footer-date {color: #ffffff;font-size: 12px;float: right;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}}</style></head><body><div class="container"><div class="header"><img class="logo" src="' . URL  . '" alt="' . BRAND . '"><h1 class="main-title">' . BRAND . ' Şifre Sıfırlama</h1><p class="main-text">Şifrenizi sıfırlamak için linke <a class="main-link" href="' . URL . URL_RESET_PASSWORD . '?resetpwd=' . $resetpwd_token . '">tıklayın.</a></p><p class="main-text-2">Şifre sıfırlama linkinin kullanım süresi ' . EXPIRY_RESET_PWD_TOKEN_MINUTE . ' dakikadır.</p></div><div class="footer"><p class="footer-text">Bu işlemi siz gerçekleştirmediyseniz bu emaili önemsemeyin.</p><a class="footer-url" href="' . URL . '">' . URL . '</a><span class="footer-date">' . date('d-m-Y H:i:s') . '</span></div></div></body></html>');
-                                        if (!is_null($result_email)) {
-                                            $this->ActionModel->CreateLogEmailSent(array(
-                                                'user_id' => $user_forgot_pwd_from_db['id'],
-                                                'user_ip' => $_SERVER['REMOTE_ADDR'],
-                                                'email_type' => 'ForgotPassword'
-                                            ));
-                                            $_SESSION[SESSION_MASSAGE] = FORGOT_PASSWORD_RESULT;
-                                            $this->input_control->Redirect(URL_LOGIN);
-                                        }
-                                    }
-                                    $this->notification_control->SetNotification('DANGER', DATABASE_ERROR);
-                                    $this->input_control->Redirect(URL_FORGOT_PASSWORD);
-                                } else {
-                                    $this->notification_control->SetNotification('DANGER', FORGOT_PASSWORD_NO_EMAIL);
-                                    $this->input_control->Redirect(URL_FORGOT_PASSWORD);
-                                }
-                            } else {
-                                $this->notification_control->SetNotification('DANGER', ERROR_NOT_VALID_EMAIL);
-                            }
-                        }
-                    } else {
-                        $this->notification_control->SetNotification('DANGER', CAPTCHA_ERROR);
-                    }
-                } else {
-                    $this->input_control->Redirect(URL_FORGOT_PASSWORD);
-                }
-            } else {
-                $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
-            }
-            // $this->SetCSRFTokenAndGetView('ForgotPassword', 'ForgotPassword');
-        }
-        $this->input_control->Redirect();
-    }
     function ResetPassword()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET['resetpwd'])) {
@@ -902,8 +921,8 @@ class ActionController extends Controller
             $password = isset($_POST['password']) ? $_POST['password'] : '';
             $repassword = isset($_POST['repassword']) ? $_POST['repassword'] : '';
             $checked_inputs = $this->input_control->CheckPostedInputs(array(
-                'password' => array('input' => $password, 'error_message_empty' => ERROR_MESSAGE_EMPTY_PASSWORD, 'no_white_space' => true, 'error_message_no_white_space' => ERROR_PASSWORD_WHITE_SPACE, 'length_control' => true, 'min_length' => PASSWORD_LIMIT, 'error_message_min_length' => ERROR_MAX_LENGTH_PASSWORD, 'is_password' => true, 'error_message_is_password' => ERROR_NOT_VALID_PASSWORD, 'preventxss' => true),
-                'repassword' => array('input' => $repassword, 'error_message_empty' => ERROR_MESSAGE_EMPTY_REPASSWORD, 'no_white_space' => true, 'error_message_no_white_space' => ERROR_REPASSWORD_WHITE_SPACE, 'length_control' => true, 'min_length' => PASSWORD_LIMIT, 'error_message_min_length' => ERROR_MAX_LENGTH_REPASSWORD, 'is_password' => true, 'error_message_is_password' => ERROR_NOT_VALID_PASSWORD, 'preventxss' => true),
+                'password' => array('input' => $password, 'error_message_empty' => ERROR_MESSAGE_EMPTY_PASSWORD, 'no_white_space' => true, 'error_message_no_white_space' => ERROR_PASSWORD_WHITE_SPACE, 'length_control' => true, 'min_length' => PASSWORD_MIN_LIMIT, 'error_message_min_length' => ERROR_MAX_LENGTH_PASSWORD, 'is_password' => true, 'error_message_is_password' => ERROR_NOT_VALID_PASSWORD, 'preventxss' => true),
+                'repassword' => array('input' => $repassword, 'error_message_empty' => ERROR_MESSAGE_EMPTY_REPASSWORD, 'no_white_space' => true, 'error_message_no_white_space' => ERROR_REPASSWORD_WHITE_SPACE, 'length_control' => true, 'min_length' => PASSWORD_MIN_LIMIT, 'error_message_min_length' => ERROR_MAX_LENGTH_REPASSWORD, 'is_password' => true, 'error_message_is_password' => ERROR_NOT_VALID_PASSWORD, 'preventxss' => true),
                 'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => ERROR_MESSAGE_EMPTY_CSRF, 'preventxss' => true)
             ));
             $go_reset_pwd = false;

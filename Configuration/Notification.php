@@ -42,10 +42,14 @@ define('URL_PROFILE_PHOTO_TITLE', 'Profil Fotoğrafı - Profil');
 define('URL_PROFILE_ORDERS_TITLE', 'Siparişlerim - Profil');
 // Action
 define('TR_NOTIFICATION_ERROR_EMPTY_EMAIL', 'Email adresinizi girin');
+define('TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL', 'Geçerli bir email adresi girin');
 define('TR_NOTIFICATION_ERROR_EMPTY_PASSWORD', 'Şifrenizi girin');
-
-
-
+define('TR_NOTIFICATION_ERROR_NO_WHITE_SPACE_PASSWORD', 'Şifreniz boşluk karakteri içermemelidir');
+define('TR_NOTIFICATION_ERROR_MIN_LENGTH_PASSWORD', 'Şifreniz '. PASSWORD_MIN_LIMIT .' karakterden az olamaz');
+define('TR_NOTIFICATION_ERROR_PATTERN_PASSWORD', 'Şifreniz en az bir küçük harf, bir büyük harf ve bir rakam içermelidir');
+define('TR_NOTIFICATION_ERROR_EMPTY_RE_PASSWORD', 'Şifrenizi tekrar girin');
+define('TR_NOTIFICATION_ERROR_NOT_SAME_PASSWORDS', 'Şifreler aynı olmalıdır');
+define('TR_NOTIFICATION_ERROR_EMPTY_REGISTER_TERMS', 'Kayıt olabilmek için kullanım şartları ve üyelik sözleşmesi ile gizlilik ve güvenlik politikasını kabul etmelisiniz');
 
 
 
