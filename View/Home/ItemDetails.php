@@ -42,7 +42,7 @@
                                         </button>
                                     </form>
                                 <?php else : ?>
-                                    <form id="form-add-to-favorites"> 
+                                    <form id="form-add-to-favorites">
                                         <input type="hidden" name="item" value="<?php echo $web_data['item']['item_cart_id']; ?>">
                                         <button id="submit-add-to-favorites" class="btn-add-to-favorites" type="submit" title="Ürünü favorilerime ekle">
                                             <i class="far fa-heart details-favorites-icon"></i>
@@ -400,7 +400,7 @@
                 <span class="icon">></span>
                 <a href="<?php echo URL . URL_ITEMS . '/' . $web_data['selected_gender_url']; ?>" class="text"><?php echo $web_data['selected_gender_name']; ?></a>
                 <span class="icon">></span>
-                <a href="<?php echo URL . URL_ITEM_DETAILS . '/' . $web_data['item']['item_url'];?>" class="text"><?php echo $web_data['item']['item_name']; ?></a>
+                <a href="<?php echo URL . URL_ITEM_DETAILS . '/' . $web_data['item']['item_url']; ?>" class="text"><?php echo $web_data['item']['item_name']; ?></a>
             </div>
         </div>
     </main>
@@ -417,6 +417,7 @@
                 bodyElement.classList.add('noscroll');
             }
         }
+
         function removeNoScroll() {
             if (bodyElement.classList.contains('noscroll')) {
                 bodyElement.classList.remove('noscroll');
@@ -688,6 +689,7 @@
             var notificationClient = $('.notification-client');
             var notificationHidden = 0;
             var notificationRemoved = 0;
+
             function setClientNotification(notificationMessage) {
                 clearTimeout(notificationHidden);
                 clearTimeout(notificationRemoved);
@@ -710,11 +712,13 @@
                 }, 10000);
             }
             var bodyElementjQ = $("body");
+
             function addNoScrolljQ() {
                 if (!bodyElementjQ.hasClass('noscroll')) {
                     bodyElementjQ.addClass('noscroll');
                 }
             }
+
             function removeNoScrolljQ() {
                 if (bodyElementjQ.hasClass('noscroll')) {
                     bodyElementjQ.removeClass('noscroll');
@@ -734,6 +738,7 @@
             var request;
             var requestUsable = true;
             var requestScroll = true;
+
             function setComments(responses) {
                 $.each(responses, function(key, response) {
                     let xx1 = $("<div></div>").attr('id', 'comment-wrapper-' + response['id']);
@@ -745,7 +750,7 @@
                     xx2.append(xx4);
                     let xx5 = $("<img>").addClass('image').attr('title', 'Yorumun Yazarının Profil Fotoğrafı').attr('src', '<?php echo URL . 'assets/images/users/'; ?>' + response['user_profile_image_path'] + '/' + response['user_profile_image']).attr('alt', response['user_first_name'] + ' ' + response['user_last_name']);
                     xx4.append(xx5);
-                    let xx6 = $("<span></span>").addClass('name').attr('title', 'Yorumun Yazarı').text(response['user_first_name'] + ' ' + response['user_last_name']);
+                    let xx6 = $("<span></span>").addClass('name').attr('title', 'Yorumun Yazarı').append(response['user_first_name'] + ' ' + response['user_last_name']);
                     xx4.append(xx6);
                     let xx7 = $("<div></div>").addClass('user-bot-container');
                     xx4.append(xx7);
@@ -763,18 +768,20 @@
                             let xx13 = $("<label></label>").attr('for', 'comment-approved-' + response['id']).addClass('btn-warning mr-left label-flex btn-comment-approve').attr('title', 'Yorumun Herkese Görünürlüğünü Değiştir');
                             xx10.append(xx13);
                             if (response['is_comment_approved'] == 1) {
-                                let xx14 = $("<span></span>").text('Açık');
+                                let xyx14 = $("<span></span>").addClass('checkmark-comment-text-asd').text('Açık');
+                                let xx14 = $("<span></span>").addClass('checkmark-comment');
                                 let xx15 = $("<input></input>").attr('type', 'checkbox').attr('id', 'comment-approved-' + response['id']).addClass('checkbox-comment').attr('name', 'is_comment_approved').prop('checked', true);
-                                xx13.append(xx14);
                                 xx13.append(xx15);
+                                xx13.append(xx14);
+                                xx13.append(xyx14);
                             } else {
-                                let xx14 = $("<span></span>").text('Kapalı');
+                                let xyx14 = $("<span></span>").addClass('checkmark-comment-text-asd').text('Kapalı');
+                                let xx14 = $("<span></span>").addClass('checkmark-comment');
                                 let xx15 = $("<input></input>").attr('type', 'checkbox').attr('id', 'comment-approved-' + response['id']).addClass('checkbox-comment').attr('name', 'is_comment_approved');
-                                xx13.append(xx14);
                                 xx13.append(xx15);
+                                xx13.append(xx14);
+                                xx13.append(xyx14);
                             }
-                            let xx16 = $("<span></span>").addClass('checkmark-comment');
-                            xx13.append(xx16);
                             xx7.append(xx10);
                             if ('<?php echo $web_data['authenticated_user'] ?>' != response['user_id']) {
                                 let xx18 = $("<button></button>").addClass('btn-danger mr-left btn-comment-delete-popup').attr('title', 'Yorumu Sil').text('Sil');
@@ -793,7 +800,7 @@
                         let xx19 = $("<a></a>").addClass('btn-success mr-left').attr('href', '<?php echo URL . URL_LOGIN . '?yonlendir=urun/' . $web_data['item']['item_url']; ?>').attr('title', 'Yoruma Cevap Yaz').text('Cevapla');
                         xx7.append(xx19);
                     <?php endif; ?>
-                    let xx20 = $("<p></p>").addClass('comment-text').text(response['comment']);
+                    let xx20 = $("<p></p>").addClass('comment-text').append(response['comment']);
                     xx2.append(xx20);
                     if (response.hasOwnProperty('comments_reply')) {
                         let xx21 = $("<div></div>").addClass('row-expand');
@@ -808,7 +815,7 @@
                             xx24.append(xx25);
                             let xx26 = $("<img>").addClass('image').attr('title', 'Yorumun Yazarının Profil Fotoğrafı').attr('src', '<?php echo URL . 'assets/images/users/'; ?>' + comments_reply['user_profile_image_path'] + '/' + comments_reply['user_profile_image']).attr('alt', comments_reply['user_first_name'] + ' ' + comments_reply['user_last_name']);
                             xx25.append(xx26);
-                            let xx27 = $("<span></span>").addClass('name').attr('title', 'Yorumun Yazarı').text(comments_reply['user_first_name'] + ' ' + comments_reply['user_last_name']);
+                            let xx27 = $("<span></span>").addClass('name').attr('title', 'Yorumun Yazarı').append(comments_reply['user_first_name'] + ' ' + comments_reply['user_last_name']);
                             xx25.append(xx27);
                             let xx28 = $("<div></div>").addClass('user-bot-container');
                             xx25.append(xx28);
@@ -823,19 +830,21 @@
                                     xx30.append(xx32);
                                     let xx33 = $("<label></label>").attr('for', 'comment-reply-approved-' + comments_reply['id']).addClass('btn-warning mr-left label-flex btn-comment-reply-approve').attr('title', 'Yorumun Herkese Görünürlüğünü Değiştir');
                                     xx30.append(xx33);
-                                    if (response['is_comment_approved'] == 1) {
-                                        let xx34 = $("<span></span>").text('Açık');
+                                    if (comments_reply['is_comment_reply_approved'] == 1) {
+                                        let xyx34 = $("<span></span>").addClass('checkmark-comment-text-asd').text('Açık');
+                                        let xx34 = $("<span></span>").addClass('checkmark-comment');
                                         let xx35 = $("<input></input>").attr('type', 'checkbox').attr('id', 'comment-reply-approved-' + comments_reply['id']).addClass('checkbox-comment').attr('name', 'is_comment_reply_approved').prop('checked', true);
-                                        xx33.append(xx34);
                                         xx33.append(xx35);
+                                        xx33.append(xx34);
+                                        xx33.append(xyx34);
                                     } else {
-                                        let xx34 = $("<span></span>").text('Kapalı');
+                                        let xyx34 = $("<span></span>").addClass('checkmark-comment-text-asd').text('Kapalı');
+                                        let xx34 = $("<span></span>").addClass('checkmark-comment');
                                         let xx35 = $("<input></input>").attr('type', 'checkbox').attr('id', 'comment-reply-approved-' + comments_reply['id']).addClass('checkbox-comment').attr('name', 'is_comment_reply_approved');
-                                        xx33.append(xx34);
                                         xx33.append(xx35);
+                                        xx33.append(xx34);
+                                        xx33.append(xyx34);
                                     }
-                                    let xx36 = $("<span></span>").addClass('checkmark-comment');
-                                    xx33.append(xx36);
                                     xx28.append(xx30);
                                     if ('<?php echo $web_data['authenticated_user'] ?>' != comments_reply['user_id']) {
                                         let xx37 = $("<button></button>").addClass('btn-danger mr-left btn-comment-reply-delete-popup').attr('title', 'Yorumu Sil').text('Sil');
@@ -853,9 +862,9 @@
                             <?php endif; ?>
                             let xx40 = $("<div></div>").addClass('reply-reference-container');
                             xx24.append(xx40);
-                            let xx41 = $("<span></span>").addClass('reply-reference').text('@' + comments_reply['user_first_name'] + ' ' + comments_reply['user_last_name'] + ' isimli kullanıcının yorumunu cevapladı');
+                            let xx41 = $("<span></span>").addClass('reply-reference').append('@' + comments_reply['user_first_name'] + ' ' + comments_reply['user_last_name'] + ' isimli kullanıcının yorumunu cevapladı');
                             xx40.append(xx41);
-                            let xx42 = $("<p></p>").addClass('comment-reply-text').text(comments_reply['comment_reply']);
+                            let xx42 = $("<p></p>").addClass('comment-reply-text').append(comments_reply['comment_reply']);
                             xx24.append(xx42);
                             xx3.append(xx24);
                         });
@@ -878,7 +887,7 @@
                                 if (requestUsable) {
                                     requestUsable = false;
                                     let approveCommentForm = $('#comment-wrapper-' + response['id'] + ' .form-approve-comment');
-                                    let spanTextApproveComment = $('#comment-wrapper-' + response['id'] + ' .checkmark-comment');
+                                    let spanTextApproveCommentTextAsd = $('#comment-wrapper-' + response['id'] + ' .checkmark-comment-text-asd');
                                     let checkboxApproveComment = $('#comment-wrapper-' + response['id'] + ' .checkbox-comment');
                                     let inputsApproveCommentForm = approveCommentForm.find('input');
                                     request = $.ajax({
@@ -899,10 +908,10 @@
                                             }
                                             if (response_comment_approve.hasOwnProperty('is_approved')) {
                                                 if (response_comment_approve['is_approved'] == 1) {
-                                                    spanTextApproveComment.text('Açık');
+                                                    spanTextApproveCommentTextAsd.text('Açık');
                                                     checkboxApproveComment.prop('checked', true);
                                                 } else {
-                                                    spanTextApproveComment.text('Kapalı');
+                                                    spanTextApproveCommentTextAsd.text('Kapalı');
                                                     checkboxApproveComment.prop('checked', false);
                                                 }
                                             }
@@ -971,7 +980,7 @@
                                         if (requestUsable) {
                                             requestUsable = false;
                                             let approveCommentReplyForm = $('#comment-reply-wrapper-' + comments_reply['id'] + ' .form-approve-comment-reply');
-                                            let spanTextApproveCommentReply = $('#comment-reply-wrapper-' + comments_reply['id'] + ' .checkmark-comment');
+                                            let spanTextApproveCommentReplyTextAsd = $('#comment-reply-wrapper-' + comments_reply['id'] + ' .checkmark-comment-text-asd');
                                             let checkboxApproveCommentReply = $('#comment-reply-wrapper-' + comments_reply['id'] + ' .checkbox-comment');
                                             let inputsApproveCommentReplyForm = approveCommentReplyForm.find('input');
                                             request = $.ajax({
@@ -990,12 +999,12 @@
                                                     if (response_comment_reply_approve.hasOwnProperty('form_token')) {
                                                         $('.input-token').val(response_comment_reply_approve['form_token']);
                                                     }
-                                                    if (response_comment_reply_approve.hasOwnProperty('is_reply_approved')) {
-                                                        if (response_comment_reply_approve['is_reply_approved'] == 1) {
-                                                            spanTextApproveCommentReply.text('Açık');
+                                                    if (response_comment_reply_approve.hasOwnProperty('is_comment_reply_approved')) {
+                                                        if (response_comment_reply_approve['is_comment_reply_approved'] == 1) {
+                                                            spanTextApproveCommentReplyTextAsd.text('Açık');
                                                             checkboxApproveCommentReply.prop('checked', true);
                                                         } else {
-                                                            spanTextApproveCommentReply.text('Kapalı');
+                                                            spanTextApproveCommentReplyTextAsd.text('Kapalı');
                                                             checkboxApproveCommentReply.prop('checked', false);
                                                         }
                                                     }
@@ -1126,7 +1135,13 @@
                             navSearch.removeClass('hidden');
                         }
                         response = jQuery.parseJSON(response);
-                        if (response.hasOwnProperty('not_found_search_item')) {
+                        if (response.hasOwnProperty('shutdown')) {
+                            window.location.href = '<?php echo URL . URL_SHUTDOWN; ?>';
+                        } else if (response.hasOwnProperty('exception')) {
+                            window.location.href = '<?php echo URL . URL_EXCEPTION; ?>';
+                        } else if (response.hasOwnProperty('stop')) {
+
+                        } else if (response.hasOwnProperty('not_found_search_item')) {
                             $('#nav-search-wrapper').remove();
                             let ss1 = $("<div></div>").attr('id', 'nav-search-wrapper');
                             let ss2 = $("<li></li>").addClass('search-item');
@@ -1140,7 +1155,7 @@
                             $.each(response['searched_items'], function(key, searchitem) {
                                 let s2 = $("<li></li>").addClass('search-item');
                                 s1.append(s2);
-                                let s3 = $("<a></a>").addClass('search-link').attr('href', '<?php echo URL . URL_ITEM_DETAILS . '/' ?>' + searchitem['item_url']).text(searchitem['item_name']);
+                                let s3 = $("<a></a>").addClass('search-link').attr('href', '<?php echo URL . URL_ITEM_DETAILS . '/' ?>' + searchitem['item_url']).append(searchitem['item_name']);
                                 s2.append(s3);
                             });
                             navSearch.append(s1);
@@ -1174,6 +1189,7 @@
                 }
             });
             <?php if (!empty($web_data['authenticated_user'])) : ?>
+
                 function AddToFavorites() {
                     $('#submit-add-to-favorites').click(function(e) {
                         e.preventDefault();
@@ -1190,7 +1206,11 @@
                             request.done(function(response) {
                                 requestUsable = true;
                                 response = jQuery.parseJSON(response);
-                                if (response.hasOwnProperty('reset') && response['reset'] == false) {
+                                if (response.hasOwnProperty('shutdown')) {
+                                    window.location.href = '<?php echo URL . URL_SHUTDOWN; ?>';
+                                } else if (response.hasOwnProperty('exception')) {
+                                    window.location.href = '<?php echo URL . URL_EXCEPTION; ?>';
+                                } else if (response.hasOwnProperty('reset') && response['reset'] == false) {
                                     if (response.hasOwnProperty('notification')) {
                                         setClientNotification(response['notification']);
                                     }
@@ -1217,6 +1237,7 @@
                         }
                     });
                 }
+
                 function RemoveFromFavorites() {
                     $('#submit-remove-from-favorites').click(function(e) {
                         e.preventDefault();
@@ -1233,7 +1254,11 @@
                             request.done(function(response) {
                                 requestUsable = true;
                                 response = jQuery.parseJSON(response);
-                                if (response.hasOwnProperty('reset') && response['reset'] == false) {
+                                if (response.hasOwnProperty('shutdown')) {
+                                    window.location.href = '<?php echo URL . URL_SHUTDOWN; ?>';
+                                } else if (response.hasOwnProperty('exception')) {
+                                    window.location.href = '<?php echo URL . URL_EXCEPTION; ?>';
+                                } else if (response.hasOwnProperty('reset') && response['reset'] == false) {
                                     if (response.hasOwnProperty('notification')) {
                                         setClientNotification(response['notification']);
                                     }
@@ -1285,7 +1310,11 @@
                         request.done(function(response) {
                             requestUsable = true;
                             response = jQuery.parseJSON(response);
-                            if (response.hasOwnProperty('reset') && response['reset'] == false) {
+                            if (response.hasOwnProperty('shutdown')) {
+                                window.location.href = '<?php echo URL . URL_SHUTDOWN; ?>';
+                            } else if (response.hasOwnProperty('exception')) {
+                                window.location.href = '<?php echo URL . URL_EXCEPTION; ?>';
+                            } else if (response.hasOwnProperty('reset') && response['reset'] == false) {
                                 if (response.hasOwnProperty('notification')) {
                                     setClientNotification(response['notification']);
                                 }
@@ -1302,11 +1331,11 @@
                                     xx2.append(xx4);
                                     let xx5 = $("<img>").addClass('image').attr('title', 'Yorumun Yazarının Profil Fotoğrafı').attr('src', '<?php echo URL . 'assets/images/users/'; ?>' + response['comment_user']['user_profile_image_path'] + '/' + response['comment_user']['user_profile_image']).attr('alt', response['comment_user']['user_first_name'] + ' ' + response['comment_user']['user_last_name']);
                                     xx4.append(xx5);
-                                    let xx6 = $("<span></span>").addClass('name').attr('title', 'Yorumun Yazarı').text(response['comment_user']['user_first_name'] + ' ' + response['comment_user']['user_last_name']);
+                                    let xx6 = $("<span></span>").addClass('name').attr('title', 'Yorumun Yazarı').append(response['comment_user']['user_first_name'] + ' ' + response['comment_user']['user_last_name']);
                                     xx4.append(xx6);
                                     let xx7 = $("<div></div>").addClass('user-bot-container');
                                     xx4.append(xx7);
-                                    let xx8 = $("<span></span>").addClass('date').attr('title', 'Yorum Oluşturulma Tarihi').text(response['comment']['date_comment_created']);
+                                    let xx8 = $("<span></span>").addClass('date').attr('title', 'Yorum Oluşturulma Tarihi').append(response['comment']['date_comment_created']);
                                     xx7.append(xx8);
                                     let xx9 = $("<button></button>").addClass('btn-success mr-left btn-popup-new-comment-reply').attr('title', 'Yoruma Cevap Yaz').text('Cevapla');
                                     xx7.append(xx9);
@@ -1318,19 +1347,19 @@
                                         xx10.append(xx12);
                                         let xx13 = $("<label></label>").attr('for', 'comment-approved-' + response['comment']['id']).addClass('btn-warning mr-left label-flex btn-comment-approve').attr('title', 'Yorumun Herkese Görünürlüğünü Değiştir');
                                         xx10.append(xx13);
-                                        let xx14 = $("<span></span>").text('Kapalı');
                                         let xx15 = $("<input></input>").attr('type', 'checkbox').attr('id', 'comment-approved-' + response['comment']['id']).addClass('checkbox-comment').attr('name', 'is_comment_approved');
-                                        xx13.append(xx14);
                                         xx13.append(xx15);
+                                        let xyx14 = $("<span></span>").addClass('checkmark-comment-text-asd').text('Kapalı');
                                         let xx16 = $("<span></span>").addClass('checkmark-comment');
                                         xx13.append(xx16);
+                                        xx13.append(xyx14);
                                         xx7.append(xx10);
                                     <?php endif; ?>
                                     let xx17 = $("<button></button>").addClass('btn-warning mr-left btn-comment-update-popup').attr('data-value', response['comment']['comment']).attr('title', 'Yorumu Güncelle').text('Güncelle');
                                     xx7.append(xx17);
                                     let xx18 = $("<button></button>").addClass('btn-danger mr-left btn-comment-delete-popup').attr('title', 'Yorumu Sil').text('Sil');
                                     xx7.append(xx18);
-                                    let xx20 = $("<p></p>").addClass('comment-text').text(response['comment']['comment']);
+                                    let xx20 = $("<p></p>").addClass('comment-text').append(response['comment']['comment']);
                                     xx2.append(xx20);
                                     $('#insert-new-comment').prepend(xx1);
                                     $('#comment-wrapper-' + response['comment']['id'] + ' .btn-popup-new-comment-reply').click(function(e) {
@@ -1349,7 +1378,7 @@
                                             if (requestUsable) {
                                                 requestUsable = false;
                                                 let approveCommentForm = $('#comment-wrapper-' + response['comment']['id'] + ' .form-approve-comment');
-                                                let spanTextApproveComment = $('#comment-wrapper-' + response['comment']['id'] + ' .checkmark-comment');
+                                                let spanTextApproveCommentTextAsd = $('#comment-wrapper-' + response['comment']['id'] + ' .checkmark-comment-text-asd');
                                                 let checkboxApproveComment = $('#comment-wrapper-' + response['comment']['id'] + ' .checkbox-comment');
                                                 let inputsApproveCommentForm = approveCommentForm.find('input');
                                                 request = $.ajax({
@@ -1370,10 +1399,10 @@
                                                         }
                                                         if (response_comment_approve.hasOwnProperty('is_approved')) {
                                                             if (response_comment_approve['is_approved'] == 1) {
-                                                                spanTextApproveComment.text('Açık');
+                                                                spanTextApproveCommentTextAsd.text('Açık');
                                                                 checkboxApproveComment.prop('checked', true);
                                                             } else {
-                                                                spanTextApproveComment.text('Kapalı');
+                                                                spanTextApproveCommentTextAsd.text('Kapalı');
                                                                 checkboxApproveComment.prop('checked', false);
                                                             }
                                                         }
@@ -1447,7 +1476,11 @@
                         request.done(function(response) {
                             requestUsable = true;
                             response = jQuery.parseJSON(response);
-                            if (response.hasOwnProperty('reset') && response['reset'] == false) {
+                            if (response.hasOwnProperty('shutdown')) {
+                                window.location.href = '<?php echo URL . URL_SHUTDOWN; ?>';
+                            } else if (response.hasOwnProperty('exception')) {
+                                window.location.href = '<?php echo URL . URL_EXCEPTION; ?>';
+                            } else if (response.hasOwnProperty('reset') && response['reset'] == false) {
                                 if (response.hasOwnProperty('notification')) {
                                     setClientNotification(response['notification']);
                                 }
@@ -1455,7 +1488,7 @@
                                     $('.input-token').val(response['form_token']);
                                 }
                                 if (response.hasOwnProperty('comment_reply') && response.hasOwnProperty('comment_reply_user')) {
-                                    if (!$('#comment-wrapper-' + response['comment_reply']['comment_id'] + ' .expand-container').length) {
+                                    if (!$('#comment-wrapper-' + response['comment_reply']['comment_id'] + ' .expand-container')) {
                                         let xx21 = $("<div></div>").addClass('row-expand');
                                         let xx22 = $("<div></div>").addClass('expand-wrapper');
                                         xx21.append(xx22);
@@ -1468,11 +1501,11 @@
                                     xx24.append(xx25);
                                     let xx26 = $("<img>").addClass('image').attr('title', 'Yorumun Yazarının Profil Fotoğrafı').attr('src', '<?php echo URL . 'assets/images/users/'; ?>' + response['comment_reply_user']['user_profile_image_path'] + '/' + response['comment_reply_user']['user_profile_image']).attr('alt', response['comment_reply_user']['user_first_name'] + ' ' + response['comment_reply_user']['user_last_name']);
                                     xx25.append(xx26);
-                                    let xx27 = $("<span></span>").addClass('name').attr('title', 'Yorumun Yazarı').text(response['comment_reply_user']['user_first_name'] + ' ' + response['comment_reply_user']['user_last_name']);
+                                    let xx27 = $("<span></span>").addClass('name').attr('title', 'Yorumun Yazarı').append(response['comment_reply_user']['user_first_name'] + ' ' + response['comment_reply_user']['user_last_name']);
                                     xx25.append(xx27);
                                     let xx28 = $("<div></div>").addClass('user-bot-container');
                                     xx25.append(xx28);
-                                    let xx29 = $("<span></span>").addClass('date').attr('title', 'Yorum Oluşturulma Tarihi').text(response['comment_reply']['date_comment_reply_created']);
+                                    let xx29 = $("<span></span>").addClass('date').attr('title', 'Yorum Oluşturulma Tarihi').append(response['comment_reply']['date_comment_reply_created']);
                                     xx28.append(xx29);
                                     <?php if ($web_data['authenticated_user'] == ADMIN_ID) : ?>
                                         let xx30 = $("<form></form>").addClass('form-approve-comment-reply');
@@ -1482,12 +1515,12 @@
                                         xx30.append(xx32);
                                         let xx33 = $("<label></label>").attr('for', 'comment-reply-approved-' + response['comment_reply']['id']).addClass('btn-warning mr-left label-flex btn-comment-reply-approve').attr('title', 'Yorumun Herkese Görünürlüğünü Değiştir');
                                         xx30.append(xx33);
-                                        let xx34 = $("<span></span>").text('Kapalı');
                                         let xx35 = $("<input></input>").attr('type', 'checkbox').attr('id', 'comment-reply-approved-' + response['comment_reply']['id']).addClass('checkbox-comment').attr('name', 'is_comment_reply_approved');
-                                        xx33.append(xx34);
                                         xx33.append(xx35);
+                                        let xyx14 = $("<span></span>").addClass('checkmark-comment-text-asd').text('Kapalı');
                                         let xx36 = $("<span></span>").addClass('checkmark-comment');
                                         xx33.append(xx36);
+                                        xx33.append(xyx14);
                                         xx28.append(xx30);
                                     <?php endif; ?>
                                     let xx38 = $("<button></button>").addClass('btn-warning mr-left btn-comment-reply-update-popup').attr('data-value', response['comment_reply']['comment_reply']).attr('title', 'Yorumu Güncelle').text('Güncelle');
@@ -1496,12 +1529,12 @@
                                     xx28.append(xx39);
                                     let xx40 = $("<div></div>").addClass('reply-reference-container');
                                     xx24.append(xx40);
-                                    let xx41 = $("<span></span>").addClass('reply-reference').text('@' + response['comment_reply_user']['user_first_name'] + ' ' + response['comment_reply_user']['user_last_name'] + ' isimli kullanıcının yorumunu cevapladı');
+                                    let xx41 = $("<span></span>").addClass('reply-reference').append('@' + response['comment_reply_user']['user_first_name'] + ' ' + response['comment_reply_user']['user_last_name'] + ' isimli kullanıcının yorumunu cevapladı');
                                     xx40.append(xx41);
-                                    let xx42 = $("<p></p>").addClass('comment-reply-text').text(response['comment_reply']['comment_reply']);
+                                    let xx42 = $("<p></p>").addClass('comment-reply-text').append(response['comment_reply']['comment_reply']);
                                     xx24.append(xx42);
                                     $('#comment-wrapper-' + response['comment_reply']['comment_id'] + ' .comment-replies-wrapper').append(xx24);
-                                    if (!$('#comment-wrapper-' + response['comment_reply']['comment_id'] + ' .expand-container').length) {
+                                    if (!$('#comment-wrapper-' + response['comment_reply']['comment_id'] + ' .expand-container')) {
                                         let expandCommentRepliesjQ = $('#comment-wrapper-' + response['comment_reply']['comment_id'] + ' .expand-container');
                                         let commentRepliesWrapperPartjQ = $('#comment-wrapper-' + response['comment_reply']['comment_id'] + ' .comment-replies-wrapper');
                                         expandCommentRepliesjQ.click(function(e) {
@@ -1521,7 +1554,7 @@
                                             if (requestUsable) {
                                                 requestUsable = false;
                                                 let approveCommentReplyForm = $('#comment-reply-wrapper-' + response['comment_reply']['id'] + ' .form-approve-comment-reply');
-                                                let spanTextApproveCommentReply = $('#comment-reply-wrapper-' + response['comment_reply']['id'] + ' .checkmark-comment');
+                                                let spanTextApproveCommentReplyTextAsd = $('#comment-reply-wrapper-' + response['comment_reply']['id'] + ' .checkmark-comment-text-asd');
                                                 let checkboxApproveCommentReply = $('#comment-reply-wrapper-' + response['comment_reply']['id'] + ' .checkbox-comment');
                                                 let inputsApproveCommentReplyForm = approveCommentReplyForm.find('input');
                                                 request = $.ajax({
@@ -1540,12 +1573,12 @@
                                                         if (response_comment_reply_approve.hasOwnProperty('form_token')) {
                                                             $('.input-token').val(response_comment_reply_approve['form_token']);
                                                         }
-                                                        if (response_comment_reply_approve.hasOwnProperty('is_reply_approved')) {
-                                                            if (response_comment_reply_approve['is_reply_approved'] == 1) {
-                                                                spanTextApproveCommentReply.text('Açık');
+                                                        if (response_comment_reply_approve.hasOwnProperty('is_comment_reply_approved')) {
+                                                            if (response_comment_reply_approve['is_comment_reply_approved'] == 1) {
+                                                                spanTextApproveCommentReplyTextAsd.text('Açık');
                                                                 checkboxApproveCommentReply.prop('checked', true);
                                                             } else {
-                                                                spanTextApproveCommentReply.text('Kapalı');
+                                                                spanTextApproveCommentReplyTextAsd.text('Kapalı');
                                                                 checkboxApproveCommentReply.prop('checked', false);
                                                             }
                                                         }
@@ -1619,7 +1652,11 @@
                         request.done(function(response) {
                             requestUsable = true;
                             response = jQuery.parseJSON(response);
-                            if (response.hasOwnProperty('reset') && response['reset'] == false) {
+                            if (response.hasOwnProperty('shutdown')) {
+                                window.location.href = '<?php echo URL . URL_SHUTDOWN; ?>';
+                            } else if (response.hasOwnProperty('exception')) {
+                                window.location.href = '<?php echo URL . URL_EXCEPTION; ?>';
+                            } else if (response.hasOwnProperty('reset') && response['reset'] == false) {
                                 if (response.hasOwnProperty('notification')) {
                                     setClientNotification(response['notification']);
                                 }
@@ -1627,7 +1664,7 @@
                                     $('.input-token').val(response['form_token']);
                                 }
                                 if (response.hasOwnProperty('comment')) {
-                                    $('#comment-wrapper-' + response['comment']['id'] + ' .comment-text').text(response['comment']['comment']);
+                                    $('#comment-wrapper-' + response['comment']['id'] + ' .comment-text').append(response['comment']['comment']);
                                     $('#comment-wrapper-' + response['comment']['id'] + ' .btn-comment-update-popup').attr('data-value', response['comment']['comment']);
                                     $('#comment-wrapper-' + response['comment']['id'] + ' .btn-comment-update-popup').data('value', response['comment']['comment']);
                                     if (!commentUpdateWrapperjQ.hasClass('disable')) {
@@ -1664,7 +1701,11 @@
                         request.done(function(response) {
                             requestUsable = true;
                             response = jQuery.parseJSON(response);
-                            if (response.hasOwnProperty('reset') && response['reset'] == false) {
+                            if (response.hasOwnProperty('shutdown')) {
+                                window.location.href = '<?php echo URL . URL_SHUTDOWN; ?>';
+                            } else if (response.hasOwnProperty('exception')) {
+                                window.location.href = '<?php echo URL . URL_EXCEPTION; ?>';
+                            } else if (response.hasOwnProperty('reset') && response['reset'] == false) {
                                 if (response.hasOwnProperty('notification')) {
                                     setClientNotification(response['notification']);
                                 }
@@ -1672,7 +1713,7 @@
                                     $('.input-token').val(response['form_token']);
                                 }
                                 if (response.hasOwnProperty('comment_reply')) {
-                                    $('#comment-reply-wrapper-' + response['comment_reply']['id'] + ' .comment-reply-text').text(response['comment_reply']['comment_reply']);
+                                    $('#comment-reply-wrapper-' + response['comment_reply']['id'] + ' .comment-reply-text').append(response['comment_reply']['comment_reply']);
                                     $('#comment-reply-wrapper-' + response['comment_reply']['id'] + ' .btn-comment-reply-update-popup').attr('data-value', response['comment_reply']['comment_reply']);
                                     $('#comment-reply-wrapper-' + response['comment_reply']['id'] + ' .btn-comment-reply-update-popup').data('value', response['comment_reply']['comment_reply']);
                                     if (!commentReplyUpdateWrapperjQ.hasClass('disable')) {
@@ -1690,6 +1731,7 @@
                         });
                     }
                 });
+
                 function setCommentDeleteSubmit(param) {
                     $('#btn-comment-delete').click(function(e) {
                         e.preventDefault();
@@ -1706,7 +1748,11 @@
                             request.done(function(response) {
                                 requestUsable = true;
                                 response = jQuery.parseJSON(response);
-                                if (response.hasOwnProperty('reset') && response['reset'] == false) {
+                                if (response.hasOwnProperty('shutdown')) {
+                                    window.location.href = '<?php echo URL . URL_SHUTDOWN; ?>';
+                                } else if (response.hasOwnProperty('exception')) {
+                                    window.location.href = '<?php echo URL . URL_EXCEPTION; ?>';
+                                } else if (response.hasOwnProperty('reset') && response['reset'] == false) {
                                     if (response.hasOwnProperty('notification')) {
                                         setClientNotification(response['notification']);
                                     }
@@ -1738,6 +1784,7 @@
                 <?php else : ?>
                     setCommentDeleteSubmit('<?php echo URL_COMMENT_DELETE; ?>');
                 <?php endif; ?>
+
                 function setCommentReplyDeleteSubmit(param) {
                     $('#btn-comment-reply-delete').click(function(e) {
                         e.preventDefault();
@@ -1754,7 +1801,11 @@
                             request.done(function(response) {
                                 requestUsable = true;
                                 response = jQuery.parseJSON(response);
-                                if (response.hasOwnProperty('reset') && response['reset'] == false) {
+                                if (response.hasOwnProperty('shutdown')) {
+                                    window.location.href = '<?php echo URL . URL_SHUTDOWN; ?>';
+                                } else if (response.hasOwnProperty('exception')) {
+                                    window.location.href = '<?php echo URL . URL_EXCEPTION; ?>';
+                                } else if (response.hasOwnProperty('reset') && response['reset'] == false) {
                                     if (response.hasOwnProperty('notification')) {
                                         setClientNotification(response['notification']);
                                     }

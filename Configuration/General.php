@@ -11,8 +11,12 @@ define('META_TAG_AUTHOR', 'Semih Polat');
 
 
 
+define('ITEM_LOAD_LIMIT_IN_ONCE', 6);
+define('COMMENT_LOAD_LIMIT_IN_ONCE', 6);
+define('DETAILS_SIZE_REMAIN_ITEM_LIMIT', 20);
 
-define('ADMIN_ID', '');
+
+define('ADMIN_ID', '2BEV2kDDjyZ1Qb3APgxurvkDrW7biovabxUNnNJgd1B1X4sF12oVCKd9xKNIKcDEuzZzODIw7IcuEqYFgmudVWxnLPA5OJyZexfrTpQTqbntSMHx2um2j740phOJqmQERfUqkj0JobJyeiS5G0k7LySjiBEVtAbvhQm8HgdrlPG6KS4vthDRUIo9GuJhooVBBlJgyrJxCrPjJCclTgNUvHLJlOCiF7ddGaz3JX8LjE2NTg1Njk4Mzc4NTU');
 define('ADMIN_EMAIL', 'utkurabiyem@gmail.com');
 define('ADMIN_IP_ADDRESS', '127.0.0.1');
 define('ADMIN_ROLE_ID', '25f50245e318a207bb70');

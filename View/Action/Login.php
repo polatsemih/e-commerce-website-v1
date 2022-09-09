@@ -44,7 +44,7 @@
                             <?php if (!empty($web_data['password'])) : ?>
                                 <input class="input-action" id="input-password" type="password" name="password" value="<?php echo $web_data['password']; ?>">
                             <?php else : ?>
-                                <input class="input-action" id="input-password" type="password" name="password"<?php echo !empty($web_data['email']) ? ' autofocus' : ''; ?>>
+                                <input class="input-action" id="input-password" type="password" name="password" <?php echo !empty($web_data['email']) ? ' autofocus' : ''; ?>>
                             <?php endif; ?>
                             <i class="btn-action-password fas fa-eye-slash" title="Şifreyi Göster"></i>
                             <span class="input-action-label">Şifre</span>
@@ -54,7 +54,7 @@
                         <div class="row-flex">
                             <label for="remember_me">
                                 <div class="checkbox-wrapper">
-                                    <input class="checkbox" type="checkbox" id="remember_me" name="remember_me"<?php echo !empty($web_data['remember_me']) ? ' checked' : ''; ?>>
+                                    <input class="checkbox" type="checkbox" id="remember_me" name="remember_me" <?php echo !empty($web_data['remember_me']) ? ' checked' : ''; ?>>
                                     <span class="checkmark"></span>
                                     <span class="checkmark-text">Beni hatırla</span>
                                 </div>
@@ -96,6 +96,7 @@
             var notificationClient = $('.notification-client');
             var notificationHidden = 0;
             var notificationRemoved = 0;
+
             function setClientNotification(notificationMessage) {
                 clearTimeout(notificationHidden);
                 clearTimeout(notificationRemoved);
@@ -158,7 +159,13 @@
                             navSearch.removeClass('hidden');
                         }
                         response = jQuery.parseJSON(response);
-                        if (response.hasOwnProperty('not_found_search_item')) {
+                        if (response.hasOwnProperty('shutdown')) {
+                            window.location.href = '<?php echo URL . URL_SHUTDOWN; ?>';
+                        } else if (response.hasOwnProperty('exception')) {
+                            window.location.href = '<?php echo URL . URL_EXCEPTION; ?>';
+                        } else if (response.hasOwnProperty('stop')) {
+
+                        } else if (response.hasOwnProperty('not_found_search_item')) {
                             $('#nav-search-wrapper').remove();
                             let ss1 = $("<div></div>").attr('id', 'nav-search-wrapper');
                             let ss2 = $("<li></li>").addClass('search-item');
@@ -172,7 +179,7 @@
                             $.each(response['searched_items'], function(key, searchitem) {
                                 let s2 = $("<li></li>").addClass('search-item');
                                 s1.append(s2);
-                                let s3 = $("<a></a>").addClass('search-link').attr('href', '<?php echo URL . URL_ITEM_DETAILS . '/' ?>' + searchitem['item_url']).text(searchitem['item_name']);
+                                let s3 = $("<a></a>").addClass('search-link').attr('href', '<?php echo URL . URL_ITEM_DETAILS . '/' ?>' + searchitem['item_url']).append(searchitem['item_name']);
                                 s2.append(s3);
                             });
                             navSearch.append(s1);

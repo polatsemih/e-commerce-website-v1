@@ -1,16 +1,8 @@
 <?php
 define('TR_NOTIFICATION_ERROR_CSRF', 'Beklenmedik bir hata oldu. Lütfen tekrar deneyin.');
-
-
-
-// ErrorController Exception
-define('TR_NOTIFICATION_ERROR_EXCEPTION', 'Bir sorundan dolayı işleminizi gerçekleştiremiyoruz. Lütfen daha sonra tekrar deneyin.');
-define('TR_NOTIFICATION_ERROR_DATABASE', 'Beklenmedik bir hata oldu. Lütfen tekrar deneyin.');
-define('TR_NOTIFICATION_EMPTY_HIDDEN_INPUT', 'Form gönderilirken bir hata oldu. Lütfen tekrar deneyin.');
-
-define('TR_NOTIFICATION_ERROR_AUTHENTICATION_KILLED', 'Beklenmedik bir hata oldu. Hata devam ederse ' . BRAND . ' çerezlerini temizleyip tekrar deneyin.');
+define('TR_NOTIFICATION_EMPTY_HIDDEN_INPUT', 'Bir hata oldu. Lütfen tekrar deneyin.');
 define('TR_NOTIFICATION_SUCCESS_AUTHENTICATION_KILLED', 'Oturumunuz sonlandırıldı. Lütfen tekrar giriş yapın.');
-define('TR_NOTIFICATION_ERROR_LOG_OUT', 'Oturumunuz sonlandırılırken bir hata oldu. Lütfen tekrar deneyin.');
+define('TR_NOTIFICATION_ERROR_DATABASE', 'Beklenmedik bir hata oldu. Lütfen tekrar deneyin.');
 define('TR_NOTIFICATION_SUCCESS_LOG_OUT', 'Oturumunuz başarıyla sonlandırıldı.');
 // Comment
 define('TR_NOTIFICATION_EMPTY_COMMENT', 'Yorum alanı boş olamaz');
@@ -21,6 +13,8 @@ define('TR_NOTIFICATION_ERROR_COMMENT_UPDATE', 'Yorum güncellenirken bir hata o
 define('TR_NOTIFICATION_SUCCESS_COMMENT_UPDATE', 'Yorum başarıyla güncellendi');
 define('TR_NOTIFICATION_ERROR_COMMENT_DELETE', 'Yorum silinirken bir hata oldu. Lütfen tekrar deneyin.');
 define('TR_NOTIFICATION_SUCCESS_COMMENT_DELETE', 'Yorum başarıyla silindi');
+define('TR_NOTIFICATION_SUCCESS_COMMENT_APPROVED', 'Yorum herkese görünür olarak güncellendi');
+define('TR_NOTIFICATION_SUCCESS_COMMENT_DISAPPROVED', 'Yorum görünmez olarak güncellendi');
 // Favorites
 define('TR_NOTIFICATION_ERROR_ADD_TO_FAVORITES', 'Ürün favorilere eklenirken bir hata oldu');
 define('TR_NOTIFICATION_SUCCESS_ADD_TO_FAVORITES', 'Ürün başarıyla favorilere eklendi');
@@ -114,9 +108,6 @@ define('ERROR_CART_FULL', 'Sepete aynı üründen en fazla 10 adet ekleyebilirsi
 define('ERROR_CART_4000_LIMIT', 'Sepete daha fazla ürün ekleyemezsiniz');
 define('ERROR_UPDATE_THE_CART', 'Sepet güncellenirken bir hata oldu.');
 define('SUCCESS_ACCOUNT_DELETE', BRAND . ' hesabınız başarıyla silindi');
-// Comment
-define('COMMENT_APPROVED', 'Yorum herkese görünür olarak güncellendi');
-define('COMMENT_DISAPPROVED', 'Yorum görünmez olarak güncellendi');
 // Input errors
 define('ERROR_MESSAGE_EMPTY_EMAIL', 'Email adresinizi girin');
 define('ERROR_MAX_LENGTH_EMAIL', 'Email adresi 320 karakterden fazla olamaz');

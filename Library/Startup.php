@@ -23,7 +23,7 @@ class StartUp
                 foreach (URL_MAPS as $url_map) {
                     if (!empty($url_map['url_pattern'])) {
                         $url_pattern = explode('/', $url_map['url_pattern']);
-                        if ((count($url_pattern) === count($url_exploded)) && (strlen($url_exploded[count($url_exploded) - 1]) <= ID_LENGTH)) {
+                        if ((count($url_pattern) === count($url_exploded))) { // &&  (strlen($url_exploded[count($url_exploded) - 1]) <= ID_LENGTH)
                             $similar = true;
                             for ($i = 0; $i < count($url_pattern) - 1; $i++) {
                                 if ($url_pattern[$i] != $url_exploded[$i]) {

@@ -73,12 +73,15 @@ class Input
     function CheckEmail(string $e)
     {
         $email = filter_var($e, FILTER_SANITIZE_EMAIL);
-        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            if (str_contains($email, '@')) {
+        if (!empty($email)) {
+            $email = filter_var($email, FILTER_VALIDATE_EMAIL);
+            if (!empty($email) && str_contains($email, '@')) {
                 $host_name = substr($email, strpos($email, '@') + 1);
-                getmxrr($host_name, $result);
-                if (((isset($result) && count($result) > 0) || $host_name === EMAIL_HOST_NAME)) {
-                    return stripslashes($email);
+                if (!empty($host_name)) {
+                    getmxrr($host_name, $result);
+                    if (((isset($result) && count($result) > 0) || $host_name === EMAIL_HOST_NAME)) {
+                        return stripslashes($email);
+                    }
                 }
             }
         }
@@ -97,6 +100,10 @@ class Input
             return $input;
         }
         return null;
+    }
+    function PreventXSSForId($input)
+    {
+        return htmlentities($input, ENT_QUOTES, 'UTF-8');
     }
     function PreventXSS($input)
     {
@@ -181,6 +188,9 @@ class Input
                 }
                 if (!empty($posted_input['preventxss'])) {
                     $input = $this->PreventXSS($input);
+                }
+                if (!empty($posted_input['preventxssforid'])) {
+                    $input = $this->PreventXSSForId($input);
                 }
                 if (!empty($posted_input['length_limit'])) {
                     if (strlen($input) > $posted_input['length_limit']) {

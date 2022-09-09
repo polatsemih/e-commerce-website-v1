@@ -33,28 +33,17 @@ class ItemModel extends Model
     {
         return $this->database->Get(TABLE_ITEM_FAVORITES, 'id', 'WHERE item_id=? AND user_id=? AND is_favorite_removed=0', $inputs, 'SINGULAR');
     }
-
-
-
-    
-    
-    
-    
-    function GetItemIdByItemUrl(string $item_url)
-    {
-        return $this->database->Get(TABLE_ITEM, 'id', 'WHERE is_item_for_sale=1 AND item_url=? AND is_item_deleted=0', $item_url, 'SINGULAR');
-    }
     function SearchItem(string $search_input)
     {
         return $this->database->Search(TABLE_ITEM, array('item_name', 'item_url'), '', $search_input, 'AND is_item_for_sale=1 AND is_item_deleted=0 ORDER BY date_item_created DESC LIMIT 10', 'PLURAL');
     }
-    function GetFavoriteItem(string $item_id)
-    {
-        return $this->database->Get(TABLE_ITEM, 'item_cart_id,item_name,item_url,item_price,item_discount_price,item_images_path,item_images', 'WHERE id=? AND is_item_for_sale=1 AND is_item_deleted=0', $item_id, 'PLURAL');
-    }
     function GetFavoritesItemId(string $condition, array $inputs)
     {
         return $this->database->Get(TABLE_ITEM_FAVORITES, 'item_id', $condition, $inputs, 'PLURAL');
+    }
+    function GetFavoriteItem(string $item_id)
+    {
+        return $this->database->Get(TABLE_ITEM, 'item_cart_id,item_name,item_url,item_price,item_discount_price,item_images_path,item_images', 'WHERE id=? AND is_item_for_sale=1 AND is_item_deleted=0', $item_id, 'SINGULAR');
     }
     function CreateFavorite(array $inputs)
     {
@@ -63,5 +52,9 @@ class ItemModel extends Model
     function UpdateFavorite(array $inputs)
     {
         return $this->database->Update(TABLE_ITEM_FAVORITES, $inputs);
+    }
+    function GetItemIdByItemUrl(string $item_url)
+    {
+        return $this->database->Get(TABLE_ITEM, 'id', 'WHERE is_item_for_sale=1 AND item_url=? AND is_item_deleted=0', $item_url, 'SINGULAR');
     }
 }

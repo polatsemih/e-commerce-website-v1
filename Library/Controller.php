@@ -116,8 +116,6 @@ class Controller
         if ($csrf_token['result'] && $this->LogModel->CreateLogCSRF(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'csrf_token' => $csrf_token['data'], 'csrf_form' => $csrf_form, 'date_csrf_expiry' => date('Y-m-d H:i:s', time() + (CSRF_TOKEN_EXPIRY))))['result']) {
             return array('result' => true, 'csrf_token' => $csrf_token['data']);
         }
-        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_CSRF);
-        // $this->input_control->Redirect(URL_SHUTDOWN);
         return array('result' => false);
     }
     function SetCSRFToken(string $csrf_form)

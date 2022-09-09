@@ -67,7 +67,7 @@ class HomeController extends Controller
         //     }
         // }
 
-        // $this->web_data['authenticated_user'] = '1BEV2kDDjyZ1Qb3APgxurvkDrW7biovabxUNnNJgd1B1X4sF12oVCKd9xKNIKcDEuzZzODIw7IcuEqYFgmudVWxnLPA5OJyZexfrTpQTqbntSMHx2um2j740phOJqmQERfUqkj0JobJyeiS5G0k7LySjiBEVtAbvhx4cvOQm8HgdrlPG6KS4vthDRUIo9GuJhooVBBlJgyrJxCrPjJCclTgNUvHLJlOCiF7ddGaz3JX8LjE2NTg1Njk4Mzc4NTU';
+        // $this->web_data['authenticated_user'] = '2BEV2kDDjyZ1Qb3APgxurvkDrW7biovabxUNnNJgd1B1X4sF12oVCKd9xKNIKcDEuzZzODIw7IcuEqYFgmudVWxnLPA5OJyZexfrTpQTqbntSMHx2um2j740phOJqmQERfUqkj0JobJyeiS5G0k7LySjiBEVtAbvhQm8HgdrlPG6KS4vthDRUIo9GuJhooVBBlJgyrJxCrPjJCclTgNUvHLJlOCiF7ddGaz3JX8LjE2NTg1Njk4Mzc4NTU';
     }
     function Index()
     {
@@ -302,7 +302,7 @@ class HomeController extends Controller
                         }
                         $item_conditions .= ' AND is_item_for_sale=1 AND is_item_deleted=0 ORDER BY date_item_created DESC LIMIT ?';
                         $item_bind_params[] = ITEM_LOAD_LIMIT_IN_ONCE;
-                        if (!empty($_POST['loadedItemOffSet'])) {
+                        if (isset($_POST['loadedItemOffSet'])) {
                             $loadedItemOffSet = $this->input_control->CheckPositivePOSTInput($_POST['loadedItemOffSet']);
                             if (!is_null($loadedItemOffSet)) {
                                 $item_conditions .= ' OFFSET ?';
@@ -319,10 +319,7 @@ class HomeController extends Controller
                                     }
                                 }
                             }
-                            $jsoned_stop = json_encode(array('stop' => 'stop'));
-                            if (!empty($jsoned_stop)) {
-                                echo $jsoned_stop;
-                            }
+                            echo '{"stop":"stop"}';
                             exit(0);
                         } else {
                             $items_from_database = $this->ItemModel->GetItems($item_columns, $item_conditions, $item_bind_params);
@@ -403,17 +400,11 @@ class HomeController extends Controller
                                                 $comment_condition .= ' LIMIT ' . COMMENT_LOAD_LIMIT_IN_ONCE . ' OFFSET ' . $loadedCommentOffset;
                                                 $comments_from_db = $this->CommentModel->GetComments('id,user_id,comment,is_comment_approved,date_comment_created', $comment_condition, $item_details_from_database['data']['id']);
                                                 if ($comments_from_db['result'] && !empty($comments_from_db['empty'])) {
-                                                    $jsoned_stop = json_encode(array('stop' => 'stop'));
-                                                    if (!empty($jsoned_stop)) {
-                                                        echo $jsoned_stop;
-                                                    }
+                                                    echo '{"stop":"stop"}';
                                                     exit(0);
                                                 }
                                             } else {
-                                                $jsoned_stop = json_encode(array('stop' => 'stop'));
-                                                if (!empty($jsoned_stop)) {
-                                                    echo $jsoned_stop;
-                                                }
+                                                echo '{"stop":"stop"}';
                                                 exit(0);
                                             }
                                         } else {
@@ -432,17 +423,11 @@ class HomeController extends Controller
                                                 $comment_condition .= ' LIMIT ' . COMMENT_LOAD_LIMIT_IN_ONCE . ' OFFSET ' . $loadedCommentOffset;
                                                 $comments_from_db = $this->CommentModel->GetComments('id,user_id,comment,date_comment_created', $comment_condition, array($item_details_from_database['data']['id'], $this->web_data['authenticated_user']));
                                                 if ($comments_from_db['result'] && !empty($comments_from_db['empty'])) {
-                                                    $jsoned_stop = json_encode(array('stop' => 'stop'));
-                                                    if (!empty($jsoned_stop)) {
-                                                        echo $jsoned_stop;
-                                                    }
+                                                    echo '{"stop":"stop"}';
                                                     exit(0);
                                                 }
                                             } else {
-                                                $jsoned_stop = json_encode(array('stop' => 'stop'));
-                                                if (!empty($jsoned_stop)) {
-                                                    echo $jsoned_stop;
-                                                }
+                                                echo '{"stop":"stop"}';
                                                 exit(0);
                                             }
                                         } else {
@@ -462,17 +447,11 @@ class HomeController extends Controller
                                             $comment_condition .= ' LIMIT ' . COMMENT_LOAD_LIMIT_IN_ONCE . ' OFFSET ' . $loadedCommentOffset;
                                             $comments_from_db = $this->CommentModel->GetComments('id,user_id,comment,date_comment_created', $comment_condition, $item_details_from_database['data']['id']);
                                             if ($comments_from_db['result'] && !empty($comments_from_db['empty'])) {
-                                                $jsoned_stop = json_encode(array('stop' => 'stop'));
-                                                if (!empty($jsoned_stop)) {
-                                                    echo $jsoned_stop;
-                                                }
+                                                echo '{"stop":"stop"}';
                                                 exit(0);
                                             }
                                         } else {
-                                            $jsoned_stop = json_encode(array('stop' => 'stop'));
-                                            if (!empty($jsoned_stop)) {
-                                                echo $jsoned_stop;
-                                            }
+                                            echo '{"stop":"stop"}';
                                             exit(0);
                                         }
                                     } else {
@@ -527,20 +506,14 @@ class HomeController extends Controller
                                             unset($comments_from_db['data'][$key]);
                                         }
                                     }
-                                    if (!empty($_POST['loadedCommentOffset'])) {
-                                        if (!empty($comments_from_db['data'])) {
-                                            $jsoned_comment = json_encode($comments_from_db['data']);
-                                            if (!empty($jsoned_comment)) {
-                                                echo $jsoned_comment;
-                                            }
-                                            exit(0);
-                                        } else {
-                                            $jsoned_stop = json_encode(array('stop' => 'stop'));
-                                            if (!empty($jsoned_stop)) {
-                                                echo $jsoned_stop;
-                                            }
+                                    if (!empty($_POST['loadedCommentOffset']) && !empty($comments_from_db['data'])) {
+                                        $jsoned_comment = json_encode($comments_from_db['data']);
+                                        if (!empty($jsoned_comment)) {
+                                            echo $jsoned_comment;
                                             exit(0);
                                         }
+                                        echo '{"stop":"stop"}';
+                                        exit(0);
                                     } else {
                                         if (!empty($comments_from_db['data'])) {
                                             $jsoned_comment = json_encode($comments_from_db['data']);
@@ -552,7 +525,12 @@ class HomeController extends Controller
                                         }
                                     }
                                 } else {
-                                    $this->web_data['comment_not_found'] = true;
+                                    if (!empty($_POST['loadedCommentOffset'])) {
+                                        echo '{"stop":"stop"}';
+                                        exit(0);
+                                    } else {
+                                        $this->web_data['comment_not_found'] = true;
+                                    }
                                 }
                                 $this->web_data['form_token'] = parent::SetCSRFToken('ItemDetails');
                                 parent::GetView('Home/ItemDetails', $this->web_data);
@@ -580,37 +558,46 @@ class HomeController extends Controller
                 ));
                 if (empty($checked_inputs['error_message'])) {
                     $searched_items_from_database = $this->ItemModel->SearchItem($checked_inputs['search_item']);
-                    if (!empty($searched_items_from_database)) {
-                        $response['searched_items'] = $searched_items_from_database;
+                    if ($searched_items_from_database['result']) {
+                        $response['searched_items'] = $searched_items_from_database['data'];
                     } else {
                         $response['not_found_search_item'] = true;
                     }
                 }
             }
+            $jsoned_response = json_encode($response);
+            if (!empty($jsoned_response)) {
+                echo $jsoned_response;
+                exit(0);
+            }
+            echo '{"stop":"stop"}';
+            exit(0);
         } catch (\Throwable $th) {
             if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function ItemSearch | ' . $th))['result']) {
-                // $this->input_control->Redirect(URL_EXCEPTION);
+                echo '{"exception":"exception"}';
+                exit(0);
             } else {
-                // $this->input_control->Redirect(URL_SHUTDOWN);
+                echo '{"shutdown":"shutdown"}';
+                exit(0);
             }
         }
-        echo json_encode($response);
-        exit(0);
     }
     function Cart()
     {
         try {
             if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $this->input_control->CheckUrl();
-                parent::LogView('Home/Cart');
+                parent::LogView('Home-Cart');
                 $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
                 parent::GetView('Home/Cart', $this->web_data);
             }
             $this->input_control->Redirect();
         } catch (\Throwable $th) {
-            $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function Cart | ' . $th));
-            $this->action_control->SendMail(ADMIN_EMAIL, BRAND . ' Error Occurred', 'Exception Error Occurred');
-            $this->input_control->Redirect(URL_EXCEPTION);
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function Cart | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
         }
     }
     function AddCart()
@@ -618,15 +605,15 @@ class HomeController extends Controller
         try {
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $checked_inputs = $this->input_control->CheckPostedInputs(array(
-                    'item_cart_id' => array('input' => isset($_POST['item']) ? $_POST['item'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxss' => true),
-                    'size_cart_id' => array('input' => isset($_POST['item_size']) ? $_POST['item_size'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_CART_SIZE, 'preventxss' => true),
+                    'item_cart_id' => array('input' => isset($_POST['item']) ? $_POST['item'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
+                    'size_cart_id' => array('input' => isset($_POST['item_size']) ? $_POST['item_size'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_CART_SIZE, 'preventxssforid' => true),
                     'item_quantity' => array('input' => isset($_POST['item_quantity']) ? $_POST['item_quantity'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT)
                 ));
                 if (empty($checked_inputs['error_message'])) {
                     $confirmed_size = $this->FilterModel->GetSizeBySizeCartId('size_url', $checked_inputs['size_cart_id']);
-                    if (!empty($confirmed_size)) {
-                        $confirmed_item = $this->ItemModel->GetItemByItemCartId($confirmed_size['size_url'], $checked_inputs['item_cart_id']);
-                        if (!empty($confirmed_item)) {
+                    if ($confirmed_size['result']) {
+                        $confirmed_item = $this->ItemModel->GetItemByItemCartId($confirmed_size['data']['size_url'], $checked_inputs['item_cart_id']);
+                        if ($confirmed_item['result']) {
                             $cart_item_not_setted = true;
                             $cart_items = array();
                             if (!empty($this->web_data['cookie_cart'])) {
@@ -635,7 +622,7 @@ class HomeController extends Controller
                                     if (!empty(count($cart_items[$key])) && count($cart_items[$key]) == 3 && !empty($cart_items[$key]['item_cart_id']) && !empty($cart_items[$key]['size_cart_id']) && !empty($cart_items[$key]['item_quantity'])) {
                                         if ($cart_items[$key]['item_cart_id'] == $checked_inputs['item_cart_id'] && $cart_items[$key]['size_cart_id'] == $checked_inputs['size_cart_id']) {
                                             $cart_item_new_quantity = $cart_items[$key]['item_quantity'] + $checked_inputs['item_quantity'];
-                                            if ($confirmed_item[$confirmed_size['size_url']] < $cart_item_new_quantity) {
+                                            if ($confirmed_item['data'][$confirmed_size['data']['size_url']] < $cart_item_new_quantity) {
                                                 $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_ADD_TO_CART_STOCK_LIMIT);
                                                 exit(0);
                                             } elseif ($cart_item_new_quantity <= 10 && $cart_item_new_quantity > 0) {
@@ -656,7 +643,7 @@ class HomeController extends Controller
                                 }
                             }
                             if ($cart_item_not_setted) {
-                                if ($confirmed_item[$confirmed_size['size_url']] < $checked_inputs['item_quantity']) {
+                                if ($confirmed_item['data'][$confirmed_size['data']['size_url']] < $checked_inputs['item_quantity']) {
                                     $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_ADD_TO_CART_STOCK_LIMIT);
                                     exit(0);
                                 } elseif ($checked_inputs['item_quantity'] <= 10 && $checked_inputs['item_quantity'] > 0) {
@@ -674,15 +661,18 @@ class HomeController extends Controller
                                 }
                             }
                             if (!empty($cart_items)) {
-                                $setted_cart_cookie = $this->input_control->EncrypteData(json_encode($cart_items), COOKIE_CART_PEPPER);
-                                if (strlen($setted_cart_cookie) <= 4000) {
-                                    if ($this->cookie_control->SetCookie(COOKIE_CART_NAME, $setted_cart_cookie, time() + (COOKIE_CART_EXPIRY), COOKIE_PATH, COOKIE_DOMAIN, COOKIE_SECURE, COOKIE_HTTP_ONLY, COOKIE_SAMESITE)) {
-                                        $_SESSION[SESSION_CART_SUCCESS] = true;
+                                $encoded_cart_items = json_encode($cart_items);
+                                if (!empty($encoded_cart_items)) {
+                                    $setted_cart_cookie = $this->input_control->EncrypteData($encoded_cart_items, COOKIE_CART_PEPPER);
+                                    if (strlen($setted_cart_cookie) <= 4000) {
+                                        if ($this->cookie_control->SetCookie(COOKIE_CART_NAME, $setted_cart_cookie, time() + (COOKIE_CART_EXPIRY), COOKIE_PATH, COOKIE_DOMAIN, COOKIE_SECURE, COOKIE_HTTP_ONLY, COOKIE_SAMESITE)) {
+                                            $_SESSION[SESSION_CART_SUCCESS] = true;
+                                            exit(0);
+                                        }
+                                    } else {
+                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_ADD_TO_CART_COOKIE_LIMIT);
                                         exit(0);
                                     }
-                                } else {
-                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_ADD_TO_CART_COOKIE_LIMIT);
-                                    exit(0);
                                 }
                             } elseif (!empty($_COOKIE[COOKIE_CART_NAME])) {
                                 $this->cookie_control->EmptyCookie(COOKIE_CART_NAME);
@@ -697,9 +687,7 @@ class HomeController extends Controller
                 }
             }
         } catch (\Throwable $th) {
-            $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function AddToCart | ' . $th));
-            $this->action_control->SendMail(ADMIN_EMAIL, BRAND . ' Error Occurred', 'Exception Error Occurred');
-            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_EXCEPTION);
+            $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function AddCart | ' . $th));
         }
         exit(0);
     }
@@ -708,14 +696,14 @@ class HomeController extends Controller
         try {
             if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_POST['increase_cart_quantity']) || isset($_POST['decrease_cart_quantity']))) {
                 $checked_inputs = $this->input_control->CheckPostedInputs(array(
-                    'item_cart_id' => array('input' => isset($_POST['item']) ? $_POST['item'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxss' => true),
-                    'size_cart_id' => array('input' => isset($_POST['item_size']) ? $_POST['item_size'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxss' => true)
+                    'item_cart_id' => array('input' => isset($_POST['item']) ? $_POST['item'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
+                    'size_cart_id' => array('input' => isset($_POST['item_size']) ? $_POST['item_size'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true)
                 ));
                 if (empty($checked_inputs['error_message'])) {
                     $confirmed_size = $this->FilterModel->GetSizeBySizeCartId('size_url', $checked_inputs['size_cart_id']);
-                    if (!empty($confirmed_size)) {
-                        $confirmed_item = $this->ItemModel->GetItemByItemCartId($confirmed_size['size_url'], $checked_inputs['item_cart_id']);
-                        if (!empty($confirmed_item)) {
+                    if ($confirmed_size['result']) {
+                        $confirmed_item = $this->ItemModel->GetItemByItemCartId($confirmed_size['data']['size_url'], $checked_inputs['item_cart_id']);
+                        if ($confirmed_item['result']) {
                             $cart_items = array();
                             if (!empty($this->web_data['cookie_cart'])) {
                                 $cart_items = $this->web_data['cookie_cart'];
@@ -734,7 +722,7 @@ class HomeController extends Controller
                                             } elseif ($cart_item_new_quantity > 10) {
                                                 $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_ADD_TO_CART_FULL);
                                                 $this->input_control->Redirect(URL_CART);
-                                            } elseif ($confirmed_item[$confirmed_size['size_url']] < $cart_item_new_quantity) {
+                                            } elseif ($confirmed_item['data'][$confirmed_size['data']['size_url']] < $cart_item_new_quantity) {
                                                 $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_ADD_TO_CART_STOCK_LIMIT);
                                                 $this->input_control->Redirect(URL_CART);
                                             } elseif ($cart_item_new_quantity <= 10 && $cart_item_new_quantity > 0) {
@@ -749,14 +737,17 @@ class HomeController extends Controller
                                 }
                             }
                             if (!empty($cart_items)) {
-                                $setted_cart_cookie = $this->input_control->EncrypteData(json_encode($cart_items), COOKIE_CART_PEPPER);
-                                if (strlen($setted_cart_cookie) <= 4000) {
-                                    if ($this->cookie_control->SetCookie(COOKIE_CART_NAME, $setted_cart_cookie, time() + (COOKIE_CART_EXPIRY), COOKIE_PATH, COOKIE_DOMAIN, COOKIE_SECURE, COOKIE_HTTP_ONLY, COOKIE_SAMESITE)) {
+                                $encoded_cart_items = json_encode($cart_items);
+                                if (!empty($encoded_cart_items)) {
+                                    $setted_cart_cookie = $this->input_control->EncrypteData($encoded_cart_items, COOKIE_CART_PEPPER);
+                                    if (strlen($setted_cart_cookie) <= 4000) {
+                                        if ($this->cookie_control->SetCookie(COOKIE_CART_NAME, $setted_cart_cookie, time() + (COOKIE_CART_EXPIRY), COOKIE_PATH, COOKIE_DOMAIN, COOKIE_SECURE, COOKIE_HTTP_ONLY, COOKIE_SAMESITE)) {
+                                            $this->input_control->Redirect(URL_CART);
+                                        }
+                                    } else {
+                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_ADD_TO_CART_COOKIE_LIMIT);
                                         $this->input_control->Redirect(URL_CART);
                                     }
-                                } else {
-                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_ADD_TO_CART_COOKIE_LIMIT);
-                                    $this->input_control->Redirect(URL_CART);
                                 }
                             } else {
                                 if (!empty($_COOKIE[COOKIE_CART_NAME]) && $this->cookie_control->EmptyCookie(COOKIE_CART_NAME)) {
@@ -775,9 +766,11 @@ class HomeController extends Controller
             }
             $this->input_control->Redirect();
         } catch (\Throwable $th) {
-            $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function UpdateCart | ' . $th));
-            $this->action_control->SendMail(ADMIN_EMAIL, BRAND . ' Error Occurred', 'Exception Error Occurred');
-            $this->input_control->Redirect(URL_EXCEPTION);
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function UpdateCart | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
         }
     }
     function EmptyCart()
@@ -792,9 +785,11 @@ class HomeController extends Controller
             }
             $this->input_control->Redirect();
         } catch (\Throwable $th) {
-            $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function EmptyCart | ' . $th));
-            $this->action_control->SendMail(ADMIN_EMAIL, BRAND . ' Error Occurred', 'Exception Error Occurred');
-            $this->input_control->Redirect(URL_EXCEPTION);
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function EmptyCart | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
         }
     }
     function Favorites()
@@ -802,59 +797,70 @@ class HomeController extends Controller
         try {
             if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'GET') {
                 $this->input_control->CheckUrl();
-                parent::LogView('Home/Favorites');
+                parent::LogView('Home-Favorites');
                 $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
                 if (!empty($this->web_data['authenticated_user'])) {
                     $item_conditions = 'WHERE user_id=? AND is_favorite_removed=0 ORDER BY date_favorite_created DESC LIMIT ?';
                     $item_bind_params = array($this->web_data['authenticated_user'], ITEM_LOAD_LIMIT_IN_ONCE);
-                    if (!empty($_POST['loadedItemOffSet'])) {
+                    if (isset($_POST['loadedItemOffSet'])) {
                         $loadedItemOffSet =  $this->input_control->CheckPositivePOSTInput($_POST['loadedItemOffSet']);
                         if (!is_null($loadedItemOffSet)) {
                             $item_conditions .= ' OFFSET ?';
                             $item_bind_params[] = $loadedItemOffSet;
                             $favorites_from_database = $this->ItemModel->GetFavoritesItemId($item_conditions, $item_bind_params);
-                            if (!empty($favorites_from_database)) {
+                            if ($favorites_from_database['result']) {
                                 $favorite_items = array();
-                                foreach ($favorites_from_database as $key => $favorite_from_database) {
+                                foreach ($favorites_from_database['data'] as $key => $favorite_from_database) {
                                     $favorite_item_from_db = $this->ItemModel->GetFavoriteItem($favorite_from_database['item_id']);
-                                    if (!empty($favorite_item_from_db)) {
-                                        $favorite_items[] = $favorite_item_from_db;
+                                    if ($favorite_item_from_db['result']) {
+                                        $favorite_items[] = $favorite_item_from_db['data'];
                                     }
                                 }
                                 if (!empty($favorite_items)) {
-                                    echo json_encode($this->input_control->GetItemsMainImageAndFormatedPrice($favorite_items));
-                                    exit(0);
+                                    $formatted_favorite_items = $this->input_control->GetItemsMainImageAndFormatedPrice($favorite_items);
+                                    if ($formatted_favorite_items['result']) {
+                                        $jsoned_favorite_items = json_encode($formatted_favorite_items['data']);
+                                        if (!empty($jsoned_favorite_items)) {
+                                            echo $jsoned_favorite_items;
+                                            exit(0);
+                                        }
+                                    }
                                 }
                             }
                         }
-                        $jsoned_stop = json_encode(array('stop' => 'stop'));
-                        if (!empty($jsoned_stop)) {
-                            echo $jsoned_stop;
-                        }
+                        echo '{"stop":"stop"}';
                         exit(0);
                     } else {
                         $favorites_from_database = $this->ItemModel->GetFavoritesItemId($item_conditions, $item_bind_params);
-                        if (!empty($favorites_from_database)) {
+                        if ($favorites_from_database['result']) {
                             $favorite_items = array();
-                            foreach ($favorites_from_database as $key => $favorite_from_database) {
+                            foreach ($favorites_from_database['data'] as $key => $favorite_from_database) {
                                 $favorite_item_from_db = $this->ItemModel->GetFavoriteItem($favorite_from_database['item_id']);
-                                if (!empty($favorite_item_from_db)) {
-                                    $favorite_items[] = $favorite_item_from_db;
+                                if ($favorite_item_from_db['result']) {
+                                    $favorite_items[] = $favorite_item_from_db['data'];
                                 }
                             }
                             if (!empty($favorite_items)) {
-                                $this->web_data['favorite_items'] = json_encode($this->input_control->GetItemsMainImageAndFormatedPrice($favorite_items));
+                                $formatted_favorite_items = $this->input_control->GetItemsMainImageAndFormatedPrice($favorite_items);
+                                if ($formatted_favorite_items['result']) {
+                                    $jsoned_favorite_items = json_encode($formatted_favorite_items['data']);
+                                    if (!empty($jsoned_favorite_items)) {
+                                        $this->web_data['favorite_items'] = $jsoned_favorite_items;
+                                    }
+                                }
                             }
                         }
-                        parent::GetView('Home/Favorites', $this->web_data);
                     }
                 }
+                parent::GetView('Home/Favorites', $this->web_data);
             }
-            $this->input_control->Redirect(URL_FAVORITES);
+            $this->input_control->Redirect();
         } catch (\Throwable $th) {
-            $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function Favorites | ' . $th));
-            $this->action_control->SendMail(ADMIN_EMAIL, BRAND . ' Error Occurred', 'Exception Error Occurred');
-            $this->input_control->Redirect(URL_EXCEPTION);
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function Favorites | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
         }
     }
     function Agreements(string $agreement_url)
@@ -864,36 +870,40 @@ class HomeController extends Controller
                 $checked_agreement_url = $this->input_control->CheckGETInput($agreement_url);
                 if (!is_null($checked_agreement_url)) {
                     $this->input_control->CheckUrl();
-                    parent::LogView('Home/Agreements/' . $checked_agreement_url);
-                    $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
                     $case_matched = false;
                     switch ($checked_agreement_url) {
                         case URL_AGREEMENT_TERMS:
                             $case_matched = true;
+                            parent::LogView('Home-Agreements-' . URL_AGREEMENT_TERMS);
                             $this->web_data['agreement_type'] = URL_AGREEMENT_TERMS;
                             $this->web_data['agreement_title'] = URL_TERMS_TITLE;
                             break;
                         case URL_AGREEMENT_PRIVACY:
                             $case_matched = true;
+                            parent::LogView('Home-Agreements-' . URL_AGREEMENT_PRIVACY);
                             $this->web_data['agreement_type'] = URL_AGREEMENT_PRIVACY;
                             $this->web_data['agreement_title'] = URL_PRIVACY_TITLE;
                             break;
                         case URL_AGREEMENT_RETURN_POLICY:
                             $case_matched = true;
+                            parent::LogView('Home-Agreements-' . URL_AGREEMENT_RETURN_POLICY);
                             $this->web_data['agreement_type'] = URL_AGREEMENT_RETURN_POLICY;
                             $this->web_data['agreement_title'] = URL_RETURN_POLICY_TITLE;
                             break;
                     }
                     if ($case_matched) {
+                        $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
                         parent::GetView('Home/Agreements', $this->web_data);
                     }
                 }
             }
             $this->input_control->Redirect();
         } catch (\Throwable $th) {
-            $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function Agreements | ' . $th));
-            $this->action_control->SendMail(ADMIN_EMAIL, BRAND . ' Error Occurred', 'Exception Error Occurred');
-            $this->input_control->Redirect(URL_EXCEPTION);
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function Agreements | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
         }
     }
 }

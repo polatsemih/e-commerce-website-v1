@@ -33,6 +33,10 @@ define('URL_COMMENT_DELETE', 'yorum-sil');
 define('URL_COMMENT_REPLY_CREATE', 'yorum-cevap-ekle');
 define('URL_COMMENT_REPLY_UPDATE', 'yorum-cevap-guncelle');
 define('URL_COMMENT_REPLY_DELETE', 'yorum-cevap-sil');
+define('URL_ADMIN_COMMENT_DELETE', 'yonetici-yorum-sil');
+define('URL_ADMIN_COMMENT_REPLY_DELETE', 'yonetici-yorum-cevap-sil');
+define('URL_ADMIN_COMMENT_APPROVE', 'yonetici-yorum-onayla');
+define('URL_ADMIN_COMMENT_REPLY_APPROVE', 'yonetici-yorum-cevap-onayla');
 define('URL_PROFILE', 'profil');
 define('URL_PROFILE_INFORMATIONS', 'bilgilerim');
 define('URL_PROFILE_PASSWORD', 'sifrem');
@@ -46,11 +50,6 @@ define('URL_EMAIL_UPDATE', 'emailimi-guncelle');
 define('URL_PROFILE_PHOTO_UPDATE', 'resmimi-guncelle');
 define('URL_PHONE_UPDATE', 'telefon-numarami-guncelle');
 define('URL_PROFILE_DELETE', 'hesabimi-sil');
-// HalfAdminController
-define('URL_ADMIN_COMMENT_DELETE', 'yonetici-yorum-sil');
-define('URL_ADMIN_COMMENT_APPROVE', 'yonetici-yorum-onayla');
-define('URL_ADMIN_COMMENT_REPLY_DELETE', 'yonetici-yorum-cevap-sil');
-define('URL_ADMIN_COMMENT_REPLY_APPROVE', 'yonetici-yorum-cevap-onayla');
 // AdminController
 define('URL_ADMIN_INDEX', 'yonetici');
 
@@ -86,6 +85,10 @@ define('URL_MAPS', array(
     array('url' => 'yorum-cevap-ekle', 'controller' => 'AccountController', 'action' => 'CommentReplyCreate'),
     array('url' => 'yorum-cevap-guncelle', 'controller' => 'AccountController', 'action' => 'CommentReplyUpdate'),
     array('url' => 'yorum-cevap-sil', 'controller' => 'AccountController', 'action' => 'CommentReplyDelete'),
+    array('url' => 'yonetici-yorum-sil', 'controller' => 'AccountController', 'action' => 'AdminCommentDelete'),
+    array('url' => 'yonetici-yorum-cevap-sil', 'controller' => 'AccountController', 'action' => 'AdminCommentReplyDelete'),
+    array('url' => 'yonetici-yorum-onayla', 'controller' => 'AccountController', 'action' => 'AdminCommentApprove'),
+    array('url' => 'yonetici-yorum-cevap-onayla', 'controller' => 'AccountController', 'action' => 'AdminCommentReplyApprove'),
     array('url_pattern' => 'profil/?', 'controller' => 'AccountController', 'action' => 'Profile'),
     array('url' => 'profil-bilgilerimi-guncelle', 'controller' => 'AccountController', 'action' => 'ProfileInformationsUpdate'),
     array('url' => 'sifremi-guncelle', 'controller' => 'AccountController', 'action' => 'ProfilePasswordUpdate'),
@@ -93,11 +96,6 @@ define('URL_MAPS', array(
     array('url' => 'resmimi-guncelle', 'controller' => 'AccountController', 'action' => 'ProfilePhotoUpdate'),
     array('url' => 'telefon-numarami-guncelle', 'controller' => 'AccountController', 'action' => 'ProfilePhoneUpdate'),
     array('url' => 'hesabimi-sil', 'controller' => 'AccountController', 'action' => 'ProfileDelete'),
-    // HalfAdminController
-    array('url' => 'yonetici-yorum-sil', 'controller' => 'AdminController', 'action' => 'AdminCommentDelete'),
-    array('url' => 'yonetici-yorum-onayla', 'controller' => 'AdminController', 'action' => 'AdminCommentApprove'),
-    array('url' => 'yonetici-yorum-cevap-sil', 'controller' => 'AdminController', 'action' => 'AdminCommentReplyDelete'),
-    array('url' => 'yonetici-yorum-cevap-onayla', 'controller' => 'AdminController', 'action' => 'AdminCommentReplyApprove'),
     // AdminController
     array('url' => 'yonetici', 'controller' => 'AdminController', 'action' => 'Index')
 ));
