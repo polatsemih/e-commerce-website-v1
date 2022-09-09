@@ -832,7 +832,6 @@ a {
 
 /* Home Settings */
 .section-home {
-    padding-bottom: 5rem;
     margin-bottom: 5rem;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -890,6 +889,7 @@ a {
 }
 
 .section-home-items {
+    padding-bottom: 5rem;
     -webkit-user-select: none;
     -moz-user-select: none;
     user-select: none;
@@ -1006,6 +1006,9 @@ a {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: #00000033;
     -webkit-transition-property: transform;
     -moz-transition-property: transform;
     -o-transition-property: transform;
@@ -1431,6 +1434,9 @@ a {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: #00000033;
     -webkit-transition-property: transform;
     -moz-transition-property: transform;
     -o-transition-property: transform;
@@ -1748,6 +1754,7 @@ a {
     justify-content: center;
     align-items: center;
     margin-top: 5rem;
+    padding-bottom: 5rem;
 }
 
 .details-tree .text,
@@ -1762,7 +1769,6 @@ a {
 }
 
 .section-details-main {
-    padding-bottom: 5rem;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -2515,7 +2521,11 @@ a {
     border-radius: 1rem;
     margin-bottom: 1rem;
     display: flex;
-    align-items: center;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #00000080;
+    border-top-left-radius: 1rem;
+    border-bottom-left-radius: 1rem;
 }
 
 .section-details-bottom .item-properties .text {
@@ -2532,27 +2542,19 @@ a {
 }
 
 .section-details-bottom .item-properties .key {
+    display: flex;
+    align-items: center;
+    height: auto;
     flex-basis: 35%;
-    border-width: 1px;
-    border-style: solid;
-    border-color: #00000080;
+    border-right-width: 1px;
+    border-right-style: solid;
+    border-right-color: #00000080;
     border-top-left-radius: 1rem;
     border-bottom-left-radius: 1rem;
 }
 
 .section-details-bottom .item-properties .value {
     flex-basis: 65%;
-    border-top-width: 1px;
-    border-top-style: solid;
-    border-top-color: #00000080;
-    border-right-width: 1px;
-    border-right-style: solid;
-    border-right-color: #00000080;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-    border-bottom-color: #00000080;
-    border-top-right-radius: 1rem;
-    border-bottom-right-radius: 1rem;
 }
 
 .section-details-bottom .details-comments .details-comments-row {
@@ -3073,6 +3075,9 @@ a {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: #00000033;
     -webkit-transition-property: transform;
     -moz-transition-property: transform;
     -o-transition-property: transform;
