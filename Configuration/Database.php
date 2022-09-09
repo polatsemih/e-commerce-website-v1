@@ -1,47 +1,33 @@
 <?php
 define('DB_HOST', 'localhost'); // change
-define('DB_NAME', 'blanckbasic_b5v1p'); // change
+define('DB_NAME', 'blanckbasic_jayq14b5h0'); // change
 define('DB_USER_NAME', 'root'); // change
-define('DB_USER_PASS', 'root123'); // change
-
-define('TABLE_SESSION_AUTHENTICATION', 'session_authentication_r2jrgqkzvh');
-define('TABLE_COOKIE_AUTHENTICATION', 'cookie_authentication_1ytk7nmi8y');
-define('TABLE_LOG_CSRF', 'log_csrf_y4auf0u3rm');
-define('TABLE_USER', 'user_c7r4fur88a');
-define('TABLE_ITEM', 'item_b4135hr6v5');
-define('TABLE_FILTER_GENDER', 'filter_gender_k87yhnr43a');
-define('TABLE_LOG_VIEW', 'log_view_ax47ngui0p');
-define('TABLE_LOG_VIEW_COUNT', 'log_view_count_bvmx7351rq');
-define('TABLE_LOG_ERROR', 'log_error_bat142mku7');
-
-
-
-
-
-
-
-
-define('TABLE_LOG_LOGIN', 'log_login_zjg76cmju2');
-define('TABLE_COUNT_FAIL_LOGIN', 'count_fail_login_cur2zkq6y0');
+define('DB_USER_PASS', ''); // change
 define('TABLE_CAPTCHA_TIMEOUT', 'captcha_timeout_qqm45mhmk3');
-define('TABLE_VERIFY_TOKEN', 'session_verify_token_im8v1za90s');
-define('TABLE_LOG_EMAIL_SENT', 'log_email_sent_j7r4a3cfgh');
-define('TABLE_VERIFY_LINK', 'session_verify_link_o0ole2r7bf');
-define('TABLE_RESET_PWD', 'reset_password_kudimh6519');
-define('TABLE_LOG_VIEWS_GENDER', 'log_views_gender_ga412kmh6y');
-define('TABLE_FILTER_COLOR', 'filter_color_gyt52mkapl');
-define('TABLE_FILTER_SIZE', 'filter_size_bxc429ujm5');
-define('TABLE_FILTER_CATEGORY', 'filter_category_nh65sil9b1');
-define('TABLE_COMMENT', 'comment_uj27dba5ti');
 define('TABLE_COMMENT_REPLY', 'comment_reply_ys512m9lx6');
+define('TABLE_COMMENT', 'comment_uj27dba5ti');
+define('TABLE_COOKIE_AUTHENTICATION', 'cookie_authentication_1ytk7nmi8y');
+define('TABLE_FILTER_CATEGORY', 'filter_category_nh65sil9b1');
+define('TABLE_FILTER_COLOR', 'filter_color_gyt52mkapl');
+define('TABLE_FILTER_GENDER', 'filter_gender_k87yhnr43a');
+define('TABLE_FILTER_SIZE', 'filter_size_bxc429ujm5');
+define('TABLE_ITEM', 'item_b4135hr6v5');
 define('TABLE_ITEM_FAVORITES', 'item_favorites_aku18vg4yx');
-
-// Column Names
-define('MAIN_FILTER_GENDER_ID', 'b6227710821322');
-define('MAIN_FILTER_COLOR_ID', 'b6227713b552ca');
-
-
-
-
-define('TABLE_ROLE', 'role_ba18c');
-
+define('TABLE_LINK_FORGOT_PASSWORD', 'link_forgot_password_1a02y65v5s');
+define('TABLE_LINK_REGISTER_CANCEL', 'link_register_cancel_16ayr0mn9y');
+define('TABLE_LOG_CAPTCHA', 'log_captcha_jaimx196g4');
+define('TABLE_LOG_CSRF', 'log_csrf_y4auf0u3rm');
+define('TABLE_LOG_EMAIL_SENT', 'log_email_sent_j7r4a3cfgh');
+define('TABLE_LOG_ERROR', 'log_error_bat142mku7');
+define('TABLE_LOG_LOGIN_FAIL', 'log_login_fail_cur2zkq6y0');
+define('TABLE_LOG_LOGIN', 'log_login_zjg76cmju2');
+define('TABLE_SQL_BACKUP', 'log_sql_kals6h5g4x');
+define('TABLE_LOG_VIEW_ALL', 'log_view_all_ax47ngui0p');
+define('TABLE_LOG_VIEW_ONCE', 'log_view_once_bvmx7351rq');
+define('TABLE_ORDER', 'order_zlfy3ko914');
+define('TABLE_SESSION_AUTHENTICATION', 'session_authentication_r2jrgqkzvh');
+define('TABLE_SESSION_REGISTER_CONFIRM', 'session_register_confirm_a1326hdnvb');
+define('TABLE_SESSION_RESET_PASSWORD', 'session_reset_password_h6g0mia217');
+define('TABLE_ADMIN', 'user_admin_51tq6ba7yw1');
+define('TABLE_USER', 'user_c7r4fur88a');
+define('TABLE_ROLE', 'user_role_7y51nab4e3');

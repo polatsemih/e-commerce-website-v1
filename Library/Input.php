@@ -26,15 +26,16 @@ class Input
         }
         if ($bad_url) {
             if ($no_get_param) {
-                $this->Redirect('/' . $_GET['url']);
+                $this->Redirect($_GET['url']);
             }
-            $this->Redirect('/' . $_GET['url'] . rtrim($new_url, '&'));
+            $this->Redirect($_GET['url'] . rtrim($new_url, '&'));
         }
     }
 
+
     function IsString($input)
     {
-        if (is_string($input) && !empty($input) && !empty(trim($input))) {
+        if (!empty($input) && is_string($input) && !empty(trim($input))) {
             return stripslashes($input);
         }
         return null;
@@ -59,6 +60,16 @@ class Input
         }
         return null;
     }
+    function IsFloatAndPositive($input)
+    {
+        if (is_numeric($input)) {
+            $input = (float)$input;
+            if ($input > 0) {
+                return $input;
+            }
+        }
+        return null;
+    }
     function CheckEmail(string $e)
     {
         $email = filter_var($e, FILTER_SANITIZE_EMAIL);
@@ -73,13 +84,6 @@ class Input
         }
         return null;
     }
-    function NoWhiteSpace($input)
-    {
-        if (!str_contains($input, ' ')) {
-            return $input;
-        }
-        return null;
-    }
     function CheckPassword(string $pwd)
     {
         if (preg_match('/[a-z]/', $pwd) && preg_match('/[A-Z]/', $pwd) && preg_match('/[0-9]/', $pwd)) {
@@ -87,7 +91,21 @@ class Input
         }
         return null;
     }
-
+    function NoWhiteSpace($input)
+    {
+        if (!str_contains($input, ' ')) {
+            return $input;
+        }
+        return null;
+    }
+    function PreventXSS($input)
+    {
+        return htmlentities($input, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
+    function DecodePreventXSS($input)
+    {
+        return html_entity_decode($input, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
     function CheckInputWithLength($input, int $input_length) {
         $input = $this->IsString($input);
         if (!is_null($input)) {
@@ -126,17 +144,17 @@ class Input
         foreach ($posted_inputs as $key => $posted_input) {
             $input = $this->IsString($posted_input['input']);
             if (!is_null($input)) {
-                if (!empty($posted_input['is_email'])) {
-                    $input = $this->CheckEmail($input);
-                    if (is_null($input)) {
-                        $error['error_message'] = $posted_input['error_message_is_email'];
-                        return $error;
-                    }
-                }
                 if (!empty($posted_input['no_white_space'])) {
                     $input = $this->NoWhiteSpace($input);
                     if (is_null($input)) {
                         $error['error_message'] = $posted_input['error_message_no_white_space'];
+                        return $error;
+                    }
+                }
+                if (!empty($posted_input['is_email'])) {
+                    $input = $this->CheckEmail($input);
+                    if (is_null($input)) {
+                        $error['error_message'] = $posted_input['error_message_is_email'];
                         return $error;
                     }
                 }
@@ -186,20 +204,28 @@ class Input
         return $checked_inputs;
     }
 
-    function GetItemsWithMainImageAndFormatedPrice(array $items_from_database)
+
+
+    function GetItemsMainImageAndFormatedPrice(array $items)
     {
-        $format = new NumberFormatter('tr_TR', NumberFormatter::DECIMAL);
-        foreach ($items_from_database as $key => $item_from_database) {
-            $item_images = explode('_', $item_from_database['item_images']);
+        foreach ($items as $key => $item) {
+            $item_images = explode('_', $item['item_images']);
             $item_images_name = array();
             for ($i = 0; $i < count($item_images); $i++) {
                 $item_images_name[] = explode('-', $item_images[$i]);
             }
-            $items_from_database[$key]['item_images'] = $item_images_name[0][1];
-            $items_from_database[$key]['item_price'] = $format->format($item_from_database['item_price']);
-            $items_from_database[$key]['item_discount_price'] = $format->format($item_from_database['item_discount_price']);
+            $items[$key]['item_images'] = $item_images_name[0][1];
+            $item_price = $this->IsFloatAndPositive($items[$key]['item_price']);
+            $item_discount_price = $this->IsFloatAndPositive($items[$key]['item_discount_price']);
+            if (!is_null($item_price) && !is_null($item_discount_price)) {
+                $format = new NumberFormatter('tr_TR', NumberFormatter::DECIMAL);
+                $items[$key]['item_price'] = $format->format($item_price);
+                $items[$key]['item_discount_price'] = $format->format($item_discount_price);
+            } else {
+                return array('result' => false);
+            }
         }
-        return $items_from_database;
+        return array('result' => true, 'data' => $items);
     }
     function GetItemImagesAndFormatedPrice(array $item)
     {
@@ -210,29 +236,43 @@ class Input
             $item_images_name[] = explode('-', $item_images[$i]);
         }
         $item['item_images'] = $item_images_name;
-        $item['item_price'] = $format->format($item['item_price']);
-        $item['item_discount_price'] = $format->format($item['item_discount_price']);
-        return $item;
+        $item_price = $this->IsFloatAndPositive($item['item_price']);
+        $item_discount_price = $this->IsFloatAndPositive($item['item_discount_price']);
+        if (!is_null($item_price) && !is_null($item_discount_price)) {
+            $format = new NumberFormatter('tr_TR', NumberFormatter::DECIMAL);
+            $item['item_price'] = $format->format($item_price);
+            $item['item_discount_price'] = $format->format($item_discount_price);
+            return array('result' => true, 'data' => $item);
+        }
+        return array('result' => false);
     }
     function GetItemMainImageAndFormatedPrice(array $item)
     {
-        $format = new NumberFormatter('tr_TR', NumberFormatter::DECIMAL);
         $item_images = explode('_', $item['item_images']);
         $item_images_name = array();
         for ($i = 0; $i < count($item_images); $i++) {
             $item_images_name[] = explode('-', $item_images[$i]);
         }
         $item['item_images'] = $item_images_name[0][1];
-        $item['item_price'] = $format->format($item['item_price']);
-        $item['item_discount_price'] = $format->format($item['item_discount_price']);
-        return $item;
+        $item_price = $this->IsFloatAndPositive($item['item_price']);
+        $item_discount_price = $this->IsFloatAndPositive($item['item_discount_price']);
+        if (!is_null($item_price) && !is_null($item_discount_price)) {
+            $format = new NumberFormatter('tr_TR', NumberFormatter::DECIMAL);
+            $item['item_price'] = $format->format($item_price);
+            $item['item_discount_price'] = $format->format($item_discount_price);
+            return array('result' => true, 'data' => $item);
+        }
+        return array('result' => false);
     }
     function FormatPrice($price) 
     {
-        $format = new NumberFormatter('tr_TR', NumberFormatter::DECIMAL);
-        return $format->format($price);
+        $checked_price = $this->IsFloatAndPositive($price);
+        if (!is_null($checked_price)) {
+            $format = new NumberFormatter('tr_TR', NumberFormatter::DECIMAL);
+            return array('result' => true, 'data' => $format->format($checked_price));
+        }
+        return array('result' => false);
     }
-
     function EncrypteData($data, $key, $block_size = 128)
     {
         $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
@@ -250,7 +290,7 @@ class Input
         $encrypted_data = str_replace('-', '+', $encrypted_data);
         $decoded = sodium_base642bin($encrypted_data, SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING);
         if (mb_strlen($decoded, '8bit') < (SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + SODIUM_CRYPTO_SECRETBOX_MACBYTES)) {
-            return null;
+            return array('result' => false);
         }
         $nonce = mb_substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit');
         $ciphertext = mb_substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit');
@@ -258,14 +298,21 @@ class Input
         if ($decrypted_padded_data === false) {
             sodium_memzero($ciphertext);
             sodium_memzero($key);
-            return null;
+            return array('result' => false);
         }
         $decrypted_data = sodium_unpad($decrypted_padded_data, $block_size <= 512 ? $block_size : 512);
         sodium_memzero($ciphertext);
         sodium_memzero($key);
-        return $decrypted_data;
+        return array('result' => true, 'data' => $decrypted_data);
     }
-
+    function GenerateToken()
+    {
+        $generated_token = strtolower(strtr(sodium_bin2base64(random_bytes(150), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING),  array('-' => 'i', '_' => 'a')));
+        if (!empty($generated_token) && strlen($generated_token) == 200) {
+            return array('result' => true, 'data' => $generated_token);
+        }
+        return array('result' => false);
+    }
 
 
 
@@ -297,16 +344,6 @@ class Input
         }
         return null;
     }
-    function IsFloatAndPositive($input)
-    {
-        if (is_numeric($input)) {
-            $input = (float)$input;
-            if ($input > 0) {
-                return $input;
-            }
-        }
-        return null;
-    }
     function GenerateUrl($url)
     {
         $tr = array('ş', 'Ş', 'ı', 'I', 'İ', 'ğ', 'Ğ', 'ü', 'Ü', 'ö', 'Ö', 'Ç', 'ç', '(', ')', '/', ':', ',');
@@ -322,19 +359,6 @@ class Input
         $url = stripslashes($url);
         return $url;
     }
-    function PreventXSS($input)
-    {
-        return htmlentities($input, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-    }
-    function DecodePreventXSS($input)
-    {
-        return html_entity_decode($input, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-    }
-    
-
-
-
-
     function CheckPhoneNumber(string $phone)
     {
         return preg_match('/^(5)([0-9]{2})\s?([0-9]{3})\s?([0-9]{2})\s?([0-9]{2})$/', $phone, $matches) ? $matches[0] : null;

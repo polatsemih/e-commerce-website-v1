@@ -99,7 +99,7 @@
                     const formSearch = $('#form-search');
                     const inputsformSearch = formSearch.find('input');
                     request = $.ajax({
-                        url: '<?php echo URL . URL_SEARCH; ?>',
+                        url: '<?php echo URL . URL_ITEM_SEARCH; ?>',
                         type: 'POST',
                         data: formSearch.serialize()
                     });

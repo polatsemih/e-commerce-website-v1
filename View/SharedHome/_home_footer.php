@@ -12,9 +12,9 @@
         </div>
         <div class="col">
             <div class="quick-pages-container">
-                <span class="quick-page-span"><a class="quick-page-link" href="<?php echo URL . URL_AGREEMENTS . '/' . URL_TERMS; ?>">Kullanım Şartları</a></span>
-                <span class="quick-page-span"><a class="quick-page-link" href="<?php echo URL . URL_AGREEMENTS . '/' . URL_PRIVACY; ?>">Gizlilik Sözleşmesi</a></span>
-                <span class="quick-page-span"><a class="quick-page-link" href="<?php echo URL . URL_AGREEMENTS . '/' . URL_RETURN_POLICY; ?>">İade Politikası</a></span>
+                <span class="quick-page-span"><a class="quick-page-link" href="<?php echo URL . URL_AGREEMENTS . '/' . URL_AGREEMENT_TERMS; ?>">Kullanım Şartları</a></span>
+                <span class="quick-page-span"><a class="quick-page-link" href="<?php echo URL . URL_AGREEMENTS . '/' . URL_AGREEMENT_PRIVACY; ?>">Gizlilik Sözleşmesi</a></span>
+                <span class="quick-page-span"><a class="quick-page-link" href="<?php echo URL . URL_AGREEMENTS . '/' . URL_AGREEMENT_RETURN_POLICY; ?>">İade Politikası</a></span>
             </div>
         </div>
         <div class="col">

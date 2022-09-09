@@ -3,17 +3,30 @@ class StartUp
 {
     function __construct()
     {
+        if (WEB_SHUTDOWN_PHASE) {
+            require_once 'View/Error/Shutdown.php';
+            exit(0);
+        }
+        if (WEB_PREPARE_PHASE) {
+            require_once 'View/Error/Prepare.php';
+            exit(0);
+        }
+        if (WEB_MAINTENANCE_PHASE) {
+            require_once 'View/Error/Maintenance.php';
+            exit(0);
+        }
+        // print_r($_GET['url']);
         if (!empty($_GET['url'])) {
             $checked_url = $this->CheckUrl($_GET['url']);
             if (!empty($checked_url)) {
                 $url_exploded = explode('%2F', $checked_url);
                 foreach (URL_MAPS as $url_map) {
-                    if (!empty($url_map['pattern'])) {
-                        $pattern = explode('/', $url_map['pattern']);
-                        if ((count($pattern) === count($url_exploded)) && (strlen($url_exploded[count($url_exploded) - 1]) <= ID_LENGTH)) {
+                    if (!empty($url_map['url_pattern'])) {
+                        $url_pattern = explode('/', $url_map['url_pattern']);
+                        if ((count($url_pattern) === count($url_exploded)) && (strlen($url_exploded[count($url_exploded) - 1]) <= ID_LENGTH)) {
                             $similar = true;
-                            for ($i = 0; $i < count($pattern) - 1; $i++) {
-                                if ($pattern[$i] != $url_exploded[$i]) {
+                            for ($i = 0; $i < count($url_pattern) - 1; $i++) {
+                                if ($url_pattern[$i] != $url_exploded[$i]) {
                                     $similar = false;
                                     break;
                                 }
@@ -36,7 +49,7 @@ class StartUp
                 header('Location: ' . URL);
                 exit(0);
             }
-            require 'Controller/' . $conroller_name . '.php';
+            require_once 'Controller/' . $conroller_name . '.php';
             $controller = new $conroller_name;
             if (!empty($conroller_param)) {
                 $controller->$conroller_method($conroller_param);
@@ -44,7 +57,7 @@ class StartUp
                 $controller->$conroller_method();
             }
         } else {
-            require 'Controller/HomeController.php';
+            require_once 'Controller/HomeController.php';
             $controller = new HomeController();
             $controller->Index();
         }

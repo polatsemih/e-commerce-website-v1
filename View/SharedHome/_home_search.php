@@ -11,9 +11,9 @@
         </ul>
         <ul class="nav-search-popular">
             <h4 class="search-title">Popüler Aramalar</h4>
-            <?php if (!empty($web_data['search_popular_items'])) : ?>
-                <?php foreach ($web_data['search_popular_items'] as $search_popular_item) : ?>
-                    <li class="search-item"><a class="search-link" href="<?php echo URL . URL_ITEM_DETAILS . '/' . $search_popular_item['item_url']; ?>"><?php echo $search_popular_item['item_name']; ?></a></li>
+            <?php if (!empty($web_data['popular_search_items'])) : ?>
+                <?php foreach ($web_data['popular_search_items'] as $popular_search_items) : ?>
+                    <li class="search-item"><a class="search-link" href="<?php echo URL . URL_ITEM_DETAILS . '/' . $popular_search_items['item_url']; ?>"><?php echo $popular_search_items['item_name']; ?></a></li>
                 <?php endforeach; ?>
             <?php endif; ?>
         </ul>

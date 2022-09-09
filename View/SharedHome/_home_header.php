@@ -2,8 +2,8 @@
     <div class="container header-row">
         <div class="mobile-toggler">
             <i class="fas fa-bars toggler-icon" id="toggler-icon"></i>
-            <?php if (!empty($web_data['cookie_cart_view'])) : ?>
-                <span class="mobile-cart-count"><?php echo count($web_data['cookie_cart_view']); ?></span>
+            <?php if (!empty($web_data['cart_data'])) : ?>
+                <span class="mobile-cart-count"><?php echo count($web_data['cart_data']); ?></span>
             <?php endif; ?>
         </div>
         <div class="brand-container">
@@ -18,14 +18,14 @@
                     <li><a class="nav-link" href="<?php echo URL . URL_FAVORITES; ?>">Favorilerim</a></li>
                     <li>
                         <a class="nav-link cart" href="<?php echo URL . URL_CART; ?>">
-                            <?php if (!empty($web_data['cookie_cart_view'])) : ?>
-                                <span class="mobile-list-cart-count"><?php echo count($web_data['cookie_cart_view']); ?></span>
+                            <?php if (!empty($web_data['cart_data'])) : ?>
+                                <span class="mobile-list-cart-count"><?php echo count($web_data['cart_data']); ?></span>
                             <?php endif; ?>
                             Sepetim
                         </a>
                     </li>
                     <?php if (!empty($web_data['authenticated_user'])) : ?>
-                        <li><a class="nav-link mobile-link" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_INFO; ?>">Profilim</a></li>
+                        <li><a class="nav-link mobile-link" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_INFORMATIONS; ?>">Profilim</a></li>
                         <li><a class="nav-link mobile-link" href="<?php echo URL . URL_LOGOUT; ?>">Çıkış Yap</a></li>
                     <?php else : ?>
                         <li><a class="nav-link mobile-link" href="<?php echo URL . URL_LOGIN; ?>">Giriş Yap</a></li>
@@ -38,7 +38,7 @@
             <i id="header-search-icon" class="fas fa-search icon search-icon" title="Ara"></i>
             <?php if (!empty($web_data['authenticated_user'])) : ?>
                 <div class="show-profile action-open-icon purgatory-icon" id="action-open-icon">
-                    <a class="row" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_INFO; ?>">
+                    <a class="row" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_INFORMATIONS; ?>">
                         <span class="text">Profilim</span>
                         <i class="fas fa-angle-down profile-icon"></i>
                     </a>                    
@@ -51,7 +51,7 @@
                         <div class="lower-triangle"></div>
                     </div>
                     <li class="dropdown-action-item">
-                        <a class="dropdown-action-link authed_link" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_INFO; ?>">Profilim</a>
+                        <a class="dropdown-action-link authed_link" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_INFORMATIONS; ?>">Profilim</a>
                     </li>
                     <li class="dropdown-action-item">
                         <a class="dropdown-action-link authed_link" href="<?php echo URL . URL_LOGOUT; ?>">Çıkış Yap</a>
@@ -76,11 +76,11 @@
             <a class="icon purgatory-icon" href="<?php echo URL . URL_FAVORITES; ?>" title="Favorilerim"><i class="fas fa-heart"></i></a>
             <a id="header-cart-open-icon" class="icon purgatory-icon cart" href="<?php echo URL . URL_CART; ?>" title="Sepetim">
                 <i class="fas fa-shopping-cart"></i>
-                <?php if (!empty($web_data['cookie_cart_view'])) : ?>
-                    <span class="cart-count"><?php echo count($web_data['cookie_cart_view']); ?></span>
+                <?php if (!empty($web_data['cart_data'])) : ?>
+                    <span class="cart-count"><?php echo count($web_data['cart_data']); ?></span>
                 <?php endif; ?>
             </a>
-            <?php if (!empty($web_data['cookie_cart_view'])) : ?>
+            <?php if (!empty($web_data['cart_data'])) : ?>
                 <?php if(!empty($_SESSION[SESSION_CART_SUCCESS])) : ?>
                     <div id="header-cart-container" class="cart-container">
                     <?php unset($_SESSION[SESSION_CART_SUCCESS]); ?>
@@ -92,20 +92,20 @@
                             <i class="fas fa-times"></i>
                         </div>
                     </div>
-                    <?php foreach ($web_data['cookie_cart_view'] as $cookie_cart_view) : ?>
+                    <?php foreach ($web_data['cart_data'] as $cart_data) : ?>
                         <div class="cart-item-wrapper">
                             <div class="cart-item-container">
-                                <a class="cart-item-link" href="<?php echo URL . URL_ITEM_DETAILS . '/' . $cookie_cart_view['item']['item_url']; ?>">
-                                    <img class="cart-item-image" src="<?php echo URL . 'assets/images/items/' . $cookie_cart_view['item']['item_images_path'] . '/' . $cookie_cart_view['item']['item_images']; ?>" alt="<?php echo $cookie_cart_view['item']['item_name']; ?>">
+                                <a class="cart-item-link" href="<?php echo URL . URL_ITEM_DETAILS . '/' . $cart_data['item']['item_url']; ?>">
+                                    <img class="cart-item-image" src="<?php echo URL . 'assets/images/items/' . $cart_data['item']['item_images_path'] . '/' . $cart_data['item']['item_images']; ?>" alt="<?php echo $cart_data['item']['item_name']; ?>">
                                 </a>
-                                <a class="cart-right" href="<?php echo URL . URL_ITEM_DETAILS . '/' . $cookie_cart_view['item']['item_url']; ?>">
-                                    <span class="cart-item-name"><?php echo $cookie_cart_view['item']['item_name']; ?></span>
+                                <a class="cart-right" href="<?php echo URL . URL_ITEM_DETAILS . '/' . $cart_data['item']['item_url']; ?>">
+                                    <span class="cart-item-name"><?php echo $cart_data['item']['item_name']; ?></span>
                                     <div class="cart-price-row">
-                                        <span class="cart-item-old-price"><?php echo $cookie_cart_view['item']['item_price']; ?>₺</span>
-                                        <span class="cart-item-new-price"><?php echo $cookie_cart_view['item']['item_discount_price']; ?>₺</span>
+                                        <span class="cart-item-old-price"><?php echo $cart_data['item']['item_price']; ?>₺</span>
+                                        <span class="cart-item-new-price"><?php echo $cart_data['item']['item_discount_price']; ?>₺</span>
                                     </div>
-                                    <span class="cart-item-size">Beden: <?php echo $cookie_cart_view['size']['size_name']; ?></span>
-                                    <div class="cart-item-quantity">Adet: <?php echo $cookie_cart_view['quantity']; ?></div>
+                                    <span class="cart-item-size">Beden: <?php echo $cart_data['size']['size_name']; ?></span>
+                                    <div class="cart-item-quantity">Adet: <?php echo $cart_data['quantity']; ?></div>
                                 </a>
                             </div>
                         </div>

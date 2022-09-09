@@ -5,32 +5,32 @@ class LogModel extends Model
     {
         parent::__construct();
     }
-    function CreateLogView(array $inputs)
+    function CreateLogViewAll(array $inputs)
     {
-        return parent::Create(TABLE_LOG_VIEW, $inputs);
+        return $this->database->Create(TABLE_LOG_VIEW_ALL, $inputs);
     }
-    function GetLogViewCount(array $inputs)
+    function GetLogViewOnce(array $inputs)
     {
-        return $this->database->GetWithColumnsByArrayCondition(TABLE_LOG_VIEW_COUNT, 'id', 'WHERE user_ip=? AND view=?', $inputs);
+        return $this->database->Get(TABLE_LOG_VIEW_ONCE, 'id', 'WHERE user_ip=? AND viewed_page=?', $inputs, 'SINGULAR');
     }
-    function CreateLogViewCount(array $inputs)
+    function CreateLogViewOnce(array $inputs)
     {
-        return parent::Create(TABLE_LOG_VIEW_COUNT, $inputs);
-    }
-    function CreateLogError(array $inputs)
-    {
-        return parent::Create(TABLE_LOG_ERROR, $inputs);
-    }
-    function GetLogCSRF(array $inputs)
-    {
-        return $this->database->GetWithColumnsByArrayCondition(TABLE_LOG_CSRF, 'id,csrf_token,date_csrf_expiry,is_csrf_used', 'WHERE user_ip=? AND csrf_form=? ORDER BY date_csrf_created DESC LIMIT 1', $inputs);
+        return $this->database->Create(TABLE_LOG_VIEW_ONCE, $inputs);
     }
     function CreateLogCSRF(array $inputs)
     {
-        return parent::Create(TABLE_LOG_CSRF, $inputs);
+        return $this->database->Create(TABLE_LOG_CSRF, $inputs);
+    }
+    function GetLogCSRF(array $inputs)
+    {
+        return $this->database->Get(TABLE_LOG_CSRF, 'id,csrf_token,date_csrf_expiry,is_csrf_used', 'WHERE user_ip=? AND csrf_form=? ORDER BY date_csrf_created DESC LIMIT 1', $inputs, 'SINGULAR');
     }
     function UpdateLogCSRF(array $inputs)
     {
-        return parent::Update(TABLE_LOG_CSRF, $inputs);
+        return $this->database->Update(TABLE_LOG_CSRF, $inputs);
+    }
+    function CreateLogError(array $inputs)
+    {
+        return $this->database->Create(TABLE_LOG_ERROR, $inputs);
     }
 }

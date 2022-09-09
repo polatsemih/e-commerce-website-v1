@@ -1,11 +1,21 @@
 <?php
+define('WEB_SHUTDOWN_PHASE', false);
+define('WEB_PREPARE_PHASE', false);
+define('WEB_MAINTENANCE_PHASE', false);
+define('WEB_SHOPPING_PERMISSION', true);
 define('BRAND', 'Blanck Basic');
-define('PURE_URL', 'http://blanckbasic.com'); // change => https://blanckbasic.com/
+define('PURE_URL', 'http://blanckbasic.com'); // change => https://blanckbasic.com
 define('URL', 'http://blanckbasic.com/'); // change => https://blanckbasic.com/
 define('META_TAG_AUTHOR', 'Semih Polat');
+
+
+
+
+
+define('ADMIN_ID', '');
+define('ADMIN_EMAIL', 'utkurabiyem@gmail.com');
 define('ADMIN_IP_ADDRESS', '127.0.0.1');
 define('ADMIN_ROLE_ID', '25f50245e318a207bb70');
-define('SHOPPING_PERMISSION', true);
 define('BRAND_INSTAGRAM', '#');
 define('BRAND_TWITTER', '#');
 

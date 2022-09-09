@@ -11,38 +11,38 @@
     <?php require_once 'View/SharedHome/_home_body.php'; ?>
     <main>
         <section class="cart-section container">
-            <?php if (!empty($web_data['cookie_cart_view'])) : ?>
+            <?php if (!empty($web_data['cart_data'])) : ?>
                 <div class="row">
                     <div class="col-items">
                         <h1 class="title">Sepetim</h1>
-                        <?php foreach ($web_data['cookie_cart_view'] as $cookie_cart_view) : ?>
+                        <?php foreach ($web_data['cart_data'] as $cart_data) : ?>
                             <div class="cart-card">
-                                <a href="<?php echo URL . URL_ITEM_DETAILS . '/' . $cookie_cart_view['item']['item_url']; ?>">
+                                <a href="<?php echo URL . URL_ITEM_DETAILS . '/' . $cart_data['item']['item_url']; ?>">
                                     <div class="details-row">
                                         <div class="cart-image-container">
-                                            <img class="cart-item-image" src="<?php echo URL . 'assets/images/items/' . $cookie_cart_view['item']['item_images_path'] . '/' . $cookie_cart_view['item']['item_images']; ?>" alt="<?php echo $cookie_cart_view['item']['item_name']; ?>">
+                                            <img class="cart-item-image" src="<?php echo URL . 'assets/images/items/' . $cart_data['item']['item_images_path'] . '/' . $cart_data['item']['item_images']; ?>" alt="<?php echo $cart_data['item']['item_name']; ?>">
                                         </div>
                                         <div class="cart-item-name-row">
-                                            <span class="cart-item-name"><?php echo $cookie_cart_view['item']['item_name']; ?></span>
-                                            <span class="cart-item-size">Beden: <?php echo $cookie_cart_view['size']['size_name']; ?></span>
+                                            <span class="cart-item-name"><?php echo $cart_data['item']['item_name']; ?></span>
+                                            <span class="cart-item-size">Beden: <?php echo $cart_data['size']['size_name']; ?></span>
                                         </div>
                                     </div>
                                 </a>
                                 <div class="right-row">
                                     <div class="cart-item-price-row">
-                                        <span class="cart-item-old-price"><?php echo $cookie_cart_view['item']['item_price']; ?> ₺</span>
-                                        <span class="cart-item-new-price"><?php echo $cookie_cart_view['item']['item_discount_price']; ?> ₺</span>
+                                        <span class="cart-item-old-price"><?php echo $cart_data['item']['item_price']; ?> ₺</span>
+                                        <span class="cart-item-new-price"><?php echo $cart_data['item']['item_discount_price']; ?> ₺</span>
                                     </div>
                                     <div class="cart-quantity-form-container">
-                                        <form action="<?php echo URL . URL_UPDATE_THE_CART; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
-                                            <input type="hidden" name="item_size" value="<?php echo $cookie_cart_view['size']['size_cart_id']; ?>">
-                                            <input type="hidden" name="item" value="<?php echo $cookie_cart_view['item']['item_cart_id']; ?>">
+                                        <form action="<?php echo URL . URL_UPDATE_CART; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                                            <input type="hidden" name="item_size" value="<?php echo $cart_data['size']['size_cart_id']; ?>">
+                                            <input type="hidden" name="item" value="<?php echo $cart_data['item']['item_cart_id']; ?>">
                                             <button class="header-cart-quantity-box header-cart-quantity-box-1" type="submit" name="decrease_cart_quantity"><i class="fas fa-minus icon"></i></button>
                                         </form>
-                                        <div class="cart-item-quantity">Adet: <?php echo $cookie_cart_view['quantity']; ?></div>
-                                        <form action="<?php echo URL . URL_UPDATE_THE_CART; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
-                                            <input type="hidden" name="item_size" value="<?php echo $cookie_cart_view['size']['size_cart_id']; ?>">
-                                            <input type="hidden" name="item" value="<?php echo $cookie_cart_view['item']['item_cart_id']; ?>">
+                                        <div class="cart-item-quantity">Adet: <?php echo $cart_data['quantity']; ?></div>
+                                        <form action="<?php echo URL . URL_UPDATE_CART; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                                            <input type="hidden" name="item_size" value="<?php echo $cart_data['size']['size_cart_id']; ?>">
+                                            <input type="hidden" name="item" value="<?php echo $cart_data['item']['item_cart_id']; ?>">
                                             <button class="header-cart-quantity-box header-cart-quantity-box-2" type="submit" name="increase_cart_quantity"><i class="fas fa-plus icon"></i></button>
                                         </form>
                                     </div>
@@ -58,10 +58,10 @@
                         </div>
                     </div>
                     <div class="col-cart-price">
-                        <?php if (!empty($web_data['cart_total_price']) && SHOPPING_PERMISSION) : ?>
+                        <?php if (!empty($web_data['cart_data_total_price']) && WEB_SHOPPING_PERMISSION) : ?>
                             <div class="vertical">
                                 <div class="selected-item">
-                                    <span class="text">Seçilen Ürün Adedi: <?php echo count($web_data['cookie_cart_view']); ?></span>
+                                    <span class="text">Seçilen Ürün Adedi: <?php echo count($web_data['cart_data']); ?></span>
                                 </div>
                                 <div class="price-infos">
                                     <span class="text">Kargo Ücreti</span>
@@ -69,7 +69,7 @@
                                 </div>
                                 <div class="price-infos">
                                     <span class="text">Toplam Ücret</span>
-                                    <span class="text"><?php echo $web_data['cart_total_price']; ?> ₺</span>
+                                    <span class="text"><?php echo $web_data['cart_data_total_price']; ?> ₺</span>
                                 </div>
                             </div>
                             <form action="">
@@ -114,7 +114,7 @@
                     const formSearch = $('#form-search');
                     const inputsformSearch = formSearch.find('input');
                     request = $.ajax({
-                        url: '<?php echo URL . URL_SEARCH; ?>',
+                        url: '<?php echo URL . URL_ITEM_SEARCH; ?>',
                         type: 'POST',
                         data: formSearch.serialize()
                     });

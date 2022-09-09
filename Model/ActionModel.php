@@ -7,135 +7,114 @@ class ActionModel extends Model
     }
     function GetSessionAuthentication(array $inputs)
     {
-        return $this->database->GetWithColumnsByArrayCondition(TABLE_SESSION_AUTHENTICATION, 'id,user_id,date_session_authentication_expiry,session_authentication_is_logout', 'WHERE user_ip=? AND session_authentication_token=? ORDER BY date_session_authentication_login DESC LIMIT 1', $inputs);
+        return $this->database->Get(TABLE_SESSION_AUTHENTICATION, 'id,user_id,date_session_authentication_expiry,is_session_authentication_logout', 'WHERE user_ip=? AND session_authentication_token=? ORDER BY date_session_authentication_login DESC LIMIT 1', $inputs, 'SINGULAR');
+    }
+    function CreateSessionAuthentication(array $inputs)
+    {
+        return $this->database->Create(TABLE_SESSION_AUTHENTICATION, $inputs);
     }
     function UpdateSessionAuthentication(array $inputs)
     {
-        return parent::Update(TABLE_SESSION_AUTHENTICATION, $inputs);
+        return $this->database->Update(TABLE_SESSION_AUTHENTICATION, $inputs);
     }
     function GetCookieAuthentication(array $inputs)
     {
-        return $this->database->GetWithColumnsByArrayCondition(TABLE_COOKIE_AUTHENTICATION, 'id,user_id,cookie_authentication_token1,cookie_authentication_salt,date_cookie_authentication_expiry,cookie_authentication_is_logout', 'WHERE user_ip=? AND cookie_authentication_token2=? ORDER BY date_cookie_authentication_login DESC LIMIT 1', $inputs);
+        return $this->database->Get(TABLE_COOKIE_AUTHENTICATION, 'id,user_id,cookie_authentication_token1,cookie_authentication_salt,date_cookie_authentication_expiry,is_cookie_authentication_logout', 'WHERE user_ip=? AND cookie_authentication_token2=? ORDER BY date_cookie_authentication_login DESC LIMIT 1', $inputs, 'SINGULAR');
+    }
+    function CreateCookieAuthentication(array $inputs)
+    {
+        return $this->database->Create(TABLE_COOKIE_AUTHENTICATION, $inputs);
     }
     function UpdateCookieAuthentication(array $inputs)
     {
-        return parent::Update(TABLE_COOKIE_AUTHENTICATION, $inputs);
-    }
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-    function GetUsersByEmail(string $columns, string $email)
-    {
-        return $this->database->GetAllWithColumnsByStringCondition(TABLE_USER, $columns, 'WHERE email=?', $email);
-    }
-    function GetUserByEmail(string $columns, string $email)
-    {
-        return $this->database->GetWithColumnsByStringCondition(TABLE_USER, $columns, 'WHERE email=? AND is_user_deleted=0', $email);
-    }
-    function CreateUser(array $inputs)
-    {
-        return parent::Create(TABLE_USER, $inputs);
-    }
-    function UpdateUser(array $inputs)
-    {
-        return parent::Update(TABLE_USER, $inputs);
-    }
-    function CreateSessionAuth(array $inputs)
-    {
-        return parent::Create(TABLE_SESSION_AUTHENTICATION, $inputs);
-    }
-    function CreateCookieAuth(array $inputs)
-    {
-        return parent::Create(TABLE_COOKIE_AUTHENTICATION, $inputs);
-    }
-    function GetExistsLogCSRF($user_ip)
-    {
-        return $this->database->GetWithColumnsByStringCondition(TABLE_LOG_CSRF, 'id', 'WHERE user_ip=?', $user_ip);
-    }
-    function GetCountFailLogin(string $user_ip)
-    {
-        return $this->database->GetWithColumnsByStringCondition(TABLE_COUNT_FAIL_LOGIN, 'id,ip_fail_login_count', 'WHERE user_ip=?', $user_ip);
-    }
-    function CreateCountFailLogin(array $inputs)
-    {
-        return parent::Create(TABLE_COUNT_FAIL_LOGIN, $inputs);
-    }
-    function UpdateCountFailLogin(array $inputs)
-    {
-        return parent::Update(TABLE_COUNT_FAIL_LOGIN, $inputs);
+        return $this->database->Update(TABLE_COOKIE_AUTHENTICATION, $inputs);
     }
     function GetCaptchaTimeOut(string $user_ip)
     {
-        return $this->database->GetWithColumnsByStringCondition(TABLE_CAPTCHA_TIMEOUT, 'id,captcha_error_count,captcha_total_error_count,date_captcha_timeout_expiry,captcha_banned', 'WHERE user_ip=?', $user_ip);
+        return $this->database->Get(TABLE_CAPTCHA_TIMEOUT, 'id,captcha_error_count,captcha_total_error_count,date_captcha_timeout_expiry', 'WHERE user_ip=?', $user_ip, 'SINGULAR');
     }
     function CreateCaptchaTimeOut(array $inputs)
     {
-        return parent::Create(TABLE_CAPTCHA_TIMEOUT, $inputs);
+        return $this->database->Create(TABLE_CAPTCHA_TIMEOUT, $inputs);
     }
     function UpdateCaptchaTimeOut(array $inputs)
     {
-        return parent::Update(TABLE_CAPTCHA_TIMEOUT, $inputs);
+        return $this->database->Update(TABLE_CAPTCHA_TIMEOUT, $inputs);
     }
-    function CreateLogLogin(array $inputs)
+    function CreateLogCaptcha(array $inputs)
     {
-        return parent::Create(TABLE_LOG_LOGIN, $inputs);
+        return $this->database->Create(TABLE_LOG_CAPTCHA, $inputs);
+    }
+    function GetSessionRegisterConfirm(array $inputs)
+    {
+        return $this->database->Get(TABLE_SESSION_REGISTER_CONFIRM, 'id,user_id,register_hashed_confirm_tokens,date_register_confirm_expiry,is_register_confirm_used', 'WHERE user_ip=? AND register_confirm_token=? ORDER BY date_register_confirm_created DESC LIMIT 1', $inputs, 'SINGULAR');
+    }
+    function CreateSessionRegisterConfirm(array $inputs)
+    {
+        return $this->database->Create(TABLE_SESSION_REGISTER_CONFIRM, $inputs);
+    }
+    function UpdateSessionRegisterConfirm(array $inputs)
+    {
+        return $this->database->Update(TABLE_SESSION_REGISTER_CONFIRM, $inputs);
+    }
+    function GetLinkRegisterCancelByUserId(string $user_id)
+    {
+        return $this->database->Get(TABLE_LINK_REGISTER_CANCEL, 'link_register_cancel', 'WHERE user_id=?', $user_id, 'SINGULAR');
+    }
+    function GetLinkRegisterCancelByLink(string $link_register_cancel)
+    {
+        return $this->database->Get(TABLE_LINK_REGISTER_CANCEL, 'user_id,date_link_register_cancel_expiry,is_link_register_cancel_used', 'WHERE link_register_cancel=? ORDER BY date_link_register_cancel_created DESC LIMIT 1', $link_register_cancel, 'SINGULAR');
+    }
+    function CreateLinkRegisterCancel(array $inputs)
+    {
+        return $this->database->Create(TABLE_LINK_REGISTER_CANCEL, $inputs);
+    }
+    function UpdateLinkRegisterCancel(array $inputs)
+    {
+        return $this->database->Update(TABLE_LINK_REGISTER_CANCEL, $inputs);
     }
     function CreateLogEmailSent(array $inputs)
     {
-        return parent::Create(TABLE_LOG_EMAIL_SENT, $inputs);
+        return $this->database->Create(TABLE_LOG_EMAIL_SENT, $inputs);
     }
-    function GetVerifyToken(array $inputs)
+    function CreateLogLogin(array $inputs)
     {
-        return $this->database->GetWithColumnsByArrayCondition(TABLE_VERIFY_TOKEN, 'id,user_id,verify_hashed_tokens,date_verify_token_expiry,is_verify_token_used,verify_token_auth,verify_token_type,verify_token_csrf_type,verify_token_remember_me', 'WHERE verify_token=? AND user_ip=? ORDER BY date_verify_token_created DESC LIMIT 1', $inputs);
+        return $this->database->Create(TABLE_LOG_LOGIN, $inputs);
     }
-    function CreateVerifyToken(array $inputs)
+    function GetLinkForgotPassword(string $link_forgot_password)
     {
-        return parent::Create(TABLE_VERIFY_TOKEN, $inputs);
+        return $this->database->Get(TABLE_LINK_FORGOT_PASSWORD, 'id,user_id,date_link_forgot_password_expiry,is_link_forgot_password_used', 'WHERE link_forgot_password=? ORDER BY date_link_forgot_password_created DESC LIMIT 1', $link_forgot_password, 'SINGULAR');
     }
-    function UpdateVerifyToken(array $inputs)
+    function CreateLinkForgotPassword(array $inputs)
     {
-        return parent::Update(TABLE_VERIFY_TOKEN, $inputs);
+        return $this->database->Create(TABLE_LINK_FORGOT_PASSWORD, $inputs);
     }
-    function GetVerifyLink(array $inputs)
+    function UpdateLinkForgotPassword(array $inputs)
     {
-        return $this->database->GetWithColumnsByArrayCondition(TABLE_VERIFY_LINK, 'id,user_id,verify_link_expiry_date,verify_link_type,is_verify_link_used', 'WHERE verify_link=? AND user_ip=? ORDER BY date_verify_link_created DESC LIMIT 1', $inputs);
+        return $this->database->Update(TABLE_LINK_FORGOT_PASSWORD, $inputs);
     }
-    function CreateVerifyLink(array $inputs)
+    function GetSessionResetPassword(array $inputs)
     {
-        return parent::Create(TABLE_VERIFY_LINK, $inputs);
+        
     }
-    function UpdateVerifyLink(array $inputs)
+    function CreateSessionResetPassword(array $inputs)
     {
-        return parent::Update(TABLE_VERIFY_LINK, $inputs);
+        return $this->database->Create(TABLE_SESSION_RESET_PASSWORD, $inputs);
     }
-    function GetResetPassword(array $inputs)
+    function UpdateSessionResetPassword(array $inputs)
     {
-        return $this->database->GetWithColumnsByArrayCondition(TABLE_RESET_PWD, 'id,user_id,date_reset_pwd_expiry,is_reset_pwd_used', 'WHERE reset_pwd_token=? AND user_ip=? ORDER BY date_reset_pwd_created DESC LIMIT 1', $inputs);
+        return $this->database->Update(TABLE_SESSION_RESET_PASSWORD, $inputs);
     }
-    function GetPostedResetPassword(array $inputs)
+    function GetLogLoginFail(string $user_ip)
     {
-        return $this->database->GetWithColumnsByArrayCondition(TABLE_RESET_PWD, 'id,user_id,date_reset_pwd_expiry,is_reset_pwd_post_used', 'WHERE reset_pwd_post_token=? AND user_ip=? AND is_reset_pwd_used=1 ORDER BY date_reset_pwd_created DESC LIMIT 1', $inputs);
+        return $this->database->Get(TABLE_LOG_LOGIN_FAIL, 'id,ip_login_fail_count', 'WHERE user_ip=?', $user_ip, 'SINGULAR');
     }
-    function CreateResetPassword(array $inputs)
+    function CreateLogLoginFail(array $inputs)
     {
-        return parent::Create(TABLE_RESET_PWD, $inputs);
+        return $this->database->Create(TABLE_LOG_LOGIN_FAIL, $inputs);
     }
-    function UpdateResetPassword(array $inputs)
+    function UpdateLogLoginFail(array $inputs)
     {
-        return parent::Update(TABLE_RESET_PWD, $inputs);
+        return $this->database->Update(TABLE_LOG_LOGIN_FAIL, $inputs);
     }
 }

@@ -174,7 +174,7 @@ echo
             <h1 class="title">BB</h1>
             <p class="text-1">' . BRAND . ' Hesabınızı Doğrulayın</p>
         </div>
-        <main class="main">
+        <div class="main">
             <div class="confirm-container">
                 <span class="confirm">' . $random_tokens[2] . '</span>
                 <span class="confirm">' . $random_tokens[4] . '</span>
@@ -187,9 +187,9 @@ echo
             </div>
             <p class="text-2">Üyeliğinizi aktif etmek için üstteki kodu girin</p>
             <p class="text-3">Doğrulama kodunun kullanım süresi ' . EXPIRY_CONFIRM_EMAIL_TOKEN_MINUTE . ' dakikadır</p>
-        </main>
+        </div>
         <footer class="footer">
-            <p class="footer-text">Bu işlemi siz gerçekleştirmediyseniz, üyelik işlemini iptal etmek için <a class="footer-text-url" href="' . URL . URL_VERIFY_LINK . '?cr=' . $cancel_register_token . '">tıklayınız.</a></p>
+            <p class="footer-text">Bu işlemi siz gerçekleştirmediyseniz, üyelik işlemini iptal etmek için <a class="footer-text-url" href="' . URL . URL_REGISTER_CANCEL_LINK . '?cr=' . $cancel_register_token . '">tıklayınız.</a></p>
             <a class="footer-url" href="' . PURE_URL . '">' . PURE_URL . '</a>
             <span class="footer-date">' . date('d/m/Y H:i:s') . '</span>
         </footer>

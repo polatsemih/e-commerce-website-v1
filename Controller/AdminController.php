@@ -9,7 +9,7 @@ class AdminController extends Controller
                 $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_AUTHENTICATION_KILLED);
                 $this->input_control->Redirect(URL_LOGIN);
             } else {
-                parent::GetView('Error/NotResponse');
+                // parent::GetView('Error/NotResponse');
             }
         }
         $session_authentication_error = true;
@@ -36,7 +36,7 @@ class AdminController extends Controller
                 $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_AUTHENTICATION_KILLED);
                 $this->input_control->Redirect(URL_LOGIN);
             } else {
-                parent::GetView('Error/NotResponse');
+                // parent::GetView('Error/NotResponse');
             }
         }
     }
@@ -944,7 +944,6 @@ class AdminController extends Controller
                     }
                     if (!empty($comments)) {
                         $users = array();
-                        parent::GetModel('UserModel');
                         foreach ($comments as $comment) {
                             $comment_user = $this->UserModel->GetCommentUserByUserId($comment['user_id']);
                             if (!empty($comment_user)) {
@@ -1431,7 +1430,6 @@ class AdminController extends Controller
                         $comments = $this->ItemModel->GetCommentsByItemId($posted_inputs['id']['input']);
                         if (!empty($comments)) {
                             $users = array();
-                            parent::GetModel('UserModel');
                             foreach ($comments as $comment) {
                                 $comment_user = $this->UserModel->GetCommentUserByUserId($comment['user_id']);
                                 if (!empty($comment_user)) {
@@ -1996,7 +1994,6 @@ class AdminController extends Controller
 
     function Users()
     {
-        parent::GetModel('UserModel');
         $data = array();
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['s'])) {
             $search_input = $this->input_control->IsString($_GET['s']);
@@ -2032,7 +2029,6 @@ class AdminController extends Controller
     {
         $url_input = $this->input_control->IsString($user_id);
         if ($url_input !== null) {
-            parent::GetModel('UserModel');
             $data = array();
             $user = $this->UserModel->GetUserById('*', $this->input_control->CheckAndGenerateUrl($url_input));
             if (!empty($user)) {
@@ -2064,7 +2060,6 @@ class AdminController extends Controller
         parent::GetModel('RoleModel');
         $roles = $this->RoleModel->GetRoleNamesAndId();
         if (!empty($roles)) {
-            parent::GetModel('UserModel');
             $data = array();
             $data['roles'] = $roles;
             if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_user'])) {
@@ -2182,7 +2177,6 @@ class AdminController extends Controller
     function UserUpdate()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user'])) {
-            parent::GetModel('UserModel');
             parent::GetModel('RoleModel');
             $roles = $this->RoleModel->GetRoleNamesAndId();
             $posted_user_role = $this->input_control->IsString(isset($_POST['user_role']) ? $_POST['user_role'] : '');
@@ -2230,7 +2224,6 @@ class AdminController extends Controller
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
             $input_id = $this->input_control->IsString(isset($_POST['user_id']) ? $_POST['user_id'] : '');
             if ($input_id !== null) {
-                parent::GetModel('UserModel');
                 $data = array();
                 $checked_id = $this->input_control->CheckPostedInputForDb($input_id);
                 $permission = true;
@@ -2297,7 +2290,6 @@ class AdminController extends Controller
             $role = $this->RoleModel->GetRoleByUrl($this->input_control->CheckAndGenerateUrl($url_input));
             if (!empty($role)) {
                 $data['role'] = $role;
-                parent::GetModel('UserModel');
                 $users_in_role = $this->UserModel->GetUsersByRole($role['id']);
                 if (!empty($users_in_role)) {
                     foreach ($users_in_role as $key => $user) {
@@ -2390,7 +2382,6 @@ class AdminController extends Controller
                         $role = $this->RoleModel->GetRoleById($checked_inputs['id']);
                         if (!empty($role)) {
                             $data['role'] = $role;
-                            parent::GetModel('UserModel');
                             $users_in_role = $this->UserModel->GetUsersByRole($role['id']);
                             if (!empty($users_in_role)) {
                                 foreach ($users_in_role as $key => $user) {
@@ -2415,7 +2406,6 @@ class AdminController extends Controller
                     $role = $this->RoleModel->GetRoleById($checked_inputs['input_datas']['id']);
                     if (!empty($role)) {
                         $data['role'] = $role;
-                        parent::GetModel('UserModel');
                         $users_in_role = $this->UserModel->GetUsersByRole($role['id']);
                         if (!empty($users_in_role)) {
                             foreach ($users_in_role as $key => $user) {
@@ -2535,7 +2525,6 @@ class AdminController extends Controller
     }
     function AdvertisingInfos()
     {
-        parent::GetModel('UserModel');
         $user_infos = $this->UserModel->GetAdvertisingInfos();
         foreach ($user_infos as $key => $user_info) {
             $user_infos[$key]['email'] = $this->input_control->DecodeMail($user_info['email']);
@@ -2545,7 +2534,6 @@ class AdminController extends Controller
 
     function Profile()
     {
-        parent::GetModel('UserModel');
         $data = array();
         $data['selected_link'] = 'Profile';
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
@@ -2602,7 +2590,6 @@ class AdminController extends Controller
     }
     function PasswordChange()
     {
-        parent::GetModel('UserModel');
         $data = array();
         $data['selected_link'] = 'PasswordChange';
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_password'])) {
@@ -2655,7 +2642,6 @@ class AdminController extends Controller
     }
     function ProfilePhotoChange()
     {
-        parent::GetModel('UserModel');
         $data = array();
         $data['selected_link'] = 'ProfilePhotoChange';
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile_photo'])) {

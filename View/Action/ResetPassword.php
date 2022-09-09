@@ -18,8 +18,8 @@
                     <?php if (!empty($web_data['form_token'])) : ?>
                         <input type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
                     <?php endif; ?>
-                    <?php if (!empty($web_data['reset_pwd_token'])) : ?>
-                        <input type="hidden" name="reset_pwd_token" value="<?php echo $web_data['reset_pwd_token']; ?>">
+                    <?php if (!empty($web_data['reset_password_token'])) : ?>
+                        <input type="hidden" name="reset_password_token" value="<?php echo $web_data['reset_password_token']; ?>">
                     <?php endif; ?>
                     <div class="form-row">
                         <div class="group">
@@ -119,7 +119,7 @@
                     const formSearch = $('#form-search');
                     const inputsformSearch = formSearch.find('input');
                     request = $.ajax({
-                        url: '<?php echo URL . URL_SEARCH; ?>',
+                        url: '<?php echo URL . URL_ITEM_SEARCH; ?>',
                         type: 'POST',
                         data: formSearch.serialize()
                     });

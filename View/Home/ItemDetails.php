@@ -135,7 +135,7 @@
                                         <i class="fas fa-times"></i>
                                     </div>
                                 </div>
-                                <h4 class="title">İade Politikası</h4>
+                                <h4 class="title">İptal ve İade Koşulları</h4>
                                 <p class="text">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet? Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?</p>
                                 <p class="text">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?</p>
                                 <p class="text">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis est exercitationem nulla temporibus nostrum? Debitis soluta corrupti esse eos, tempora error explicabo! Doloremque labore consequuntur accusantium autem qui ad amet?</p>
@@ -169,24 +169,28 @@
                 <div class="item-properties">
                     <h2 class="title">Ürünün Özellikleri</h2>
                     <div class="row">
-                        <span class="text key">Materyal</span>
-                        <span class="text value"><?php echo $web_data['item']['item_material']; ?></span>
+                        <span class="text key">Koleksiyon</span>
+                        <span class="text value"><?php echo $web_data['item']['item_collection']; ?></span>
                     </div>
                     <div class="row">
-                        <span class="text key">Kumaş</span>
-                        <span class="text value"><?php echo $web_data['item']['item_fabric_type']; ?></span>
+                        <span class="text key">Materyal</span>
+                        <span class="text value"><?php echo $web_data['item']['item_material']; ?></span>
                     </div>
                     <div class="row">
                         <span class="text key">Kesim</span>
                         <span class="text value"><?php echo $web_data['item']['item_cut_model']; ?></span>
                     </div>
                     <div class="row">
-                        <span class="text key">Yaka</span>
-                        <span class="text value"><?php echo $web_data['item']['item_lapel']; ?></span>
-                    </div>
-                    <div class="row">
                         <span class="text key">Kalınlık</span>
                         <span class="text value"><?php echo $web_data['item']['item_thickness']; ?></span>
+                    </div>
+                    <div class="row">
+                        <span class="text key">Desen</span>
+                        <span class="text value"><?php echo $web_data['item']['item_pattern']; ?></span>
+                    </div>
+                    <div class="row">
+                        <span class="text key">Yaka</span>
+                        <span class="text value"><?php echo $web_data['item']['item_lapel']; ?></span>
                     </div>
                     <div class="row">
                         <span class="text key">Kol Tipi</span>
@@ -750,7 +754,7 @@
                     <?php if (!empty($web_data['authenticated_user'])) : ?>
                         let xx9 = $("<button></button>").addClass('btn-success mr-left btn-popup-new-comment-reply').attr('title', 'Yoruma Cevap Yaz').text('Cevapla');
                         xx7.append(xx9);
-                        <?php if ($web_data['authenticated_user']['user_role'] == ADMIN_ROLE_ID) : ?>
+                        <?php if ($web_data['authenticated_user'] == ADMIN_ID) : ?>
                             let xx10 = $("<form></form>").addClass('form-approve-comment');
                             let xx11 = $("<input></input>").addClass('input-token').attr('type', 'hidden').attr('name', 'form_token').attr('value', form_token_comment);
                             xx10.append(xx11);
@@ -772,13 +776,13 @@
                             let xx16 = $("<span></span>").addClass('checkmark-comment');
                             xx13.append(xx16);
                             xx7.append(xx10);
-                            if ('<?php echo $web_data['authenticated_user']['id'] ?>' != response['user_id']) {
+                            if ('<?php echo $web_data['authenticated_user'] ?>' != response['user_id']) {
                                 let xx18 = $("<button></button>").addClass('btn-danger mr-left btn-comment-delete-popup').attr('title', 'Yorumu Sil').text('Sil');
                                 xx7.append(xx18);
                             }
                         <?php endif; ?>
                         <?php if (!empty($web_data['user_has_comment'])) : ?>
-                            if ('<?php echo $web_data['authenticated_user']['id'] ?>' == response['user_id']) {
+                            if ('<?php echo $web_data['authenticated_user'] ?>' == response['user_id']) {
                                 let xx17 = $("<button></button>").addClass('btn-warning mr-left btn-comment-update-popup').attr('data-value', response['comment']).attr('title', 'Yorumu Güncelle').text('Güncelle');
                                 xx7.append(xx17);
                                 let xx18 = $("<button></button>").addClass('btn-danger mr-left btn-comment-delete-popup').attr('title', 'Yorumu Sil').text('Sil');
@@ -811,7 +815,7 @@
                             let xx29 = $("<span></span>").addClass('date').attr('title', 'Yorum Oluşturulma Tarihi').text(comments_reply['date_comment_reply_created']);
                             xx28.append(xx29);
                             <?php if (!empty($web_data['authenticated_user'])) : ?>
-                                <?php if ($web_data['authenticated_user']['user_role'] == ADMIN_ROLE_ID) : ?>
+                                <?php if ($web_data['authenticated_user'] == ADMIN_ID) : ?>
                                     let xx30 = $("<form></form>").addClass('form-approve-comment-reply');
                                     let xx31 = $("<input></input>").addClass('input-token').attr('type', 'hidden').attr('name', 'form_token').attr('value', form_token_comment);
                                     xx30.append(xx31);
@@ -833,13 +837,13 @@
                                     let xx36 = $("<span></span>").addClass('checkmark-comment');
                                     xx33.append(xx36);
                                     xx28.append(xx30);
-                                    if ('<?php echo $web_data['authenticated_user']['id'] ?>' != comments_reply['user_id']) {
+                                    if ('<?php echo $web_data['authenticated_user'] ?>' != comments_reply['user_id']) {
                                         let xx37 = $("<button></button>").addClass('btn-danger mr-left btn-comment-reply-delete-popup').attr('title', 'Yorumu Sil').text('Sil');
                                         xx28.append(xx37);
                                     }
                                 <?php endif; ?>
                                 <?php if (!empty($web_data['user_has_comment_reply'])) : ?>
-                                    if ('<?php echo $web_data['authenticated_user']['id'] ?>' == comments_reply['user_id']) {
+                                    if ('<?php echo $web_data['authenticated_user'] ?>' == comments_reply['user_id']) {
                                         let xx38 = $("<button></button>").addClass('btn-warning mr-left btn-comment-reply-update-popup').attr('data-value', comments_reply['comment_reply']).attr('title', 'Yorumu Güncelle').text('Güncelle');
                                         xx28.append(xx38);
                                         let xx39 = $("<button></button>").addClass('btn-danger mr-left btn-comment-reply-delete-popup').attr('title', 'Yorumu Sil').text('Sil');
@@ -868,7 +872,7 @@
                             }
                             addNoScrolljQ();
                         });
-                        <?php if ($web_data['authenticated_user']['user_role'] == ADMIN_ROLE_ID) : ?>
+                        <?php if ($web_data['authenticated_user'] == ADMIN_ID) : ?>
                             $('#comment-wrapper-' + response['id'] + ' .btn-comment-approve').click(function(e) {
                                 e.preventDefault();
                                 if (requestUsable) {
@@ -911,7 +915,7 @@
                                     });
                                 }
                             });
-                            if ('<?php echo $web_data['authenticated_user']['id'] ?>' != response['user_id']) {
+                            if ('<?php echo $web_data['authenticated_user'] ?>' != response['user_id']) {
                                 $('#comment-wrapper-' + response['id'] + ' .btn-comment-delete-popup').click(function(e) {
                                     e.preventDefault();
                                     if (commentDeleteWrapperjQ.hasClass('disable')) {
@@ -923,7 +927,7 @@
                             }
                         <?php endif; ?>
                         <?php if (!empty($web_data['user_has_comment'])) : ?>
-                            if ('<?php echo $web_data['authenticated_user']['id'] ?>' == response['user_id']) {
+                            if ('<?php echo $web_data['authenticated_user'] ?>' == response['user_id']) {
                                 let btnCommentUpdatePopupjQ = $('#comment-wrapper-' + response['id'] + ' .btn-comment-update-popup');
                                 btnCommentUpdatePopupjQ.click(function(e) {
                                     e.preventDefault();
@@ -961,7 +965,7 @@
                         });
                         <?php if (!empty($web_data['authenticated_user'])) : ?>
                             $.each(response['comments_reply'], function(key, comments_reply) {
-                                <?php if ($web_data['authenticated_user']['user_role'] == ADMIN_ROLE_ID) : ?>
+                                <?php if ($web_data['authenticated_user'] == ADMIN_ID) : ?>
                                     $('#comment-reply-wrapper-' + comments_reply['id'] + ' .btn-comment-reply-approve').click(function(e) {
                                         e.preventDefault();
                                         if (requestUsable) {
@@ -1004,7 +1008,7 @@
                                             });
                                         }
                                     });
-                                    if ('<?php echo $web_data['authenticated_user']['id'] ?>' != comments_reply['user_id']) {
+                                    if ('<?php echo $web_data['authenticated_user'] ?>' != comments_reply['user_id']) {
                                         $('#comment-reply-wrapper-' + comments_reply['id'] + ' .btn-comment-reply-delete-popup').click(function(e) {
                                             e.preventDefault();
                                             if (commentReplyDeleteWrapperjQ.hasClass('disable')) {
@@ -1017,7 +1021,7 @@
                                     }
                                 <?php endif; ?>
                                 <?php if (!empty($web_data['user_has_comment_reply'])) : ?>
-                                    if ('<?php echo $web_data['authenticated_user']['id'] ?>' == comments_reply['user_id']) {
+                                    if ('<?php echo $web_data['authenticated_user'] ?>' == comments_reply['user_id']) {
                                         let btnCommentReplyUpdatePopupjQ = $('#comment-reply-wrapper-' + comments_reply['id'] + ' .btn-comment-reply-update-popup');
                                         btnCommentReplyUpdatePopupjQ.click(function(e) {
                                             e.preventDefault();
@@ -1108,7 +1112,7 @@
                     const formSearch = $('#form-search');
                     const inputsformSearch = formSearch.find('input');
                     request = $.ajax({
-                        url: '<?php echo URL . URL_SEARCH; ?>',
+                        url: '<?php echo URL . URL_ITEM_SEARCH; ?>',
                         type: 'POST',
                         data: formSearch.serialize()
                     });
@@ -1155,7 +1159,7 @@
                     const formAddToCart = $('#form-add-to-cart');
                     const inputsformAddToCart = formAddToCart.find('input, select');
                     request = $.ajax({
-                        url: '<?php echo URL . URL_ADD_TO_CART; ?>',
+                        url: '<?php echo URL . URL_ADD_CART; ?>',
                         type: 'POST',
                         data: formAddToCart.serialize()
                     });
@@ -1178,7 +1182,7 @@
                             const formAddToFavorites = $('#form-add-to-favorites');
                             const inputsformAddToFavorites = formAddToFavorites.find('input, button');
                             request = $.ajax({
-                                url: '<?php echo URL . URL_ADD_TO_FAVORITES; ?>',
+                                url: '<?php echo URL . URL_ADD_FAVORITES; ?>',
                                 type: 'POST',
                                 data: formAddToFavorites.serialize()
                             });
@@ -1266,8 +1270,8 @@
                     const textareaCommentCreatejQ = $('#textarea-comment-create');
                     if (!$.trim(textareaCommentCreatejQ.val())) {
                         setClientNotification('<div class="notification danger"><span class="text">Yorum alanı boş olamaz</span></div>');
-                    } else if (textareaCommentCreatejQ.val().length > <?php echo COMMENT_LIMIT; ?>) {
-                        setClientNotification('<div class="notification danger"><span class="text">Yorum <?php echo COMMENT_LIMIT; ?> karakterden fazla olamaz</span></div>');
+                    } else if (textareaCommentCreatejQ.val().length > <?php echo COMMENT_MAX_LIMIT; ?>) {
+                        setClientNotification('<div class="notification danger"><span class="text">Yorum <?php echo COMMENT_MAX_LIMIT; ?> karakterden fazla olamaz</span></div>');
                     } else if (requestUsable) {
                         requestUsable = false;
                         const formCommentCreate = $('#form-comment-create');
@@ -1306,7 +1310,7 @@
                                     xx7.append(xx8);
                                     let xx9 = $("<button></button>").addClass('btn-success mr-left btn-popup-new-comment-reply').attr('title', 'Yoruma Cevap Yaz').text('Cevapla');
                                     xx7.append(xx9);
-                                    <?php if ($web_data['authenticated_user']['user_role'] == ADMIN_ROLE_ID) : ?>
+                                    <?php if ($web_data['authenticated_user'] == ADMIN_ID) : ?>
                                         let xx10 = $("<form></form>").addClass('form-approve-comment');
                                         let xx11 = $("<input></input>").addClass('input-token').attr('type', 'hidden').attr('name', 'form_token').attr('value', response['form_token']);
                                         xx10.append(xx11);
@@ -1339,7 +1343,7 @@
                                         }
                                         addNoScrolljQ();
                                     });
-                                    <?php if ($web_data['authenticated_user']['user_role'] == ADMIN_ROLE_ID) : ?>
+                                    <?php if ($web_data['authenticated_user'] == ADMIN_ID) : ?>
                                         $('#comment-wrapper-' + response['comment']['id'] + ' .btn-comment-approve').click(function(e) {
                                             e.preventDefault();
                                             if (requestUsable) {
@@ -1428,8 +1432,8 @@
                     e.preventDefault();
                     if (!$.trim(textareaCommentReplyCreatejQ.val())) {
                         setClientNotification('<div class="notification danger"><span class="text">Yorum alanı boş olamaz</span></div>');
-                    } else if (textareaCommentReplyCreatejQ.val().length > <?php echo COMMENT_LIMIT; ?>) {
-                        setClientNotification('<div class="notification danger"><span class="text">Yorum <?php echo COMMENT_LIMIT; ?> karakterden fazla olamaz</span></div>');
+                    } else if (textareaCommentReplyCreatejQ.val().length > <?php echo COMMENT_MAX_LIMIT; ?>) {
+                        setClientNotification('<div class="notification danger"><span class="text">Yorum <?php echo COMMENT_MAX_LIMIT; ?> karakterden fazla olamaz</span></div>');
                     } else if (requestUsable) {
                         requestUsable = false;
                         const formCommentReplyCreate = $('#form-comment-reply-create');
@@ -1470,7 +1474,7 @@
                                     xx25.append(xx28);
                                     let xx29 = $("<span></span>").addClass('date').attr('title', 'Yorum Oluşturulma Tarihi').text(response['comment_reply']['date_comment_reply_created']);
                                     xx28.append(xx29);
-                                    <?php if ($web_data['authenticated_user']['user_role'] == ADMIN_ROLE_ID) : ?>
+                                    <?php if ($web_data['authenticated_user'] == ADMIN_ID) : ?>
                                         let xx30 = $("<form></form>").addClass('form-approve-comment-reply');
                                         let xx31 = $("<input></input>").addClass('input-token').attr('type', 'hidden').attr('name', 'form_token').attr('value', response['form_token']);
                                         xx30.append(xx31);
@@ -1511,7 +1515,7 @@
                                             }
                                         });
                                     }
-                                    <?php if ($web_data['authenticated_user']['user_role'] == ADMIN_ROLE_ID) : ?>
+                                    <?php if ($web_data['authenticated_user'] == ADMIN_ID) : ?>
                                         $('#comment-reply-wrapper-' + response['comment_reply']['id'] + ' .btn-comment-reply-approve').click(function(e) {
                                             e.preventDefault();
                                             if (requestUsable) {
@@ -1600,8 +1604,8 @@
                     e.preventDefault();
                     if (!$.trim(textareaCommentUpdatejQ.val())) {
                         setClientNotification('<div class="notification danger"><span class="text">Yorum alanı boş olamaz</span></div>');
-                    } else if (textareaCommentUpdatejQ.val().length > <?php echo COMMENT_LIMIT; ?>) {
-                        setClientNotification('<div class="notification danger"><span class="text">Yorum <?php echo COMMENT_LIMIT; ?> karakterden fazla olamaz</span></div>');
+                    } else if (textareaCommentUpdatejQ.val().length > <?php echo COMMENT_MAX_LIMIT; ?>) {
+                        setClientNotification('<div class="notification danger"><span class="text">Yorum <?php echo COMMENT_MAX_LIMIT; ?> karakterden fazla olamaz</span></div>');
                     } else if (requestUsable) {
                         requestUsable = false;
                         const formCommentUpdate = $('#form-comment-update');
@@ -1645,8 +1649,8 @@
                     e.preventDefault();
                     if (!$.trim(textareaCommentReplyUpdatejQ.val())) {
                         setClientNotification('<div class="notification danger"><span class="text">Yorum alanı boş olamaz</span></div>');
-                    } else if (textareaCommentReplyUpdatejQ.val().length > <?php echo COMMENT_LIMIT; ?>) {
-                        setClientNotification('<div class="notification danger"><span class="text">Yorum <?php echo COMMENT_LIMIT; ?> karakterden fazla olamaz</span></div>');
+                    } else if (textareaCommentReplyUpdatejQ.val().length > <?php echo COMMENT_MAX_LIMIT; ?>) {
+                        setClientNotification('<div class="notification danger"><span class="text">Yorum <?php echo COMMENT_MAX_LIMIT; ?> karakterden fazla olamaz</span></div>');
                     } else if (requestUsable) {
                         requestUsable = false;
                         const formCommentReplyUpdate = $('#form-comment-reply-update');
@@ -1729,7 +1733,7 @@
                         }
                     });
                 }
-                <?php if ($web_data['authenticated_user']['user_role'] == ADMIN_ROLE_ID) : ?>
+                <?php if ($web_data['authenticated_user'] == ADMIN_ID) : ?>
                     setCommentDeleteSubmit('<?php echo URL_ADMIN_COMMENT_DELETE; ?>');
                 <?php else : ?>
                     setCommentDeleteSubmit('<?php echo URL_COMMENT_DELETE; ?>');
@@ -1777,7 +1781,7 @@
                         }
                     });
                 }
-                <?php if ($web_data['authenticated_user']['user_role'] == ADMIN_ROLE_ID) : ?>
+                <?php if ($web_data['authenticated_user'] == ADMIN_ID) : ?>
                     setCommentReplyDeleteSubmit('<?php echo URL_ADMIN_COMMENT_REPLY_DELETE; ?>');
                 <?php else : ?>
                     setCommentReplyDeleteSubmit('<?php echo URL_COMMENT_REPLY_DELETE; ?>');

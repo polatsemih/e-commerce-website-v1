@@ -16,11 +16,11 @@
         <section class="action-section">
             <div class="action-container">
                 <h1 class="title">Giriş</h1>
-                <?php if (!empty($_SESSION[SESSION_MASSAGE])) : ?>
+                <?php if (!empty($_SESSION[SESSION_LOGIN_MESSAGE_NAME])) : ?>
                     <div class="message-container">
-                        <span class="text"><?php echo $_SESSION[SESSION_MASSAGE]; ?></span>
+                        <span class="text"><?php echo $_SESSION[SESSION_LOGIN_MESSAGE_NAME]; ?></span>
                     </div>
-                    <?php unset($_SESSION[SESSION_MASSAGE]); ?>
+                    <?php unset($_SESSION[SESSION_LOGIN_MESSAGE_NAME]); ?>
                 <?php endif; ?>
                 <form id="form-login" action="<?php echo URL . URL_LOGIN; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
                     <?php if (!empty($web_data['form_token'])) : ?>
@@ -144,7 +144,7 @@
                     const formSearch = $('#form-search');
                     const inputsformSearch = formSearch.find('input');
                     request = $.ajax({
-                        url: '<?php echo URL . URL_SEARCH; ?>',
+                        url: '<?php echo URL . URL_ITEM_SEARCH; ?>',
                         type: 'POST',
                         data: formSearch.serialize()
                     });

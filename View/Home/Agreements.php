@@ -14,13 +14,13 @@
             <div class="row">
                 <div class="nav-menu">
                     <div class="agreements-nav">
-                        <a class="link<?php echo $web_data['agreement_type'] == URL_TERMS ? ' active' : ''; ?>" href="<?php echo URL . URL_AGREEMENTS . '/' . URL_TERMS; ?>">Kullanım Şartları</a>
-                        <a class="link<?php echo $web_data['agreement_type'] == URL_PRIVACY ? ' active' : ''; ?>" href="<?php echo URL . URL_AGREEMENTS . '/' . URL_PRIVACY; ?>">Gizlilik Sözleşmesi</a>
-                        <a class="link<?php echo $web_data['agreement_type'] == URL_RETURN_POLICY ? ' active' : ''; ?>" href="<?php echo URL . URL_AGREEMENTS . '/' . URL_RETURN_POLICY; ?>">İade Politikası</a>
+                        <a class="link<?php echo $web_data['agreement_type'] == URL_AGREEMENT_TERMS ? ' active' : ''; ?>" href="<?php echo URL . URL_AGREEMENTS . '/' . URL_AGREEMENT_TERMS; ?>">Kullanım Şartları</a>
+                        <a class="link<?php echo $web_data['agreement_type'] == URL_AGREEMENT_PRIVACY ? ' active' : ''; ?>" href="<?php echo URL . URL_AGREEMENTS . '/' . URL_AGREEMENT_PRIVACY; ?>">Gizlilik Sözleşmesi</a>
+                        <a class="link<?php echo $web_data['agreement_type'] == URL_AGREEMENT_RETURN_POLICY ? ' active' : ''; ?>" href="<?php echo URL . URL_AGREEMENTS . '/' . URL_AGREEMENT_RETURN_POLICY; ?>">İade Politikası</a>
                     </div>
                 </div>
                 <div class="agreements-container">
-                    <?php if ($web_data['agreement_type'] == URL_TERMS) : ?>
+                    <?php if ($web_data['agreement_type'] == URL_AGREEMENT_TERMS) : ?>
                         <h1 class="title">Kullanım Şartları ve Üyelik Sözleşmesi</h1>
                         <p class="text">SİTE KULLANIM ŞARTLARI</p>
                         <p class="text">Lütfen sitemizi kullanmadan evvel bu ‘site kullanım şartları’nı dikkatlice okuyunuz. Bu alışveriş sitesini kullanan ve alışveriş yapan müşterilerimiz aşağıdaki şartları kabul etmiş varsayılmaktadır: Sitemizdeki web sayfaları ve ona bağlı tüm sayfalar (‘site’) ……………………… adresindeki ……………………………….firmasının (Firma) malıdır ve onun tarafından işletilir. Sizler (‘Kullanıcı’) sitede sunulan tüm hizmetleri kullanırken aşağıdaki şartlara tabi olduğunuzu, sitedeki hizmetten yararlanmakla ve kullanmaya devam etmekle; Bağlı olduğunuz yasalara göre sözleşme imzalama hakkına, yetkisine ve hukuki ehliyetine sahip ve 18 yaşın üzerinde olduğunuzu, bu sözleşmeyi okuduğunuzu, anladığınızı ve sözleşmede yazan şartlarla bağlı olduğunuzu kabul etmiş sayılırsınız.</p>
@@ -52,7 +52,7 @@
                         <p class="text">Taraflar arasında işbu sözleşme ile ilgili işlemler için çıkabilecek her türlü uyuşmazlıklarda Taraflar’ın defter, kayıt ve belgeleri ile ve bilgisayar kayıtları ve faks kayıtları 6100 sayılı Hukuk Muhakemeleri Kanunu uyarınca delil olarak kabul edilecek olup, kullanıcı bu kayıtlara itiraz etmeyeceğini kabul eder.</p>
                         <p class="text">11. Uyuşmazlıkların Çözümü</p>
                         <p class="text">İşbu Sözleşme’nin uygulanmasından veya yorumlanmasından doğacak her türlü uyuşmazlığın çözümünde İstanbul (Merkez) Adliyesi Mahkemeleri ve İcra Daireleri yetkilidir.</p>
-                    <?php elseif ($web_data['agreement_type'] == URL_PRIVACY) : ?>
+                    <?php elseif ($web_data['agreement_type'] == URL_AGREEMENT_PRIVACY) : ?>
                         <h1 class="title">Gizlilik ve Güvenlik Politikası</h1>
                         <p class="text">Mağazamızda verilen tüm servisler ve ,………… adresinde kayıtlı  ……………….Şti. firmamıza aittir ve firmamız tarafından işletilir.</p>
                         <p class="text">Firmamız, çeşitli amaçlarla kişisel veriler toplayabilir. Aşağıda, toplanan kişisel verilerin nasıl ve ne şekilde toplandığı, bu verilerin nasıl ve ne şekilde korunduğu belirtilmiştir.</p>
@@ -90,7 +90,7 @@
                         <p class="text">Eposta: </p>
                         <p class="text">Tel: </p>
                         <p class="text">Fax: </p>
-                    <?php elseif ($web_data['agreement_type'] == URL_RETURN_POLICY) : ?>
+                    <?php elseif ($web_data['agreement_type'] == URL_AGREEMENT_RETURN_POLICY) : ?>
                         <h1 class="title">İptal ve İade Koşulları</h1>
                         <p class="text">1- Kullanmakta olduğunuz web sitesi üzerinden elektronik ortamda sipariş verdiğiniz takdirde, size sunulan ön bilgilendirme formunu ve mesafeli satış sözleşmesini kabul etmiş sayılırsınız.</p>
                         <p class="text">2- Alıcılar, satın aldıkları ürünün satış ve teslimi ile ilgili olarak 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği (RG:27.11.2014/29188) hükümleri ile yürürlükteki diğer yasalara tabidir.</p>
@@ -142,7 +142,7 @@
                     const formSearch = $('#form-search');
                     const inputsformSearch = formSearch.find('input');
                     request = $.ajax({
-                        url: '<?php echo URL . URL_SEARCH; ?>',
+                        url: '<?php echo URL . URL_ITEM_SEARCH; ?>',
                         type: 'POST',
                         data: formSearch.serialize()
                     });

@@ -14,15 +14,15 @@
         <section class="profile-section container">
             <div class="row">
                 <div class="nav-menu">
-                    <a class="link<?php echo $web_data['profile_type'] == URL_PROFILE_INFO ? ' active' : ''; ?>" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_INFO; ?>">Profil Bilgilerim</a>
-                    <a class="link<?php echo $web_data['profile_type'] == URL_PROFILE_PWD ? ' active' : ''; ?>" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_PWD; ?>">Şifremi Değiştir</a>
+                    <a class="link<?php echo $web_data['profile_type'] == URL_PROFILE_INFORMATIONS ? ' active' : ''; ?>" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_INFORMATIONS; ?>">Profil Bilgilerim</a>
+                    <a class="link<?php echo $web_data['profile_type'] == URL_PROFILE_PASSWORD ? ' active' : ''; ?>" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_PASSWORD; ?>">Şifremi Değiştir</a>
                     <a class="link<?php echo $web_data['profile_type'] == URL_PROFILE_EMAIL ? ' active' : ''; ?>" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_EMAIL; ?>">Emailimi Değiştir</a>
-                    <a class="link<?php echo $web_data['profile_type'] == URL_PROFILE_TEL ? ' active' : ''; ?>" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_TEL; ?>">Telefon Numaramı Değiştir</a>
+                    <a class="link<?php echo $web_data['profile_type'] == URL_PROFILE_PHONE ? ' active' : ''; ?>" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_PHONE; ?>">Telefon Numaramı Değiştir</a>
                     <a class="link<?php echo $web_data['profile_type'] == URL_PROFILE_PHOTO ? ' active' : ''; ?>" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_PHOTO; ?>">Profil Fotoğrafımı Değiştir</a>
                     <a class="link<?php echo $web_data['profile_type'] == URL_PROFILE_ORDERS ? ' active' : ''; ?>" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_ORDERS; ?>">Siparişlerim</a>
                 </div>
                 <div class="profile-container">
-                    <?php if ($web_data['profile_type'] == URL_PROFILE_INFO) : ?>
+                    <?php if ($web_data['profile_type'] == URL_PROFILE_INFORMATIONS) : ?>
                         <div class="row-space">
                             <div class="left">
                                 <h1 class="title mb">Profil Bilgilerim</h1>
@@ -62,7 +62,7 @@
                                 </div>
                             </div>
                         </form>
-                    <?php elseif ($web_data['profile_type'] == URL_PROFILE_PWD) : ?>
+                    <?php elseif ($web_data['profile_type'] == URL_PROFILE_PASSWORD) : ?>
                         <h1 class="title">Şifremi Değiştir</h1>
                         <form action="<?php echo URL . URL_PASSWORD_UPDATE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
                             <?php if (!empty($web_data['form_token'])) : ?>
@@ -108,7 +108,7 @@
                                 </div>
                             </div>
                         </form>
-                    <?php elseif ($web_data['profile_type'] == URL_PROFILE_TEL) : ?>
+                    <?php elseif ($web_data['profile_type'] == URL_PROFILE_PHONE) : ?>
                         <h1 class="title">Telefon Numaramı Değiştir</h1>
                         <form action="<?php echo URL . URL_EMAIL_UPDATE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
                             <?php if (!empty($web_data['form_token'])) : ?>
@@ -165,7 +165,7 @@
                     const formSearch = $('#form-search');
                     const inputsformSearch = formSearch.find('input');
                     request = $.ajax({
-                        url: '<?php echo URL . URL_SEARCH; ?>',
+                        url: '<?php echo URL . URL_ITEM_SEARCH; ?>',
                         type: 'POST',
                         data: formSearch.serialize()
                     });

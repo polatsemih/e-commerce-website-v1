@@ -4,6 +4,14 @@ class Session
     function __construct()
     {
     }
+    function GenerateSessionAuthenticationToken()
+    {
+        return strtr(sodium_bin2base64(random_bytes(191), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING), array('-' => 'R', '_' => 'O'));
+    }
+    function KillSession(string $session_name)
+    {
+        unset($_SESSION[$session_name]);
+    }
     function KillAllSessions()
     {
         $_SESSION = array();
@@ -19,18 +27,5 @@ class Session
         } else {
             return false;
         }
-    }
-    function KillSession(string $session_name)
-    {
-        unset($_SESSION[$session_name]);
-    }
-
-
-
-
-
-    function GenerateSessionAuthToken()
-    {
-        return strtr(sodium_bin2base64(random_bytes(191), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING), array('-' => 'R', '_' => 'O'));
     }
 }
