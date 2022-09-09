@@ -2834,7 +2834,7 @@ a {
     display: inline-block;
     height: 1.5rem;
     width: 1.5rem;
-    margin-left: 0.5rem;
+    margin-right: 0.5rem;
     background-color: var(--color-primary-light);
     border-width: 2px;
     border-style: solid;
