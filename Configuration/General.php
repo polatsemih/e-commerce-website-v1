@@ -14,12 +14,12 @@ define('META_TAG_AUTHOR', 'Semih Polat');
 define('ITEM_LOAD_LIMIT_IN_ONCE', 6);
 define('COMMENT_LOAD_LIMIT_IN_ONCE', 6);
 define('DETAILS_SIZE_REMAIN_ITEM_LIMIT', 20);
-
+define('REDIRECT_PERMISSION', array('urun'));
 
 define('ADMIN_ID', '2BEV2kDDjyZ1Qb3APgxurvkDrW7biovabxUNnNJgd1B1X4sF12oVCKd9xKNIKcDEuzZzODIw7IcuEqYFgmudVWxnLPA5OJyZexfrTpQTqbntSMHx2um2j740phOJqmQERfUqkj0JobJyeiS5G0k7LySjiBEVtAbvhQm8HgdrlPG6KS4vthDRUIo9GuJhooVBBlJgyrJxCrPjJCclTgNUvHLJlOCiF7ddGaz3JX8LjE2NTg1Njk4Mzc4NTU');
+define('ADMIN_ROLE_ID', 'qdxueqmljzl6onco4msxvsfuxivnikus9f9n5cnlw5lfgnzjb88erqvrgzvwzqbu13n77vvygoee9kno7fjmf9hihkf8ifq5damlmyv2jrexgutrk0db0tjzttgv6dql7zxg82y0nlbyhdjyaw7bqnc5r45jufulpv4gbyqkhptzkwpflzivghjcfwdnhmldktgduy2cnrxkgdapt5tykqs0qqosugneu2lqcmvncajwyuudboczcc52qe');
 define('ADMIN_EMAIL', 'utkurabiyem@gmail.com');
 define('ADMIN_IP_ADDRESS', '127.0.0.1');
-define('ADMIN_ROLE_ID', '25f50245e318a207bb70');
 define('BRAND_INSTAGRAM', '#');
 define('BRAND_TWITTER', '#');
 
@@ -30,7 +30,7 @@ define('BRAND_TWITTER', '#');
 
 
 
-define('REDIRECT_PERMISSION', array('urun'));
+
 
 
 

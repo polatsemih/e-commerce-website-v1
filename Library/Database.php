@@ -5,6 +5,7 @@ class Database extends PDO
     {
         parent::__construct('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=' . 'utf8mb4', DB_USER_NAME, DB_USER_PASS);
         $this->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+        $this->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
     function BackUpSql(string $prepare, string $values = null)
     {

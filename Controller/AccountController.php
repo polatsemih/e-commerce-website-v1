@@ -58,7 +58,7 @@ class AccountController extends Controller
         //                     $this->input_control->Redirect(URL_LOGIN);
         //                 }
         //             } catch (\Throwable $th) {
-        //                 $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function __construct COOKIE | ' . $th));
+        //                 $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function __construct COOKIE | ' . $th));
         //                 $this->GetView('Error/NotResponse');
         //             }
         //         }
@@ -103,7 +103,7 @@ class AccountController extends Controller
             }
             $this->input_control->Redirect();
         } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function LogOut | ' . $th))['result']) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function LogOut | ' . $th))['result']) {
                 $this->input_control->Redirect(URL_EXCEPTION);
             } else {
                 $this->input_control->Redirect(URL_SHUTDOWN);
@@ -153,7 +153,7 @@ class AccountController extends Controller
                 exit(0);
             }
         } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function AddFavorites | ' . $th))['result']) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function AddFavorites | ' . $th))['result']) {
                 echo '{"exception":"exception"}';
                 exit(0);
             } else {
@@ -207,7 +207,7 @@ class AccountController extends Controller
                 exit(0);
             }
         } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function RemoveFavorite | ' . $th))['result']) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function RemoveFavorite | ' . $th))['result']) {
                 echo '{"exception":"exception"}';
                 exit(0);
             } else {
@@ -243,21 +243,27 @@ class AccountController extends Controller
                                 $created_comment_from_database = $this->CommentModel->GetCommentById($comment_create_result['id']);
                                 if ($created_comment_from_database['result']) {
                                     $created_comment_from_database['data']['comment'] = stripslashes($comment);
-                                    $created_comment_from_database['data']['date_comment_created'] = date('d/m/Y', strtotime($created_comment_from_database['data']['date_comment_created']));
-                                    $result_set_csrf_token = parent::SetCSRFTokenjQ('ItemDetails');
-                                    if ($result_set_csrf_token['result']) {
-                                        $user_form_database = $this->UserModel->GetUserByUserId('first_name,last_name,profile_image_path,profile_image', $this->web_data['authenticated_user']);
-                                        if ($user_form_database['result']) {
-                                            $response['reset'] = false;
-                                            $response['form_token'] = $result_set_csrf_token['csrf_token'];
-                                            $response['notification'] = $this->notification_control->SetNotificationForjQ('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_CREATE);
-                                            $response['comment'] = $created_comment_from_database['data'];
-                                            $response['comment_user'] = array(
-                                                'user_first_name' => $user_form_database['data']['first_name'],
-                                                'user_last_name' => $user_form_database['data']['last_name'],
-                                                'user_profile_image_path' => $user_form_database['data']['profile_image_path'],
-                                                'user_profile_image' => $user_form_database['data']['profile_image']
-                                            );
+                                    $a = date('d/m/Y', strtotime($created_comment_from_database['data']['date_comment_created']));
+                                    if (!empty($a)) {
+                                        $created_comment_from_database['data']['date_comment_created'] = $a;
+                                        $result_set_csrf_token = parent::SetCSRFTokenjQ('ItemDetails');
+                                        if ($result_set_csrf_token['result']) {
+                                            $user_form_database = $this->UserModel->GetUserByUserId('first_name,last_name,profile_image_path,profile_image', $this->web_data['authenticated_user']);
+                                            if ($user_form_database['result']) {
+                                                $response['reset'] = false;
+                                                $response['form_token'] = $result_set_csrf_token['csrf_token'];
+                                                $response['notification'] = $this->notification_control->SetNotificationForjQ('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_CREATE);
+                                                $response['comment'] = $created_comment_from_database['data'];
+                                                $response['comment_user'] = array(
+                                                    'user_first_name' => $user_form_database['data']['first_name'],
+                                                    'user_last_name' => $user_form_database['data']['last_name'],
+                                                    'user_profile_image_path' => $user_form_database['data']['profile_image_path'],
+                                                    'user_profile_image' => $user_form_database['data']['profile_image']
+                                                );
+                                            }
+                                        } else {
+                                            echo '{"shutdown":"shutdown"}';
+                                            exit(0);
                                         }
                                     } else {
                                         echo '{"shutdown":"shutdown"}';
@@ -285,7 +291,7 @@ class AccountController extends Controller
                 exit(0);
             }
         } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function CommentCreate | ' . $th))['result']) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function CommentCreate | ' . $th))['result']) {
                 echo '{"exception":"exception"}';
                 exit(0);
             } else {
@@ -341,7 +347,7 @@ class AccountController extends Controller
                 exit(0);
             }
         } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function CommentCreate | ' . $th))['result']) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function CommentCreate | ' . $th))['result']) {
                 echo '{"exception":"exception"}';
                 exit(0);
             } else {
@@ -401,7 +407,7 @@ class AccountController extends Controller
                 exit(0);
             }
         } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function CommentCreate | ' . $th))['result']) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function CommentCreate | ' . $th))['result']) {
                 echo '{"exception":"exception"}';
                 exit(0);
             } else {
@@ -435,21 +441,27 @@ class AccountController extends Controller
                             $created_comment_from_database = $this->CommentModel->GetCommentReplyById($comment_reply_create_result['id']);
                             if ($created_comment_from_database['result']) {
                                 $created_comment_from_database['data']['comment_reply'] = stripslashes($comment_reply);
-                                $created_comment_from_database['data']['date_comment_reply_created'] = date('d/m/Y', strtotime($created_comment_from_database['data']['date_comment_reply_created']));
-                                $result_set_csrf_token = parent::SetCSRFTokenjQ('ItemDetails');
-                                if ($result_set_csrf_token['result']) {
-                                    $user_form_database = $this->UserModel->GetUserByUserId('first_name,last_name,profile_image_path,profile_image', $this->web_data['authenticated_user']);
-                                    if ($user_form_database['result']) {
-                                        $response['reset'] = false;
-                                        $response['form_token'] = $result_set_csrf_token['csrf_token'];
-                                        $response['notification'] = $this->notification_control->SetNotificationForjQ('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_CREATE);
-                                        $response['comment_reply'] = $created_comment_from_database['data'];
-                                        $response['comment_reply_user'] = array(
-                                            'user_first_name' => $user_form_database['data']['first_name'],
-                                            'user_last_name' => $user_form_database['data']['last_name'],
-                                            'user_profile_image_path' => $user_form_database['data']['profile_image_path'],
-                                            'user_profile_image' => $user_form_database['data']['profile_image']
-                                        );
+                                $b = date('d/m/Y', strtotime($created_comment_from_database['data']['date_comment_reply_created']));
+                                if (!empty($b)) {
+                                    $created_comment_from_database['data']['date_comment_reply_created'] = $b;
+                                    $result_set_csrf_token = parent::SetCSRFTokenjQ('ItemDetails');
+                                    if ($result_set_csrf_token['result']) {
+                                        $user_form_database = $this->UserModel->GetUserByUserId('first_name,last_name,profile_image_path,profile_image', $this->web_data['authenticated_user']);
+                                        if ($user_form_database['result']) {
+                                            $response['reset'] = false;
+                                            $response['form_token'] = $result_set_csrf_token['csrf_token'];
+                                            $response['notification'] = $this->notification_control->SetNotificationForjQ('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_CREATE);
+                                            $response['comment_reply'] = $created_comment_from_database['data'];
+                                            $response['comment_reply_user'] = array(
+                                                'user_first_name' => $user_form_database['data']['first_name'],
+                                                'user_last_name' => $user_form_database['data']['last_name'],
+                                                'user_profile_image_path' => $user_form_database['data']['profile_image_path'],
+                                                'user_profile_image' => $user_form_database['data']['profile_image']
+                                            );
+                                        }
+                                    } else {
+                                        echo '{"shutdown":"shutdown"}';
+                                        exit(0);
                                     }
                                 } else {
                                     echo '{"shutdown":"shutdown"}';
@@ -474,7 +486,7 @@ class AccountController extends Controller
                 exit(0);
             }
         } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function CommentCreate | ' . $th))['result']) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function CommentCreate | ' . $th))['result']) {
                 echo '{"exception":"exception"}';
                 exit(0);
             } else {
@@ -531,7 +543,7 @@ class AccountController extends Controller
                 exit(0);
             }
         } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function CommentCreate | ' . $th))['result']) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function CommentCreate | ' . $th))['result']) {
                 echo '{"exception":"exception"}';
                 exit(0);
             } else {
@@ -586,7 +598,7 @@ class AccountController extends Controller
                 exit(0);
             }
         } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function CommentCreate | ' . $th))['result']) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function CommentCreate | ' . $th))['result']) {
                 echo '{"exception":"exception"}';
                 exit(0);
             } else {
@@ -643,7 +655,7 @@ class AccountController extends Controller
                 }
             }
         } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function AdminCommentDelete | ' . $th))['result']) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function AdminCommentDelete | ' . $th))['result']) {
                 echo '{"exception":"exception"}';
                 exit(0);
             } else {
@@ -695,7 +707,7 @@ class AccountController extends Controller
                 }
             }
         } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function AdminCommentReplyDelete | ' . $th))['result']) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function AdminCommentReplyDelete | ' . $th))['result']) {
                 echo '{"exception":"exception"}';
                 exit(0);
             } else {
@@ -741,7 +753,7 @@ class AccountController extends Controller
                                     exit(0);
                                 }
                             } else {
-                                $this->notification_control->SetNotification('DANGER', DATABASE_ERROR);
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
                             }
                         }
                     } else {
@@ -757,7 +769,7 @@ class AccountController extends Controller
                 }
             }
         } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function AdminCommentApprove | ' . $th))['result']) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function AdminCommentApprove | ' . $th))['result']) {
                 echo '{"exception":"exception"}';
                 exit(0);
             } else {
@@ -803,7 +815,7 @@ class AccountController extends Controller
                                     exit(0);
                                 }
                             } else {
-                                $this->notification_control->SetNotification('DANGER', DATABASE_ERROR);
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
                             }
                         }
                     } else {
@@ -819,7 +831,7 @@ class AccountController extends Controller
                 }
             }
         } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function AdminCommentReplyApprove | ' . $th))['result']) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function AdminCommentReplyApprove | ' . $th))['result']) {
                 echo '{"exception":"exception"}';
                 exit(0);
             } else {
@@ -834,56 +846,53 @@ class AccountController extends Controller
     {
         try {
             if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-                $checked_profile_url = $this->input_control->CheckGETInput($profile_url);
-                if (!is_null($checked_profile_url)) {
-                    $this->input_control->CheckUrl();
-                    parent::LogView('Home-Profile-' . $checked_profile_url);
-                    $case_matched = false;
-                    switch ($checked_profile_url) {
-                        case URL_PROFILE_INFORMATIONS:
-                            $case_matched = true;
-                            $this->web_data['profile_type'] = URL_PROFILE_INFORMATIONS;
-                            $this->web_data['profile_title'] = URL_PROFILE_INFO_TITLE;
-                            $user_from_database = $this->UserModel->GetUserByUserId('id,first_name,last_name,address,user_delete_able', $this->web_data['authenticated_user']);
-                            break;
-                        case URL_PROFILE_PASSWORD:
-                            $case_matched = true;
-                            $this->web_data['profile_type'] = URL_PROFILE_PASSWORD;
-                            $this->web_data['profile_title'] = URL_PROFILE_PWD_TITLE;
-                            $user_from_database = $this->UserModel->GetUserByUserId('id', $this->web_data['authenticated_user']);
-                            break;
-                        case URL_PROFILE_EMAIL:
-                            $case_matched = true;
-                            $this->web_data['profile_type'] = URL_PROFILE_EMAIL;
-                            $this->web_data['profile_title'] = URL_PROFILE_EMAIL_TITLE;
-                            $user_from_database = $this->UserModel->GetUserByUserId('id,email', $this->web_data['authenticated_user']);
-                            break;
-                        case URL_PROFILE_PHONE:
-                            $case_matched = true;
-                            $this->web_data['profile_type'] = URL_PROFILE_PHONE;
-                            $this->web_data['profile_title'] = URL_PROFILE_TEL_TITLE;
-                            $user_from_database = $this->UserModel->GetUserByUserId('id,phone_number', $this->web_data['authenticated_user']);
-                            break;
-                        case URL_PROFILE_PHOTO:
-                            $case_matched = true;
-                            $this->web_data['profile_type'] = URL_PROFILE_PHOTO;
-                            $this->web_data['profile_title'] = URL_PROFILE_PHOTO_TITLE;
-                            $user_from_database = $this->UserModel->GetUserByUserId('id,profile_image_path,profile_image', $this->web_data['authenticated_user']);
-                            break;
-                        case URL_PROFILE_ORDERS:
-                            $case_matched = true;
-                            $this->web_data['profile_type'] = URL_PROFILE_ORDERS;
-                            $this->web_data['profile_title'] = URL_PROFILE_ORDERS_TITLE;
-                            $user_from_database = $this->UserModel->GetUserByUserId('id', $this->web_data['authenticated_user']);
-                            break;
-                    }
-                    if ($case_matched) {
-                        if ($user_from_database['result']) {
-                            $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
-                            $this->web_data['authenticated_user'] = $user_from_database['data'];
-                            $this->web_data['form_token'] = parent::SetCSRFToken('Profile');
-                            parent::GetView('Home/Profile', $this->web_data);
-                        }
+                $this->input_control->CheckUrl();
+                parent::LogView('Home-Profile-' . $profile_url);
+                $case_matched = false;
+                switch ($profile_url) {
+                    case URL_PROFILE_INFORMATIONS:
+                        $case_matched = true;
+                        $this->web_data['profile_type'] = URL_PROFILE_INFORMATIONS;
+                        $this->web_data['profile_title'] = URL_PROFILE_INFO_TITLE;
+                        $user_from_database = $this->UserModel->GetUserByUserId('id,first_name,last_name,address,user_delete_able', $this->web_data['authenticated_user']);
+                        break;
+                    case URL_PROFILE_PASSWORD:
+                        $case_matched = true;
+                        $this->web_data['profile_type'] = URL_PROFILE_PASSWORD;
+                        $this->web_data['profile_title'] = URL_PROFILE_PWD_TITLE;
+                        $user_from_database = $this->UserModel->GetUserByUserId('id', $this->web_data['authenticated_user']);
+                        break;
+                    case URL_PROFILE_EMAIL:
+                        $case_matched = true;
+                        $this->web_data['profile_type'] = URL_PROFILE_EMAIL;
+                        $this->web_data['profile_title'] = URL_PROFILE_EMAIL_TITLE;
+                        $user_from_database = $this->UserModel->GetUserByUserId('id,email', $this->web_data['authenticated_user']);
+                        break;
+                    case URL_PROFILE_PHONE:
+                        $case_matched = true;
+                        $this->web_data['profile_type'] = URL_PROFILE_PHONE;
+                        $this->web_data['profile_title'] = URL_PROFILE_TEL_TITLE;
+                        $user_from_database = $this->UserModel->GetUserByUserId('id,phone_number', $this->web_data['authenticated_user']);
+                        break;
+                    case URL_PROFILE_PHOTO:
+                        $case_matched = true;
+                        $this->web_data['profile_type'] = URL_PROFILE_PHOTO;
+                        $this->web_data['profile_title'] = URL_PROFILE_PHOTO_TITLE;
+                        $user_from_database = $this->UserModel->GetUserByUserId('id,profile_image_path,profile_image', $this->web_data['authenticated_user']);
+                        break;
+                    case URL_PROFILE_ORDERS:
+                        $case_matched = true;
+                        $this->web_data['profile_type'] = URL_PROFILE_ORDERS;
+                        $this->web_data['profile_title'] = URL_PROFILE_ORDERS_TITLE;
+                        $user_from_database = $this->UserModel->GetUserByUserId('id', $this->web_data['authenticated_user']);
+                        break;
+                }
+                if ($case_matched) {
+                    if ($user_from_database['result']) {
+                        $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
+                        $this->web_data['authenticated_user'] = $user_from_database['data'];
+                        $this->web_data['form_token'] = parent::SetCSRFToken('Profile');
+                        parent::GetView('Home/Profile', $this->web_data);
                     }
                 }
             } else {
@@ -891,7 +900,7 @@ class AccountController extends Controller
             }
             $this->input_control->Redirect();
         } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function Index | ' . $th))['result']) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function Index | ' . $th))['result']) {
                 $this->input_control->Redirect(URL_EXCEPTION);
             } else {
                 $this->input_control->Redirect(URL_SHUTDOWN);
@@ -930,10 +939,10 @@ class AccountController extends Controller
                             'id' => $confirmed_user_from_db['id']
                         ));
                         if ($result_account_delete['result']) {
-                            $this->notification_control->SetNotification('SUCCESS', SUCCESS_ACCOUNT_DELETE);
+                            // $this->notification_control->SetNotification('SUCCESS', SUCCESS_ACCOUNT_DELETE);
                             $this->input_control->Redirect(URL_LOGOUT);
                         } else {
-                            $this->notification_control->SetNotification('DANGER', DATABASE_ERROR);
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
                         }
                     }
                 }

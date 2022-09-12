@@ -31,8 +31,6 @@ class Input
             $this->Redirect($_GET['url'] . rtrim($new_url, '&'));
         }
     }
-
-
     function IsString($input)
     {
         if (!empty($input) && is_string($input) && !empty(trim($input))) {
@@ -213,9 +211,6 @@ class Input
         }
         return $checked_inputs;
     }
-
-
-
     function GetItemsMainImageAndFormatedPrice(array $items)
     {
         foreach ($items as $key => $item) {
@@ -356,6 +351,10 @@ class Input
     }
     function GenerateUrl($url)
     {
+        // $url = str_replace(array('<', '>', '£', '#', '$', '½', '{', '[', ']', '}', '|', '"', 'é', '!', "'", '^', '+', '%', '&', '(', ')', '=', '*', '?', '_', '@', '€', '₺', '¨', '~', 'æ', 'ß', '´', '`', ',', ';', '.', ':'), '', $url);
+        // $old = array('ş', 'Ş', 'ı', 'I', 'İ', 'ğ', 'Ğ', 'ü', 'Ü', 'ö', 'Ö', 'Ç', 'ç', 'x', 'X', 'w', 'W', 'q', 'Q');
+        // $new = array('s', 's', 'i', 'i', 'i', 'g', 'g', 'u', 'u', 'o', 'o', 'c', 'c', '', '', '', '', '', '');
+        // $url = str_replace($old, $new, $url);
         $tr = array('ş', 'Ş', 'ı', 'I', 'İ', 'ğ', 'Ğ', 'ü', 'Ü', 'ö', 'Ö', 'Ç', 'ç', '(', ')', '/', ':', ',');
         $eng = array('s', 's', 'i', 'i', 'i', 'g', 'g', 'u', 'u', 'o', 'o', 'c', 'c', '', '', '-', '-', '');
         $url = str_replace($tr, $eng, $url);

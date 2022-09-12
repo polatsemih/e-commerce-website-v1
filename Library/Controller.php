@@ -4,7 +4,7 @@ class Controller
     function __construct()
     {
         try {
-            if (session_name(SESSION_NAME) != false && session_set_cookie_params(array('lifetime' => SESSION_LIFETIME, 'path' => SESSION_PATH, 'domain' => SESSION_DOMAIN, 'secure' => SESSION_SECURE, 'httponly' => SESSION_HTTP_ONLY, 'samesite' => SESSION_SAMESITE)) && session_start() && date_default_timezone_set('Europe/Istanbul')) {
+            if (!empty(session_name(SESSION_NAME)) && session_set_cookie_params(array('lifetime' => SESSION_LIFETIME, 'path' => SESSION_PATH, 'domain' => SESSION_DOMAIN, 'secure' => SESSION_SECURE, 'httponly' => SESSION_HTTP_ONLY, 'samesite' => SESSION_SAMESITE)) && session_start() && date_default_timezone_set('Europe/Istanbul')) {
                 $this->web_data = array();
                 $this->action_control = new Action();
                 $this->cookie_control = new Cookie();
@@ -17,7 +17,26 @@ class Controller
                 $this->GetModel('ItemModel');
                 $this->GetModel('LogModel');
                 $this->GetModel('UserModel');
-                
+                if (!empty($_SESSION[SESSION_OBSOLETE_NAME]) && $_SESSION[SESSION_OBSOLETE_NAME] < time()) {
+                    if ($this->session_control->KillAllSessions() && session_regenerate_id()) {
+                        $_SESSION[SESSION_REFRESH_NAME] = time() + (60 * 15);   
+                    } else {
+                        $this->input_control->Redirect(URL_EXCEPTION);
+                    }
+                }
+                if (!empty($_SESSION[SESSION_REFRESH_NAME])) {
+                    if ($_SESSION[SESSION_REFRESH_NAME] < time()) {
+                        $_SESSION[SESSION_OBSOLETE_NAME] = time() + (60 * 5);
+                        if (session_regenerate_id()) {
+                            $this->session_control->KillSession(SESSION_OBSOLETE_NAME);
+                            $_SESSION[SESSION_REFRESH_NAME] = time() + (60 * 15);
+                        } else {
+                            $this->input_control->Redirect(URL_EXCEPTION);
+                        }
+                    }
+                } else {
+                    $_SESSION[SESSION_REFRESH_NAME] = time() + (60 * 15);
+                }
                 $popular_search_items = $this->ItemModel->GetPopularSearchItems();
                 if ($popular_search_items['result']) {
                     $this->web_data['popular_search_items'] = $popular_search_items['data'];
@@ -43,7 +62,7 @@ class Controller
                                             if ($formatted_item['result']) {
                                                 $cookie_item_not_matched = false;
                                                 $this->web_data['cart_data'][] = array('item' => $formatted_item['data'], 'size' => $size_in_cart['data'], 'quantity' => $cart_items[$key]['item_quantity']);
-                                            }                                            
+                                            }
                                         }
                                     }
                                 }
@@ -54,7 +73,7 @@ class Controller
                             if (!empty($this->web_data['cart_data'])) {
                                 $formatted_cart_total_price = $this->input_control->FormatPrice($cart_total_price);
                                 if ($formatted_cart_total_price['result']) {
-                                    $this->web_data['cart_data_total_price'] = $formatted_cart_total_price['data'];   
+                                    $this->web_data['cart_data_total_price'] = $formatted_cart_total_price['data'];
                                 }
                             }
                             if (!empty($cart_items)) {
@@ -82,8 +101,9 @@ class Controller
                 }
             }
         } catch (\Throwable $th) {
-            $this->input_control->Redirect(URL_SHUTDOWN);
-        }            
+            require_once 'View/Error/Shutdown.php';
+            exit(0);
+        }
     }
     function GetModel(string $model)
     {

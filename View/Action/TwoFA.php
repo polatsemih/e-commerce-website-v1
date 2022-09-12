@@ -12,7 +12,7 @@
     <main>
         <section class="action-section">
             <div class="verify-token-container">
-                <h1 class="verify-token-title">Email kutunuza gelen doğrulama kodunu alt bölüme girerek üyeliğinizi aktif edebilirsniz.</h1>
+                <h1 class="verify-token-title">Email kutunuza gelen doğrulama kodunu alt bölüme girerek giriş yapabilirsiniz.</h1>
                 <div class="counter-container">
                     <div class="right">
                         <span class="counter-text">Kalan Süre:</span>
@@ -21,7 +21,7 @@
                         <span id="counter-remain-s" class="counter-text"></span>
                     </div>
                 </div>
-                <form id="form-verify-token" action="<?php echo URL . URL_REGISTER_CONFIRM; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                <form id="form-verify-token" action="<?php echo URL . URL_TWO_FA; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
                     <div class="row">
                         <?php if (!empty($web_data['form_token'])) : ?>
                             <input type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
@@ -39,7 +39,7 @@
                         <input class="verify-token-input" type="text" name="token_8" maxlength="1">
                     </div>
                     <div class="row-center">
-                        <button class="verify-token-submit" title="Email Adresimi Doğrula">Doğrula</button>
+                        <button class="verify-token-submit" title="Giriş Yap">Giriş Yap</button>
                         <a class="go-back-login" href="<?php echo URL . URL_LOGIN; ?>">Giriş Ekranına Dön</a>
                     </div>
                 </form>

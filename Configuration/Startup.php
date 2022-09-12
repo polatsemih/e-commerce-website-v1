@@ -17,6 +17,7 @@ define('URL_AGREEMENT_PRIVACY', 'gizlilik-ve-guvenlik-politikasi');
 define('URL_AGREEMENT_RETURN_POLICY', 'iptal-ve-iade-kosullari');
 // ActionController
 define('URL_LOGIN', 'giris');
+define('URL_TWO_FA', 'iki-asamali-dogrulama');
 define('URL_REGISTER', 'kayit');
 define('URL_REGISTER_CONFIRM', 'uyelik-aktiflestirme');
 define('URL_REGISTER_CANCEL', 'uyelik-iptal');
@@ -69,6 +70,7 @@ define('URL_MAPS', array(
     array('url_pattern' => 'sartlar-sozlesmeler-politikalar-ve-kosullar/?', 'controller' => 'HomeController', 'action' => 'Agreements'),
     // ActionController
     array('url' => 'giris', 'controller' => 'ActionController', 'action' => 'Login'),
+    array('url' => 'iki-asamali-dogrulama', 'controller' => 'ActionController', 'action' => 'TwoFA'),
     array('url' => 'kayit', 'controller' => 'ActionController', 'action' => 'Register'),
     array('url' => 'uyelik-aktiflestirme', 'controller' => 'ActionController', 'action' => 'RegisterConfirm'),
     array('url' => 'uyelik-iptal', 'controller' => 'ActionController', 'action' => 'RegisterCancel'),

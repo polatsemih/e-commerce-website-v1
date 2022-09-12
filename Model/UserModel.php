@@ -9,12 +9,9 @@ class UserModel extends Model
     {
         return $this->database->Get(TABLE_USER, $columns, 'WHERE id=? AND is_user_deleted=0', $user_id, 'SINGULAR');
     }
-
-
-    
-    function GetUserByEmail(string $columns, string $user_email)
+    function IsUserEmailUnique(string $user_email)
     {
-        return $this->database->Get(TABLE_USER, $columns, 'WHERE email=? AND is_user_deleted=0', $user_email, 'SINGULAR');
+        return $this->database->Get(TABLE_USER, 'COUNT(id)', 'WHERE email=? AND is_user_deleted=0 ', $user_email, 'SINGULAR');
     }
     function CreateUser(array $inputs)
     {
@@ -24,12 +21,12 @@ class UserModel extends Model
     {
         return $this->database->Update(TABLE_USER, $inputs);
     }
-    function DeleteUser(string $user_id)
+    function GetUserByEmail(string $columns, string $user_email)
     {
-        return $this->database->Delete(TABLE_USER, $user_id);
+        return $this->database->Get(TABLE_USER, $columns, 'WHERE email=? AND is_user_deleted=0', $user_email, 'SINGULAR');
     }
-    function IsUserEmailUnique(string $user_email)
+    function GetUserAdminByEmail(string $columns, string $user_email)
     {
-        return $this->database->Get(TABLE_USER, 'id', 'WHERE email=? AND is_user_deleted=0 ', $user_email, 'PLURAL');
+        return $this->database->Get(TABLE_ADMIN, $columns, 'WHERE email=?', $user_email, 'SINGULAR');
     }
 }
