@@ -158,3 +158,6 @@ searchIconPrimary.addEventListener('click', (e) => {
         closeSearch();
     }
 });
+console.log('%cSemih Polat', 'font-size: 50px;font-weight: bold;color: #6466ec;text-shadow: 9px 9px 0 #6466ec32;');
+console.log('%cFull Stack Web Developer', 'font-size: 25px;color: #6466ec;');
+console.log('%ccontact => ' + '%cpolatsemih@protonmail.com', 'font-size: 20px;color: #aaaaaa;', 'font-size: 20px;color: #ffffff;');

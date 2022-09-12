@@ -3738,7 +3738,7 @@ a {
     cursor: pointer;
 }
 
-.profile-section .profile-container .btn-warning { 
+.profile-section .profile-container .btn-warning {
     color: var(--color-primary-light);
     background-color: var(--warning);
 }
@@ -4790,7 +4790,7 @@ a {
     }
 
     /* Cart Settings */
-    .cart-section .cart-card .right-row  {
+    .cart-section .cart-card .right-row {
         flex-direction: row;
     }
 
@@ -4835,7 +4835,7 @@ a {
     .verify-token-container {
         width: 55%;
     }
-    
+
     .action-section #popup-wrapper .popup-container {
         width: 75%;
     }

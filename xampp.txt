@@ -1,0 +1,31 @@
+xampp/php/php_ini.txt
+session.name=PHPSESSID => session.name=BB_SESS (Session)
+;extension=sodium => extension=sodium (Encryption)
+;extension=intl => extension=intl (Class NumberFormatter)
+sendmail_path = "\"C:\xampp\sendmail\sendmail.exe\" -t" (SMTP Mail)
+extension=php_openssl.dll
+;extension=openssl => extension=openssl
+session.use_strict_mode=0 => session.use_strict_mode=1
+session.cookie_httponly= => session.cookie_httponly=1
+;session.cookie_secure = => session.cookie_secure =1
+session.cookie_samesite= => session.cookie_samesite="Strict"
+session.sid_length=26 => session.sid_length=48
+session.sid_bits_per_character=5 => session.sid_bits_per_character=6
+session.save_path="C:\xampp\tmp" => session.save_path="C:\xampp\x9laktap9tfdbtmys9wori9jhaypa33lgibnpzhmv"
+upload_tmp_dir="C:\xampp\tmp" => upload_tmp_dir="C:\xampp\x9laktap9tfdbtmys9wori9jhaypa33lgibnpzhmv"
+soap.wsdl_cache_dir="/tmp" => soap.wsdl_cache_dir="/x9laktap9tfdbtmys9wori9jhaypa33lgibnpzhmv"
+
+xampp/sendmail/sendmail.ini
+smtp_server=smtp.gmail.com
+;smtp_port=25 => smtp_port=465
+;smtp_ssl=auto => smtp_ssl=ssl
+auth_username= => auth_username=utkupolat000@gmail.com
+auth_password= => auth_password=vixotejmpgmwhfaa
+
+at xampp app apache config Apache(httpdx-xampp.conf)
+SetEnv TMP "\\xampp\\x9laktap9tfdbtmys9wori9jhaypa33lgibnpzhmv"
+
+at xampp app mysql config my.ini
+tmpdir="C:/xampp/x9laktap9tfdbtmys9wori9jhaypa33lgibnpzhmv"
+
+copy php/libsodium.dll to apache/bin/
