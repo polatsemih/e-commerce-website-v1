@@ -3754,6 +3754,32 @@ a {
     margin-bottom: 2rem;
 }
 
+.profile-section .form-password-row {
+    margin-bottom: 1rem !important;
+}
+
+.profile-section .relative-password-row {
+    position: relative;
+}
+
+.profile-section .relative-password-row .btn-action-password {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.profile-section .input-message {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--danger);
+}
+
 .profile-section .profile-container .form-row .label,
 .profile-section .profile-container .form-row .label-textarea {
     flex-basis: 20%;
@@ -3803,6 +3829,53 @@ a {
 .profile-section .profile-container .form-row .input:focus,
 .profile-section .profile-container .form-row .textarea:focus {
     outline: 0;
+}
+
+.profile-section .image-label {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-section .profile-image {
+    width: 30rem;
+}
+
+.profile-section .upload-image-icon-container {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+.profile-section .upload-image-icon {
+    font-size: 4rem;
+    opacity: 0.4;
+    -webkit-transition-property: all;
+    -moz-transition-property: all;
+    -o-transition-property: all;
+    transition-property: all;
+    -webkit-transition-duration: 0.5s;
+    -moz-transition-duration: 0.5s;
+    -o-transition-duration: 0.5s;
+    transition-duration: 0.5s;
+    -webkit-transition-timing-function: ease;
+    -moz-transition-timing-function: ease;
+    -o-transition-timing-function: ease;
+    transition-timing-function: ease;
+}
+
+.profile-section .image-label:hover .upload-image-icon {
+    opacity: 1 !important;
+}
+
+.profile-section .item-image-input {
+    display: none;
+}
+
+.profile-section .mt-2 {
+    margin-top: 2rem;
 }
 
 /* Action Settings */
