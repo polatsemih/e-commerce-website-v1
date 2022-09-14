@@ -4,69 +4,6 @@ class HomeController extends Controller
     function __construct()
     {
         parent::__construct();
-        // if (!empty($_SESSION[SESSION_AUTHENTICATION_NAME]) && !empty($_COOKIE[COOKIE_AUTHENTICATION_NAME])) {
-        //     $this->session_control->KillSession(SESSION_AUTHENTICATION_NAME);
-        //     $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME);
-        //     $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_SUCCESS_AUTHENTICATION_KILLED);
-        //     $this->input_control->Redirect(URL_LOGIN);
-        // } elseif (!empty($_SESSION[SESSION_AUTHENTICATION_NAME])) {
-        //     $session_authentication_error = true;
-        //     $checked_session_authentication_token = $this->input_control->CheckInputWithLength($_SESSION[SESSION_AUTHENTICATION_NAME], 255);
-        //     if (!empty($checked_session_authentication_token)) {
-        //         $session_authentication_from_database = $this->ActionModel->GetSessionAuthentication(array($_SERVER['REMOTE_ADDR'], $checked_session_authentication_token));
-        //         if (!empty($session_authentication_from_database) && $session_authentication_from_database['date_session_authentication_expiry'] > date('Y-m-d H:i:s') && $session_authentication_from_database['session_authentication_is_logout'] == 0) {
-        //             $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id,user_role', $session_authentication_from_database['user_id']);
-        //             if (!empty($authenticated_user_from_database)) {
-        //                 if (session_regenerate_id(true)) {
-        //                     $session_authentication_error = false;
-        //                     $this->web_data['authenticated_user'] = $authenticated_user_from_database;
-        //                 }
-        //             }
-        //             if ($session_authentication_error && $this->ActionModel->UpdateSessionAuthentication(array('is_session_authentication_killed' => 1, 'session_authentication_killed_function' => 'HomeController __construct', 'date_session_authentication_killed' => date('Y-m-d H:i:s'), 'id' => $session_authentication_from_database['id'])) == 'Updated') {
-        //                 $this->session_control->KillSession(SESSION_AUTHENTICATION_NAME);
-        //                 $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_SUCCESS_AUTHENTICATION_KILLED);
-        //                 $this->input_control->Redirect(URL_LOGIN);
-        //             }
-        //         }
-        //     }
-        //     if ($session_authentication_error) {
-        //         $this->session_control->KillSession(SESSION_AUTHENTICATION_NAME);
-        //         $this->input_control->Redirect();
-        //     }
-        // } elseif (!empty($_COOKIE[COOKIE_AUTHENTICATION_NAME])) {
-        //     $cookie_authentication_error = true;
-        //     $checked_cookie_authentication = $this->input_control->CheckInputWithLength($_COOKIE[COOKIE_AUTHENTICATION_NAME], 500);
-        //     if (!empty($checked_cookie_authentication)) {
-        //         $cookie_authentication_from_database = $this->ActionModel->GetCookieAuthentication(array($_SERVER['REMOTE_ADDR'], substr($checked_cookie_authentication, 0, 247)));
-        //         if (!empty($cookie_authentication_from_database) && $cookie_authentication_from_database['date_cookie_authentication_expiry'] > date('Y-m-d H:i:s') && $cookie_authentication_from_database['is_cookie_authentication_logout'] == 0) {
-        //             try {
-        //                 $cookie_authentication_token1 = hash_hmac('SHA512', substr($checked_cookie_authentication, 247, 253), $cookie_authentication_from_database['cookie_authentication_salt'], false);
-        //                 if (hash_equals($cookie_authentication_from_database['cookie_authentication_token1'], $cookie_authentication_token1)) {
-        //                     $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id,user_role', $cookie_authentication_from_database['user_id']);
-        //                     if (!empty($authenticated_user_from_database)) {
-        //                         if (session_regenerate_id(true)) {
-        //                             $cookie_authentication_error = false;
-        //                             $this->web_data['authenticated_user'] = $authenticated_user_from_database;
-        //                         }
-        //                     }
-        //                 }
-        //                 if ($cookie_authentication_error && $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME) && $this->ActionModel->UpdateCookieAuthentication(array('is_cookie_authentication_killed' => 1, 'cookie_authentication_killed_function' => 'HomeController __construct', 'date_cookie_authentication_killed' => date('Y-m-d H:i:s'), 'id' => $cookie_authentication_from_database['id'])) == 'Updated') {
-        //                     $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_SUCCESS_AUTHENTICATION_KILLED);
-        //                     $this->input_control->Redirect(URL_LOGIN);
-        //                 }
-        //             } catch (\Throwable $th) {
-        //                 $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function __construct COOKIE | ' . $th));
-        //                 $this->GetView('Error/NotResponse');
-        //             }
-        //         }
-        //     }
-        //     if ($cookie_authentication_error) {
-        //         $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME);
-        //         $this->input_control->Redirect();
-        //     }
-        // }
-        // $_SERVER['HTTP_HOST'] bu neymiş yaw
-        // $this->web_data['authenticated_user'] = '2BEV2kDDjyZ1Qb3APgxurvkDrW7biovabxUNnNJgd1B1X4sF12oVCKd9xKNIKcDEuzZzODIw7IcuEqYFgmudVWxnLPA5OJyZexfrTpQTqbntSMHx2um2j740phOJqmQERfUqkj0JobJyeiS5G0k7LySjiBEVtAbvhQm8HgdrlPG6KS4vthDRUIo9GuJhooVBBlJgyrJxCrPjJCclTgNUvHLJlOCiF7ddGaz3JX8LjE2NTg1Njk4Mzc4NTU';
     }
     function Index()
     {
@@ -81,7 +18,7 @@ class HomeController extends Controller
                         $this->web_data['home_items'] = $formatted_home_items['data'];
                     }
                 }
-                echo $_SESSION[SESSION_AUTHENTICATION_NAME];
+
                 $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url,gender_home_image');
                 parent::GetView('Home/Index', $this->web_data);
             }
@@ -890,6 +827,494 @@ class HomeController extends Controller
             $this->input_control->Redirect();
         } catch (\Throwable $th) {
             if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function Agreements | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function LogOut()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($this->web_data['authenticated_user'])) {
+                if (!empty($this->web_data['session_authentication_id'])) {
+                    $this->ActionModel->UpdateSessionAuthentication(array('is_session_authentication_logout' => 1, 'date_session_authentication_logout' => date('Y-m-d H:i:s'), 'id' => $this->web_data['session_authentication_id']));
+                    $this->session_control->KillSession(SESSION_AUTHENTICATION_NAME);
+                    $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_LOG_OUT);
+                }
+                if (!empty($this->web_data['cookie_authentication_id'])) {
+                    $this->ActionModel->UpdateCookieAuthentication(array('is_cookie_authentication_logout' => 1, 'date_cookie_authentication_logout' => date('Y-m-d H:i:s'), 'id' => $this->web_data['cookie_authentication_id']));
+                    $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME);
+                    $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_LOG_OUT);
+                }
+            }
+            $this->input_control->Redirect();
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function LogOut | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function Profile(string $profile_url)
+    {
+        try {
+            if (empty($this->web_data['authenticated_user'])) {
+                $this->input_control->Redirect();
+            }
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl();
+                parent::LogView('Home-Profile-' . $profile_url);
+                $case_matched = false;
+                switch ($profile_url) {
+                    case URL_PROFILE_INFORMATIONS:
+                        $case_matched = true;
+                        $this->web_data['profile_type'] = URL_PROFILE_INFORMATIONS;
+                        $this->web_data['profile_title'] = URL_PROFILE_INFO_TITLE;
+                        $user_from_database = $this->UserModel->GetUserByUserId('first_name,last_name,user_delete_able', $this->web_data['authenticated_user']);
+                        break;
+                    case URL_PROFILE_ADDRESS:
+                        $case_matched = true;
+                        $this->web_data['profile_type'] = URL_PROFILE_ADDRESS;
+                        $this->web_data['profile_title'] = URL_PROFILE_ADDRESS_TITLE;
+                        $user_from_database = $this->UserModel->GetUserByUserId('address', $this->web_data['authenticated_user']);
+                        break;
+                    case URL_PROFILE_PASSWORD:
+                        $case_matched = true;
+                        $this->web_data['profile_type'] = URL_PROFILE_PASSWORD;
+                        $this->web_data['profile_title'] = URL_PROFILE_PWD_TITLE;
+                        break;
+                    case URL_PROFILE_EMAIL:
+                        $case_matched = true;
+                        $this->web_data['profile_type'] = URL_PROFILE_EMAIL;
+                        $this->web_data['profile_title'] = URL_PROFILE_EMAIL_TITLE;
+                        $user_from_database = $this->UserModel->GetUserByUserId('email', $this->web_data['authenticated_user']);
+                        break;
+                    case URL_PROFILE_PHONE:
+                        $case_matched = true;
+                        $this->web_data['profile_type'] = URL_PROFILE_PHONE;
+                        $this->web_data['profile_title'] = URL_PROFILE_TEL_TITLE;
+                        $user_from_database = $this->UserModel->GetUserByUserId('phone_number', $this->web_data['authenticated_user']);
+                        break;
+                    case URL_PROFILE_PHOTO:
+                        $case_matched = true;
+                        $this->web_data['profile_type'] = URL_PROFILE_PHOTO;
+                        $this->web_data['profile_title'] = URL_PROFILE_PHOTO_TITLE;
+                        $user_from_database = $this->UserModel->GetUserByUserId('profile_image_path,profile_image', $this->web_data['authenticated_user']);
+                        break;
+                    case URL_PROFILE_ORDERS:
+                        $case_matched = true;
+                        $this->web_data['profile_type'] = URL_PROFILE_ORDERS;
+                        $this->web_data['profile_title'] = URL_PROFILE_ORDERS_TITLE;
+                        break;
+                }
+                if ($case_matched) {
+                    if (!empty($user_from_database) && $user_from_database['result']) {
+                        $this->web_data['authenticated_user'] = $user_from_database['data'];
+                    }
+                    $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
+                    $this->web_data['form_token'] = parent::SetCSRFToken('Profile');
+                    parent::GetView('Home/Profile', $this->web_data);
+                }
+            }
+            parent::KillAuthentication('HomeController Profile');
+            $this->input_control->Redirect();
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function Profile | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function ProfileInformationsUpdate()
+    {
+        try {
+            if (empty($this->web_data['authenticated_user'])) {
+                $this->input_control->Redirect();
+            }
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'user_first_name' => array('input' => isset($_POST['user_first_name']) ? $_POST['user_first_name'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_USER_NAME, 'no_white_space' => true, 'error_message_no_white_space' => TR_NOTIFICATION_ERROR_NOT_VALID_USER_NAME, 'length_control' => true, 'max_length' => USER_NAME_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_MAX_LIMIT_USER_NAME, 'preventxss' => true, 'length_limit' => USER_NAME_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_MAX_LIMIT_USER_NAME),
+                    'user_last_name' => array('input' => isset($_POST['user_last_name']) ? $_POST['user_last_name'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_USER_LAST_NAME, 'no_white_space' => true, 'error_message_no_white_space' => TR_NOTIFICATION_ERROR_NOT_VALID_USER_LAST_NAME, 'length_control' => true, 'max_length' => USER_NAME_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_MAX_LIMIT_USER_LAST_NAME, 'preventxss' => true, 'length_limit' => USER_NAME_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_MAX_LIMIT_USER_LAST_NAME),
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'Profile')) {
+                        $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id,first_name,last_name', $this->web_data['authenticated_user']);
+                        if ($confirmed_user_from_db['result']) {
+                            if ($confirmed_user_from_db['data']['first_name'] == $checked_inputs['user_first_name'] && $confirmed_user_from_db['data']['last_name'] == $checked_inputs['user_last_name']) {
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_NEW_USER_NAME);
+                            } else {
+                                if ($this->UserModel->UpdateUser(array('first_name' => $checked_inputs['user_first_name'], 'last_name' => $checked_inputs['user_last_name'], 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                                    $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_PROFILE_USER_NAME_UPDATE);
+                                } else {
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                }
+                            }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                        }
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                }
+                $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_INFORMATIONS);
+            }
+            parent::KillAuthentication('HomeController ProfileInformationsUpdate');
+            $this->input_control->Redirect();
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function ProfileInformationsUpdate | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function ProfilePasswordUpdate()
+    {
+        try {
+            if (empty($this->web_data['authenticated_user'])) {
+                $this->input_control->Redirect();
+            }
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'user_old_password' => array('input' => isset($_POST['user_old_password']) ? $_POST['user_old_password'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_PASSWORD),
+                    'user_new_password' => array('input' => isset($_POST['user_new_password']) ? $_POST['user_new_password'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_PASSWORD, 'no_white_space' => true, 'error_message_no_white_space' => TR_NOTIFICATION_ERROR_NO_WHITE_SPACE_PASSWORD, 'length_control' => true, 'min_length' => PASSWORD_MIN_LIMIT, 'error_message_min_length' => TR_NOTIFICATION_ERROR_MIN_LENGTH_PASSWORD, 'is_password' => true, 'error_message_is_password' => TR_NOTIFICATION_ERROR_PATTERN_PASSWORD),
+                    'user_new_re_password' => array('input' => isset($_POST['user_new_re_password']) ? $_POST['user_new_re_password'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_RE_PASSWORD, 'no_white_space' => true, 'error_message_no_white_space' => TR_NOTIFICATION_ERROR_NO_WHITE_SPACE_PASSWORD, 'length_control' => true, 'min_length' => PASSWORD_MIN_LIMIT, 'error_message_min_length' => TR_NOTIFICATION_ERROR_MIN_LENGTH_PASSWORD, 'is_password' => true, 'error_message_is_password' => TR_NOTIFICATION_ERROR_PATTERN_PASSWORD),
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'Profile')) {
+                        $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id,password,password_salt', $this->web_data['authenticated_user']);
+                        if ($confirmed_user_from_db['result']) {
+                            $salted_old_password = hash_hmac('sha512', $confirmed_user_from_db['data']['password_salt'] . str_replace("\0", "", $checked_inputs['user_old_password']), PASSWORD_SECRET_KEY, true);
+                            $decrypted_old_hashed_password = $this->input_control->DecrypteData($confirmed_user_from_db['data']['password'], PASSWORD_PEPPER);
+                            if ($decrypted_old_hashed_password['result'] && !empty($salted_old_password)) {
+                                if (password_verify($salted_old_password, $decrypted_old_hashed_password['data'])) {
+                                    $password_salt = strtr(sodium_bin2base64(random_bytes(75), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING), array('-' => '2', '_' => '4'));
+                                    $salted_password = hash_hmac('sha512', $password_salt . str_replace("\0", "", $checked_inputs['user_new_password']), PASSWORD_SECRET_KEY, true);
+                                    $salted_re_password = hash_hmac('sha512', $password_salt . str_replace("\0", "", $checked_inputs['user_new_re_password']), PASSWORD_SECRET_KEY, true);
+                                    if (!empty($salted_password) && !empty($salted_re_password)) {
+                                        $hashed_password = password_hash($salted_password, PASSWORD_BCRYPT, $this->password_control->BcryptOptions());
+                                        if (password_verify($salted_re_password, $hashed_password)) {
+                                            if ($this->UserModel->UpdateUser(array('password' => $this->input_control->EncrypteData($hashed_password, PASSWORD_PEPPER), 'password_salt' => $password_salt, 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                                                $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_PROFILE_PASSWORD_UPDATE);
+                                            } else {
+                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                            }
+                                        } else {
+                                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_NOT_SAME_PASSWORDS);
+                                        }
+                                    } else {
+                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_PROFILE_PASSWORD_UPDATE);
+                                    }
+                                } else {
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_WRONG_OLD_PASSWORD);
+                                }
+                            } else {
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_PROFILE_PASSWORD_UPDATE);
+                            }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                        }
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                }
+                $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_PASSWORD);
+            }
+            parent::KillAuthentication('HomeController ProfilePasswordUpdate');
+            $this->input_control->Redirect();
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function ProfilePasswordUpdate | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function ProfileEmailUpdate()
+    {
+        try {
+            if (empty($this->web_data['authenticated_user'])) {
+                $this->input_control->Redirect();
+            }
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'user_email' => array('input' => isset($_POST['user_email']) ? $_POST['user_email'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL, 'no_white_space' => true, 'error_message_no_white_space' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL, 'is_email' => true, 'error_message_is_email' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL, 'length_control' => true, 'max_length' => EMAIL_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL, 'preventxss' => true, 'length_limit' => EMAIL_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL),
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'Profile')) {
+                        $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id,email', $this->web_data['authenticated_user']);
+                        if ($confirmed_user_from_db['result']) {
+                            if ($confirmed_user_from_db['data']['email'] != $checked_inputs['user_email']) {
+                                $is_email_unique = $this->UserModel->IsUserEmailUnique($checked_inputs['user_email']);
+                                if ($is_email_unique['result']) {
+                                    if ($is_email_unique['data']['COUNT(id)'] > 0) {
+                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_PROFILE_NOT_UNIQUE_EMAIL);
+                                    } else {
+                                        $session_update_email = $this->input_control->GenerateToken();
+                                        $session_update_email_bytes = $this->action_control->GenerateConfirmTokenBytes();
+                                        if (!empty($session_update_email_bytes)) {
+                                            $hashed_token = $this->action_control->HashedConfirmTokenBytes($session_update_email_bytes[4] . $session_update_email_bytes[7] . $session_update_email_bytes[0] . $session_update_email_bytes[1] . $session_update_email_bytes[6] . $session_update_email_bytes[3] . $session_update_email_bytes[2] . $session_update_email_bytes[5]);
+                                            if (!empty($session_update_email['result']) && !empty($hashed_token) && $this->UserModel->CreateSessionUpdateEmail(array('user_id' => $this->web_data['authenticated_user'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'update_email_token' => $session_update_email['data'], 'update_email_hashed_tokens' => $hashed_token, 'date_update_email_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_CONFIRM_EMAIL_TOKEN)), 'is_update_email_used' => 0))['result'] && $this->action_control->SendMail($this->input_control->DecodePreventXSS($checked_inputs['user_email']), BRAND . ' Yeni Email Doğrulama', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>Yeni Email Doğrulama | ' . BRAND . '</title><style>* {margin: 0px;padding: 0px;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}body {font-family: sans-serif;background-color: #ffffff;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;border-bottom-width: 1px;border-bottom-style: solid;border-bottom-color: #ffffff;}.title {font-size: 40px;letter-spacing: 5px;color: #ffffff;margin-bottom: 20px;}.text-1 {font-size: 16px;line-height: 1.4;color: #ffffff;letter-spacing: 1px;}.main {background-color: #000000;text-align: center;}.confirm-container {width: 100%;margin-left: auto;margin-right: auto;padding-top: 20px;padding-bottom: 20px;}.confirm {display: inline-block;font-size: 20px;text-align: center;background-color: #ffffff;color: #000000;width: 10%;padding-top: 10px;padding-bottom: 10px;margin-right: 1%;}.text-2 {font-size: 15px;line-height: 1.4;color: #ffffff;padding-top: 20px;margin-bottom: 10px;padding-left: 10px;padding-right: 10px;border-top-width: 1px;border-top-style: solid;border-top-color: #ffffff;}.text-3 {font-size: 13px;line-height: 1.4;color: #ffffff;padding-left: 10px;padding-right: 10px;padding-bottom: 20px;}.footer {background-color: #f3f3f398;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.footer-text {font-size: 13px;line-height: 1.4;color: #000000;margin-bottom: 20px;}.footer-url {font-size: 12px;color: #000000;margin-right: 10px;}.footer-date {font-size: 12px;color: #000000;margin-left: 10px;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}.confirm-container {width: 70%;}.confirm {padding-top: 20px;padding-bottom: 20px;}}</style></head><body><div class="container"><div class="header"><h1 class="title">BB</h1><p class="text-1">' . BRAND . ' Yeni Email Doğrulama</p></div><div class="main"><div class="confirm-container"><span class="confirm">' . $session_update_email_bytes[2] . '</span><span class="confirm">' . $session_update_email_bytes[4] . '</span><span class="confirm">' . $session_update_email_bytes[0] . '</span><span class="confirm">' . $session_update_email_bytes[7] . '</span><span class="confirm">' . $session_update_email_bytes[1] . '</span><span class="confirm">' . $session_update_email_bytes[3] . '</span><span class="confirm">' . $session_update_email_bytes[6] . '</span><span class="confirm">' . $session_update_email_bytes[5] . '</span></div><p class="text-2">Yeni email adresinizi doğrulamak için üstteki kodu girin</p><p class="text-3">Doğrulama kodunun kullanım süresi ' . EXPIRY_CONFIRM_EMAIL_TOKEN_MINUTE . ' dakikadır</p></div><footer class="footer"><p class="footer-text">Bu işlemi siz gerçekleştirmediyseniz, hemen ' . BRAND . ' hesabınızın şifresini değiştirin</p><a class="footer-url" href="' . PURE_URL . '">' . PURE_URL . '</a><span class="footer-date">' . date('d/m/Y H:i:s') . '</span></footer></div></body></html>') && $this->ActionModel->CreateLogEmailSent(array('user_id' => $this->web_data['authenticated_user'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'email_type' => 'EmailUpdate'))['result']) {
+                                                $_SESSION[SESSION_EMAIL_UPDATE_NAME] = array('token' => $session_update_email['data'], 'email' => $checked_inputs['user_email']);
+                                                $this->input_control->Redirect(URL_EMAIL_UPDATE_CONFIRM);
+                                            }
+                                        }
+                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_EMAIL_UPDATE);
+                                    }
+                                } else {
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                }
+                            } else {
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_PROFILE_NEW_EMAIL);
+                            }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                        }
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                }
+                $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_EMAIL);
+            }
+            parent::KillAuthentication('HomeController ProfileEmailUpdate');
+            $this->input_control->Redirect();
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function ProfileEmailUpdate | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function EmailUpdateConfirm()
+    {
+        try {
+            if (empty($this->web_data['authenticated_user'])) {
+                $this->input_control->Redirect();
+            }
+            if (!empty($_SESSION[SESSION_EMAIL_UPDATE_NAME])) {
+                $email_update_token_from_database = $this->UserModel->GetSessionUpdateEmail(array($_SERVER['REMOTE_ADDR'], $_SESSION[SESSION_EMAIL_UPDATE_NAME]['token']));
+                if ($email_update_token_from_database['result'] && $email_update_token_from_database['data']['date_update_email_expiry'] > date('Y-m-d H:i:s') && $email_update_token_from_database['data']['is_update_email_used'] == 0) {
+                    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                        $this->input_control->CheckUrl();
+                        parent::LogView('Home-EmailUpdateConfirm');
+                        $bait_token = $this->action_control->GenerateBaitToken();
+                        if (!empty($bait_token)) {
+                            $this->web_data['confirm_token'] = $bait_token;
+                        }
+                        $a = strtotime($email_update_token_from_database['data']['date_update_email_expiry']);
+                        $b = strtotime(date('Y-m-d H:i:s'));
+                        if (!empty($a) && !empty($b)) {
+                            $this->web_data['expiry_remain_minute'] = (int)(($a - $b) / 60);
+                            $this->web_data['expiry_remain_second'] = ($a - $b) % 60;
+                            $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
+                            $this->web_data['form_token'] = parent::SetCSRFToken('EmailUpdateConfirm');
+                            parent::GetView('Home/EmailUpdate', $this->web_data);
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                        }
+                    } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
+                        $checked_email = $_SESSION[SESSION_EMAIL_UPDATE_NAME]['email'];
+                        $this->session_control->KillSession(SESSION_EMAIL_UPDATE_NAME);
+                        $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                            'token_1' => array('input' => isset($_POST['token_1']) ? $_POST['token_1'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN, 'length_control' => true, 'max_length' => 1, 'error_message_max_length' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN, 'preventxssforid' => true, 'length_limit' => 1, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN),
+                            'token_2' => array('input' => isset($_POST['token_2']) ? $_POST['token_2'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN, 'length_control' => true, 'max_length' => 1, 'error_message_max_length' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN, 'preventxssforid' => true, 'length_limit' => 1, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN),
+                            'token_3' => array('input' => isset($_POST['token_3']) ? $_POST['token_3'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN, 'length_control' => true, 'max_length' => 1, 'error_message_max_length' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN, 'preventxssforid' => true, 'length_limit' => 1, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN),
+                            'token_4' => array('input' => isset($_POST['token_4']) ? $_POST['token_4'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN, 'length_control' => true, 'max_length' => 1, 'error_message_max_length' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN, 'preventxssforid' => true, 'length_limit' => 1, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN),
+                            'token_5' => array('input' => isset($_POST['token_5']) ? $_POST['token_5'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN, 'length_control' => true, 'max_length' => 1, 'error_message_max_length' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN, 'preventxssforid' => true, 'length_limit' => 1, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN),
+                            'token_6' => array('input' => isset($_POST['token_6']) ? $_POST['token_6'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN, 'length_control' => true, 'max_length' => 1, 'error_message_max_length' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN, 'preventxssforid' => true, 'length_limit' => 1, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN),
+                            'token_7' => array('input' => isset($_POST['token_7']) ? $_POST['token_7'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN, 'length_control' => true, 'max_length' => 1, 'error_message_max_length' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN, 'preventxssforid' => true, 'length_limit' => 1, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN),
+                            'token_8' => array('input' => isset($_POST['token_8']) ? $_POST['token_8'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN, 'length_control' => true, 'max_length' => 1, 'error_message_max_length' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN, 'preventxssforid' => true, 'length_limit' => 1, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN),
+                            'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                        ));
+                        if (empty($checked_inputs['error_message'])) {
+                            if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'EmailUpdateConfirm')) {
+                                $hashed_token = $this->action_control->HashedConfirmTokenBytes($checked_inputs['token_2'] . $checked_inputs['token_4'] . $checked_inputs['token_3'] . $checked_inputs['token_5'] . $checked_inputs['token_7'] . $checked_inputs['token_6'] . $checked_inputs['token_1'] . $checked_inputs['token_8']);
+                                if ($this->UserModel->UpdateSessionUpdateEmail(array('is_update_email_used' => 1, 'date_update_email_used' => date('Y-m-d H:i:s'), 'id' => $email_update_token_from_database['data']['id']))['result'] && !empty($hashed_token)) {
+                                    if ($email_update_token_from_database['data']['update_email_hashed_tokens'] == $hashed_token) {
+                                        $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id', $this->web_data['authenticated_user']);
+                                        if ($confirmed_user_from_db['result']) {
+                                            if ($this->UserModel->UpdateUser(array('email' => $checked_email, 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                                                $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_EMAIL_UPDATE);
+                                            } else {
+                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                            }
+                                        } else {
+                                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                        }
+                                    } else {
+                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN);
+                                    }
+                                } else {
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                }
+                            }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                        }
+                    }
+                } else {
+                    $this->session_control->KillSession(SESSION_EMAIL_UPDATE_NAME);
+                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_EMAIL_UPDATE_TOKEN_EXPIRIED);
+                }
+                $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_EMAIL);
+            }
+            parent::KillAuthentication('HomeController EmailUpdateConfirm');
+            $this->input_control->Redirect();
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function EmailUpdateConfirm | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function ProfilePhoneUpdate()
+    {
+    }
+    function ProfilePhotoUpdate()
+    {
+        try {
+            if (empty($this->web_data['authenticated_user'])) {
+                $this->input_control->Redirect();
+            }
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile_photo'])) {
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'Profile')) {
+                        $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id', $this->web_data['authenticated_user']);
+                        if ($confirmed_user_from_db['result']) {
+                            print_r($_FILES);
+                            exit(0);
+
+
+
+
+
+                            if (isset($_FILES['user_image'])) {
+                                $user_image = $_FILES['user_image'];
+                                if ($user_image['error'] == 0) {
+                                    if ($user_image['size'] <= (1024 * 1024 * 20)) {
+                                        $accepted_image_types = array('image/png', 'image/jpeg');
+                                        if (in_array($user_image['type'], $accepted_image_types)) {
+                                            $user_name = explode(".", $user_image['name']);
+                                            $new_image_folder = USER_IMAGES_PATH . $this->authenticated_user['id'];
+                                            $filename = $user_image['tmp_name'];
+                                            if (!is_dir($new_image_folder)) {
+                                                mkdir($new_image_folder, 0777, true);
+                                            }
+                                            $image_random_name = strtolower(substr(strtr(base64_encode(hash_hmac('SHA512', time(), base64_encode(random_bytes(128)), true)), array('+' => 't', '=' => 's', '/' => '9', '.' => '2', '_' => 'g')), 21, 30));
+                                            $width = 100;
+                                            $height = 100;
+                                            $dst_image = imagecreatetruecolor($width, $height);
+                                            $image_infos = getimagesize($filename);
+                                            $image_width = $image_infos[0];
+                                            $image_height = $image_infos[1];
+                                            $uploadImageType = $image_infos[2];
+                                            if ($uploadImageType == 2) {
+                                                $src_image = imagecreatefromjpeg($filename);
+                                                imagecopyresampled($dst_image, $src_image, 0, 0, 0, 0, $width, $height, $image_width, $image_height);
+                                                imagejpeg($dst_image, $new_image_folder . '/' . $image_random_name . '.' . $user_name[count($user_name) - 1], 100);
+                                            } elseif ($uploadImageType == 3) {
+                                                $src_image = imagecreatefrompng($filename);
+                                                imagecopyresampled($dst_image, $src_image, 0, 0, 0, 0, $width, $height, $image_width, $image_height);
+                                                imagepng($dst_image, $new_image_folder . '/' . $image_random_name . '.' . $user_name[count($user_name) - 1], 9);
+                                            }
+                                            imagedestroy($src_image);
+                                            $user_images_db = $image_random_name . '.' . $user_name[count($user_name) - 1] . '-';
+                                            $success = true;
+                                        } else {
+                                            $data['image_error_message'] = 'Fotoğrafın Uzantısı Desteklenmiyor (Desteklenen Uzantılar: jpeg, png)';
+                                        }
+                                    } else {
+                                        $data['image_error_message'] = 'Fotoğrafın Boyutu 20mb dan Fazla Olamaz';
+                                    }
+                                } else {
+                                    $data['image_error_message'] = 'Profil Fotoğrafını Yükleyin';
+                                }
+                            } else {
+                                $data['image_error_message'] = 'Profil Fotoğrafını Yükleyin';
+                            }
+
+
+
+
+
+
+
+
+
+
+
+
+                            if ($this->UserModel->UpdateUser(array('profile_image_path' => '', 'profile_image' => '', 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                                $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_PROFILE_PHOTO_UPDATE);
+                            } else {
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                            }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                        }
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                }
+                $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_PHOTO);
+            }
+            parent::KillAuthentication('HomeController ProfilePhotoUpdate');
+            $this->input_control->Redirect();
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function ProfilePhotoUpdate | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function ProfileDelete()
+    {
+        try {
+            if (empty($this->web_data['authenticated_user'])) {
+                $this->input_control->Redirect();
+            }
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_user_delete'])) {
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'Profile')) {
+                        $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id,user_delete_able', $this->web_data['authenticated_user']);
+                        if ($confirmed_user_from_db['result'] && $confirmed_user_from_db['data']['user_delete_able'] == 1 && $this->UserModel->UpdateUser(array('is_user_deleted' => 1, 'date_user_deleted' => date('Y-m-d H:i:s'), 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                            $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_ACCOUNT_DELETE);
+                            if (!empty($this->web_data['session_authentication_id'])) {
+                                $this->ActionModel->UpdateSessionAuthentication(array('is_session_authentication_logout' => 1, 'date_session_authentication_logout' => date('Y-m-d H:i:s'), 'id' => $this->web_data['session_authentication_id']));
+                                $this->session_control->KillSession(SESSION_AUTHENTICATION_NAME);
+                            }
+                            if (!empty($this->web_data['cookie_authentication_id'])) {
+                                $this->ActionModel->UpdateCookieAuthentication(array('is_cookie_authentication_logout' => 1, 'date_cookie_authentication_logout' => date('Y-m-d H:i:s'), 'id' => $this->web_data['cookie_authentication_id']));
+                                $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME);
+                            }
+                            $this->input_control->Redirect();
+                        }
+                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                }
+                $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_INFORMATIONS);
+            }
+            parent::KillAuthentication('HomeController ProfileDelete');
+            $this->input_control->Redirect();
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function ProfileDelete | ' . $th))['result']) {
                 $this->input_control->Redirect(URL_EXCEPTION);
             } else {
                 $this->input_control->Redirect(URL_SHUTDOWN);

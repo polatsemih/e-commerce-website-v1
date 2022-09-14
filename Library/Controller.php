@@ -19,7 +19,7 @@ class Controller
                 $this->GetModel('UserModel');
                 if (!empty($_SESSION[SESSION_OBSOLETE_NAME]) && $_SESSION[SESSION_OBSOLETE_NAME] < time()) {
                     if ($this->session_control->KillAllSessions() && session_regenerate_id()) {
-                        $_SESSION[SESSION_REFRESH_NAME] = time() + (60 * 15);   
+                        $_SESSION[SESSION_REFRESH_NAME] = time() + (60 * 15);
                     } else {
                         $this->input_control->Redirect(URL_EXCEPTION);
                     }
@@ -36,6 +36,62 @@ class Controller
                     }
                 } else {
                     $_SESSION[SESSION_REFRESH_NAME] = time() + (60 * 15);
+                }
+                if (!empty($_SESSION[SESSION_AUTHENTICATION_NAME]) && !empty($_COOKIE[COOKIE_AUTHENTICATION_NAME])) {
+                    $this->session_control->KillSession(SESSION_AUTHENTICATION_NAME);
+                    $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME);
+                    $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_SUCCESS_AUTHENTICATION_KILLED);
+                    $this->input_control->Redirect(URL_LOGIN);
+                } elseif (!empty($_SESSION[SESSION_AUTHENTICATION_NAME])) {
+                    $session_authentication_error = true;
+                    $session_authentication_from_database = $this->ActionModel->GetSessionAuthentication(array($_SERVER['REMOTE_ADDR'], $_SESSION[SESSION_AUTHENTICATION_NAME]));
+                    if ($session_authentication_from_database['result'] && $session_authentication_from_database['data']['date_session_authentication_expiry'] > date('Y-m-d H:i:s') && $session_authentication_from_database['data']['is_session_authentication_logout'] == 0) {
+                        $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id', $session_authentication_from_database['data']['user_id']);
+                        if ($authenticated_user_from_database['result']) {
+                            $session_authentication_error = false;
+                            $this->web_data['authenticated_user'] = $authenticated_user_from_database['data']['id'];
+                            $this->web_data['session_authentication_id'] = $session_authentication_from_database['data']['id'];
+                        }
+                        if ($session_authentication_error && $this->ActionModel->UpdateSessionAuthentication(array('is_session_authentication_killed' => 1, 'date_session_authentication_killed' => date('Y-m-d H:i:s'), 'session_authentication_killed_function' => 'Controller __construct', 'id' => $session_authentication_from_database['data']['id']))['result']) {
+                            $this->session_control->KillSession(SESSION_AUTHENTICATION_NAME);
+                            $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_SUCCESS_AUTHENTICATION_KILLED);
+                            $this->input_control->Redirect(URL_LOGIN);
+                        }
+                    }
+                    if ($session_authentication_error) {
+                        $this->session_control->KillSession(SESSION_AUTHENTICATION_NAME);
+                        $this->input_control->Redirect(URL_LOGIN);
+                    }
+                } elseif (!empty($_COOKIE[COOKIE_AUTHENTICATION_NAME])) {
+                    $cookie_authentication_error = true;
+                    $checked_cookie_authentication = $this->input_control->CheckGETInputWithLength($_COOKIE[COOKIE_AUTHENTICATION_NAME], 400);
+                    if (!empty($checked_cookie_authentication)) {
+                        $extracted_cookie_authentication_token1 = substr($checked_cookie_authentication, 200, 200);
+                        $extracted_cookie_authentication_token2 = substr($checked_cookie_authentication, 0, 200);
+                        if (!empty($extracted_cookie_authentication_token1) && !empty($extracted_cookie_authentication_token2)) {
+                            $cookie_authentication_from_database = $this->ActionModel->GetCookieAuthentication(array($_SERVER['REMOTE_ADDR'], $extracted_cookie_authentication_token2));
+                            if ($cookie_authentication_from_database['result'] && $cookie_authentication_from_database['data']['date_cookie_authentication_expiry'] > date('Y-m-d H:i:s') && $cookie_authentication_from_database['data']['is_cookie_authentication_logout'] == 0) {
+                                $cookie_authentication_token1 = hash_hmac('SHA512', $extracted_cookie_authentication_token1, $cookie_authentication_from_database['data']['cookie_authentication_salt'], false);
+                                if (hash_equals($cookie_authentication_from_database['data']['cookie_authentication_token1'], $cookie_authentication_token1)) {
+                                    $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id', $cookie_authentication_from_database['data']['user_id']);
+                                    if ($authenticated_user_from_database['result']) {
+                                        $cookie_authentication_error = false;
+                                        $this->web_data['authenticated_user'] = $authenticated_user_from_database['data']['id'];
+                                        $this->web_data['cookie_authentication_id'] = $cookie_authentication_from_database['data']['id'];
+                                    }
+                                }
+                                if ($cookie_authentication_error && $this->ActionModel->UpdateCookieAuthentication(array('is_cookie_authentication_killed' => 1, 'date_cookie_authentication_killed' => date('Y-m-d H:i:s'), 'cookie_authentication_killed_function' => 'Controller __construct', 'id' => $cookie_authentication_from_database['data']['id']))['result']) {
+                                    $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME);
+                                    $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_SUCCESS_AUTHENTICATION_KILLED);
+                                    $this->input_control->Redirect(URL_LOGIN);
+                                }
+                            }
+                        }
+                    }
+                    if ($cookie_authentication_error) {
+                        $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME);
+                        $this->input_control->Redirect(URL_LOGIN);
+                    }
                 }
                 $popular_search_items = $this->ItemModel->GetPopularSearchItems();
                 if ($popular_search_items['result']) {
@@ -162,5 +218,18 @@ class Controller
             return $genders['data'];
         }
         $this->input_control->Redirect(URL_SHUTDOWN);
+    }
+    function KillAuthentication(string $killed_function)
+    {
+        if (!empty($this->web_data['session_authentication_id'])) {
+            $this->ActionModel->UpdateSessionAuthentication(array('is_session_authentication_killed' => 1, 'date_session_authentication_killed' => date('Y-m-d H:i:s'), 'session_authentication_killed_function' => $killed_function, 'id' => $this->web_data['session_authentication_id']));
+            $this->session_control->KillSession(SESSION_AUTHENTICATION_NAME);
+            $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_SUCCESS_AUTHENTICATION_KILLED);
+        }
+        if (!empty($this->web_data['cookie_authentication_id'])) {
+            $this->ActionModel->UpdateCookieAuthentication(array('is_cookie_authentication_killed' => 1, 'date_cookie_authentication_killed' => date('Y-m-d H:i:s'), 'cookie_authentication_killed_function' => $killed_function, 'id' => $this->web_data['cookie_authentication_id']));
+            $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME);
+            $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_SUCCESS_AUTHENTICATION_KILLED);
+        }
     }
 }

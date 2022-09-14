@@ -15,6 +15,22 @@ define('URL_AGREEMENTS', 'sartlar-sozlesmeler-politikalar-ve-kosullar');
 define('URL_AGREEMENT_TERMS', 'kullanim-sartlari-ve-uyelik-sozlesmesi');
 define('URL_AGREEMENT_PRIVACY', 'gizlilik-ve-guvenlik-politikasi');
 define('URL_AGREEMENT_RETURN_POLICY', 'iptal-ve-iade-kosullari');
+define('URL_LOGOUT', 'cikis');
+define('URL_PROFILE', 'profil');
+define('URL_PROFILE_INFORMATIONS', 'bilgilerim');
+define('URL_PROFILE_ADDRESS', 'adresim');
+define('URL_PROFILE_PASSWORD', 'sifrem');
+define('URL_PROFILE_EMAIL', 'emailim');
+define('URL_PROFILE_PHONE', 'telefonum');
+define('URL_PROFILE_PHOTO', 'profil-fotom');
+define('URL_PROFILE_ORDERS', 'siparislerim');
+define('URL_PROFILE_UPDATE', 'bilgilerimi-guncelle');
+define('URL_PASSWORD_UPDATE', 'sifremi-guncelle');
+define('URL_EMAIL_UPDATE', 'emailimi-guncelle');
+define('URL_EMAIL_UPDATE_CONFIRM', 'yeni-email-dogrulama');
+define('URL_PHONE_UPDATE', 'telefon-numarami-guncelle');
+define('URL_PROFILE_PHOTO_UPDATE', 'resmimi-guncelle');
+define('URL_PROFILE_DELETE', 'hesabimi-sil');
 // ActionController
 define('URL_LOGIN', 'giris');
 define('URL_TWO_FA', 'iki-asamali-dogrulama');
@@ -25,7 +41,6 @@ define('URL_FORGOT_PASSWORD', 'sifremi-unuttum');
 define('URL_RESET_PASSWORD', 'sifre-reset');
 define('URL_ADMIN_LOGIN', 'yonetici-giris');
 // AccountController
-define('URL_LOGOUT', 'cikis');
 define('URL_ADD_FAVORITES', 'favorilere-ekle');
 define('URL_REMOVE_FAVORITE', 'favorilerden-kaldir');
 define('URL_COMMENT_CREATE', 'yorum-ekle');
@@ -38,19 +53,6 @@ define('URL_ADMIN_COMMENT_DELETE', 'yonetici-yorum-sil');
 define('URL_ADMIN_COMMENT_REPLY_DELETE', 'yonetici-yorum-cevap-sil');
 define('URL_ADMIN_COMMENT_APPROVE', 'yonetici-yorum-onayla');
 define('URL_ADMIN_COMMENT_REPLY_APPROVE', 'yonetici-yorum-cevap-onayla');
-define('URL_PROFILE', 'profil');
-define('URL_PROFILE_INFORMATIONS', 'bilgilerim');
-define('URL_PROFILE_PASSWORD', 'sifrem');
-define('URL_PROFILE_EMAIL', 'emailim');
-define('URL_PROFILE_PHONE', 'telefonum');
-define('URL_PROFILE_PHOTO', 'profil-fotom');
-define('URL_PROFILE_ORDERS', 'siparislerim');
-define('URL_PROFILE_UPDATE', 'profil-bilgilerimi-guncelle');
-define('URL_PASSWORD_UPDATE', 'sifremi-guncelle');
-define('URL_EMAIL_UPDATE', 'emailimi-guncelle');
-define('URL_PROFILE_PHOTO_UPDATE', 'resmimi-guncelle');
-define('URL_PHONE_UPDATE', 'telefon-numarami-guncelle');
-define('URL_PROFILE_DELETE', 'hesabimi-sil');
 // AdminController
 define('URL_ADMIN_INDEX', 'yonetici');
 
@@ -68,6 +70,15 @@ define('URL_MAPS', array(
     array('url' => 'sepeti-bosalt', 'controller' => 'HomeController', 'action' => 'EmptyCart'),
     array('url' => 'favoriler', 'controller' => 'HomeController', 'action' => 'Favorites'),
     array('url_pattern' => 'sartlar-sozlesmeler-politikalar-ve-kosullar/?', 'controller' => 'HomeController', 'action' => 'Agreements'),
+    array('url' => 'cikis', 'controller' => 'HomeController', 'action' => 'LogOut'),
+    array('url_pattern' => 'profil/?', 'controller' => 'HomeController', 'action' => 'Profile'),
+    array('url' => 'bilgilerimi-guncelle', 'controller' => 'HomeController', 'action' => 'ProfileInformationsUpdate'),
+    array('url' => 'sifremi-guncelle', 'controller' => 'HomeController', 'action' => 'ProfilePasswordUpdate'),
+    array('url' => 'emailimi-guncelle', 'controller' => 'HomeController', 'action' => 'ProfileEmailUpdate'),
+    array('url' => 'yeni-email-dogrulama', 'controller' => 'HomeController', 'action' => 'EmailUpdateConfirm'),
+    array('url' => 'telefon-numarami-guncelle', 'controller' => 'HomeController', 'action' => 'ProfilePhoneUpdate'),
+    array('url' => 'resmimi-guncelle', 'controller' => 'HomeController', 'action' => 'ProfilePhotoUpdate'),
+    array('url' => 'hesabimi-sil', 'controller' => 'HomeController', 'action' => 'ProfileDelete'),
     // ActionController
     array('url' => 'giris', 'controller' => 'ActionController', 'action' => 'Login'),
     array('url' => 'iki-asamali-dogrulama', 'controller' => 'ActionController', 'action' => 'TwoFA'),
@@ -78,7 +89,6 @@ define('URL_MAPS', array(
     array('url' => 'sifre-reset', 'controller' => 'ActionController', 'action' => 'ResetPassword'),
     array('url' => 'yonetici-giris', 'controller' => 'ActionController', 'action' => 'AdminLogin'),
     // AccountController
-    array('url' => 'cikis', 'controller' => 'AccountController', 'action' => 'LogOut'),
     array('url' => 'favorilere-ekle', 'controller' => 'AccountController', 'action' => 'AddFavorites'),
     array('url' => 'favorilerden-kaldir', 'controller' => 'AccountController', 'action' => 'RemoveFavorite'),
     array('url' => 'yorum-ekle', 'controller' => 'AccountController', 'action' => 'CommentCreate'),
@@ -91,13 +101,6 @@ define('URL_MAPS', array(
     array('url' => 'yonetici-yorum-cevap-sil', 'controller' => 'AccountController', 'action' => 'AdminCommentReplyDelete'),
     array('url' => 'yonetici-yorum-onayla', 'controller' => 'AccountController', 'action' => 'AdminCommentApprove'),
     array('url' => 'yonetici-yorum-cevap-onayla', 'controller' => 'AccountController', 'action' => 'AdminCommentReplyApprove'),
-    array('url_pattern' => 'profil/?', 'controller' => 'AccountController', 'action' => 'Profile'),
-    array('url' => 'profil-bilgilerimi-guncelle', 'controller' => 'AccountController', 'action' => 'ProfileInformationsUpdate'),
-    array('url' => 'sifremi-guncelle', 'controller' => 'AccountController', 'action' => 'ProfilePasswordUpdate'),
-    array('url' => 'emailimi-guncelle', 'controller' => 'AccountController', 'action' => 'ProfileEmailUpdate'),
-    array('url' => 'resmimi-guncelle', 'controller' => 'AccountController', 'action' => 'ProfilePhotoUpdate'),
-    array('url' => 'telefon-numarami-guncelle', 'controller' => 'AccountController', 'action' => 'ProfilePhoneUpdate'),
-    array('url' => 'hesabimi-sil', 'controller' => 'AccountController', 'action' => 'ProfileDelete'),
     // AdminController
     array('url' => 'yonetici', 'controller' => 'AdminController', 'action' => 'Index')
 ));

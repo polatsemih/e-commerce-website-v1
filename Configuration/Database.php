@@ -29,6 +29,8 @@ define('TABLE_SESSION_AUTHENTICATION', 'session_authentication_r2jrgqkzvh');
 define('TABLE_SESSION_REGISTER_CONFIRM', 'session_register_confirm_a1326hdnvb');
 define('TABLE_SESSION_RESET_PASSWORD', 'session_reset_password_h6g0mia217');
 define('TABLE_SESSION_TWO_FA', 'session_two_fa_majfk125gt');
+define('TABLE_SESSION_UPDATE_EMAIL', 'session_update_email_kals72ub16');
+define('TABLE_ADDRESS', 'user_address_op1538ft5g');
 define('TABLE_ADMIN', 'user_admin_51tq6ba7yw1');
 define('TABLE_USER', 'user_c7r4fur88a');
 define('TABLE_ROLE', 'user_role_7y51nab4e3');

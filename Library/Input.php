@@ -34,7 +34,7 @@ class Input
     function IsString($input)
     {
         if (!empty($input) && is_string($input) && !empty(trim($input))) {
-            return stripslashes($input);
+            return stripslashes(trim($input));
         }
         return null;
     }
@@ -111,20 +111,20 @@ class Input
     {
         return html_entity_decode($input, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
-    function CheckInputWithLength($input, int $input_length) {
-        $input = $this->IsString($input);
-        if (!is_null($input)) {
-            if (strlen($input) == $input_length) {
-                return $this->PreventXSS($input);
-            }
-        }
-        return null;
-    }
     function CheckGETInput($get_input)
     {
         $get_input = $this->IsString($get_input);
         if (!is_null($get_input)) {
             return $this->PreventXSS(urlencode($get_input));
+        }
+        return null;
+    }
+    function CheckGETInputWithLength($input, int $input_length) {
+        $input = $this->IsString($input);
+        if (!is_null($input)) {
+            if (strlen($input) == $input_length) {
+                return $this->PreventXSS(urlencode($input));
+            }
         }
         return null;
     }
@@ -351,10 +351,10 @@ class Input
     }
     function GenerateUrl($url)
     {
-        // $url = str_replace(array('<', '>', '£', '#', '$', '½', '{', '[', ']', '}', '|', '"', 'é', '!', "'", '^', '+', '%', '&', '(', ')', '=', '*', '?', '_', '@', '€', '₺', '¨', '~', 'æ', 'ß', '´', '`', ',', ';', '.', ':'), '', $url);
-        // $old = array('ş', 'Ş', 'ı', 'I', 'İ', 'ğ', 'Ğ', 'ü', 'Ü', 'ö', 'Ö', 'Ç', 'ç', 'x', 'X', 'w', 'W', 'q', 'Q');
-        // $new = array('s', 's', 'i', 'i', 'i', 'g', 'g', 'u', 'u', 'o', 'o', 'c', 'c', '', '', '', '', '', '');
-        // $url = str_replace($old, $new, $url);
+        $url = str_replace(array('<', '>', '£', '#', '$', '½', '{', '[', ']', '}', '|', '"', 'é', '!', "'", '^', '+', '%', '&', '(', ')', '=', '*', '?', '_', '@', '€', '₺', '¨', '~', 'æ', 'ß', '´', '`', ',', ';', '.', ':'), '', $url);
+        $old = array('ş', 'Ş', 'ı', 'I', 'İ', 'ğ', 'Ğ', 'ü', 'Ü', 'ö', 'Ö', 'Ç', 'ç', 'x', 'X', 'w', 'W', 'q', 'Q');
+        $new = array('s', 's', 'i', 'i', 'i', 'g', 'g', 'u', 'u', 'o', 'o', 'c', 'c', '', '', '', '', '', '');
+        $url = str_replace($old, $new, $url);
         $tr = array('ş', 'Ş', 'ı', 'I', 'İ', 'ğ', 'Ğ', 'ü', 'Ü', 'ö', 'Ö', 'Ç', 'ç', '(', ')', '/', ':', ',');
         $eng = array('s', 's', 'i', 'i', 'i', 'g', 'g', 'u', 'u', 'o', 'o', 'c', 'c', '', '', '-', '-', '');
         $url = str_replace($tr, $eng, $url);

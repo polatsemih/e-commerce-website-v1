@@ -16,10 +16,14 @@ define('COMMENT_LOAD_LIMIT_IN_ONCE', 6);
 define('DETAILS_SIZE_REMAIN_ITEM_LIMIT', 20);
 define('REDIRECT_PERMISSION', array('urun'));
 
-define('ADMIN_ID', '2BEV2kDDjyZ1Qb3APgxurvkDrW7biovabxUNnNJgd1B1X4sF12oVCKd9xKNIKcDEuzZzODIw7IcuEqYFgmudVWxnLPA5OJyZexfrTpQTqbntSMHx2um2j740phOJqmQERfUqkj0JobJyeiS5G0k7LySjiBEVtAbvhQm8HgdrlPG6KS4vthDRUIo9GuJhooVBBlJgyrJxCrPjJCclTgNUvHLJlOCiF7ddGaz3JX8LjE2NTg1Njk4Mzc4NTU');
+
+define('ADMIN_IP_ADDRESS', '127.0.0.1');
+define('ADMIN_MAIN_ID', 'jpx1vxtf9mc9xc0lsyxrcpwd8vvgxhkkzvrgsluecnottowbpdh1zmtgiotseafkbxcv6e5awgnwtrkkzvq213zoaxn5l9k5wqzxuve9blydpqvb8b17xrwsp0gunn8lvq5lmb09ibhwkrxxzfnap1ifmu5kbbcggpsg9gmxhvg1wgjr93mnrp9mp7vrsi3lcsbkrriomfx9jfn9m7tzqflyhsu2wtg5zhf5emo67ap5dpw9inm6h1gvmg');
 define('ADMIN_ROLE_ID', 'qdxueqmljzl6onco4msxvsfuxivnikus9f9n5cnlw5lfgnzjb88erqvrgzvwzqbu13n77vvygoee9kno7fjmf9hihkf8ifq5damlmyv2jrexgutrk0db0tjzttgv6dql7zxg82y0nlbyhdjyaw7bqnc5r45jufulpv4gbyqkhptzkwpflzivghjcfwdnhmldktgduy2cnrxkgdapt5tykqs0qqosugneu2lqcmvncajwyuudboczcc52qe');
 define('ADMIN_EMAIL', 'utkurabiyem@gmail.com');
-define('ADMIN_IP_ADDRESS', '127.0.0.1');
+
+
+define('ADMIN_ID', 'iev5ozcgtjitdm8wx6p5xyqtgiwfn5hkwe05twafh8mw57dh7l5uby5paoanjvudmhhc56dzng3dq7o2rzjoeurmmrugechmcvgbl5yw1zdohgpvxlcd2r6avdcqi6zrwf09ogldxqzwpimjcqiwl3ebuehatj0sivfnuv4brgs1eig78ysavq4gcgtfjrgiyvsrfkyc5w8ajqjtewd0rswdjcics6w4bvefpooofz57ymydijxahqvoqq');
 define('BRAND_INSTAGRAM', '#');
 define('BRAND_TWITTER', '#');
 

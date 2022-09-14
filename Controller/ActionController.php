@@ -4,55 +4,9 @@ class ActionController extends Controller
     function __construct()
     {
         parent::__construct();
-        // user_block
-        // if (!empty($_SESSION[SESSION_AUTHENTICATION_NAME]) && !empty($_COOKIE[COOKIE_AUTHENTICATION_NAME])) {
-        //     if ($this->session_control->KillSession() && $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME)) {
-        //         $this->input_control->Redirect(URL_LOGIN);
-        //     } else {
-        //         parent::GetView('Error/NotResponse');
-        //     }
-        // }
-        // if (!empty($_SESSION[SESSION_AUTHENTICATION_NAME])) {
-        //     $checked_session_authentication_token = $this->input_control->CheckInputWithLength($_SESSION[SESSION_AUTHENTICATION_NAME], 255);
-        //     if (!is_null($checked_session_authentication_token)) {
-        //         $session_authentication_from_database = $this->ActionModel->GetSessionAuthentication(array($_SERVER['REMOTE_ADDR'], $checked_session_authentication_token));
-        //         if (!empty($session_authentication_from_database) && $session_authentication_from_database['date_session_authentication_expiry'] > date('Y-m-d H:i:s') && $session_authentication_from_database['is_session_authentication_logout'] == 0) {
-        //             $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id', $session_authentication_from_database['user_id']);
-        //             if (!empty($authenticated_user_from_database)) {
-        //                 $this->input_control->Redirect();
-        //             }
-        //         }
-        //     }
-        //     if ($this->session_control->KillSession()) {
-        //         $this->input_control->Redirect(URL_LOGIN);
-        //     } else {
-        //         parent::GetView('Error/NotResponse');
-        //     }
-        // } elseif (!empty($_COOKIE[COOKIE_AUTHENTICATION_NAME])) {
-        //     $checked_cookie_authentication = $this->input_control->CheckInputWithLength($_COOKIE[COOKIE_AUTHENTICATION_NAME], 500);
-        //     if (!is_null($checked_cookie_authentication)) {
-        //         $cookie_authentication_from_database = $this->ActionModel->GetCookieAuthentication(array($_SERVER['REMOTE_ADDR'], substr($checked_cookie_authentication, 0, 247)));
-        //         if (!empty($cookie_authentication_from_database) && $cookie_authentication_from_database['date_cookie_authentication_expiry'] > date('Y-m-d H:i:s') && $cookie_authentication_from_database['is_cookie_authentication_logout'] == 0) {
-        //             try {
-        //                 $cookie_authentication_token1 = hash_hmac('SHA512', substr($checked_cookie_authentication, 247, 253), $cookie_authentication_from_database['cookie_authentication_salt'], false);
-        //                 if (hash_equals($cookie_authentication_from_database['cookie_authentication_token1'], $cookie_authentication_token1)) {
-        //                     $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id', $cookie_authentication_from_database['user_id']);
-        //                     if (!empty($authenticated_user_from_database)) {
-        //                         $this->input_control->Redirect();
-        //                     }
-        //                 }
-        //             } catch (\Throwable $th) {
-        //                 // mail
-        //             }
-        //         }
-        //     }
-        //     if ($this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME)) {
-        //         $this->input_control->Redirect(URL_LOGIN);
-        //     } else {
-        //         parent::GetView('Error/NotResponse');
-        //     }
-        // }
-
+        if (!empty($this->web_data['authenticated_user'])) {
+            $this->input_control->Redirect();
+        }
         $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
     }
     function TwoFA()
@@ -96,19 +50,62 @@ class ActionController extends Controller
                                 $hashed_token = $this->action_control->HashedConfirmTokenBytes($checked_inputs['token_2'] . $checked_inputs['token_4'] . $checked_inputs['token_3'] . $checked_inputs['token_5'] . $checked_inputs['token_7'] . $checked_inputs['token_6'] . $checked_inputs['token_1'] . $checked_inputs['token_8']);
                                 if ($this->ActionModel->UpdateSessionTwoFA(array('is_two_fa_used' => 1, 'date_two_fa_used' => date('Y-m-d H:i:s'), 'id' => $two_fa_token_from_database['data']['id']))['result'] && !empty($hashed_token)) {
                                     if ($two_fa_token_from_database['data']['two_fa_hashed_tokens'] == $hashed_token) {
-                                        $two_fa_user_from_database = $this->UserModel->GetUserByUserId('id', $two_fa_token_from_database['data']['user_id']);
-                                        if ($two_fa_user_from_database['result']) {
-                                            if ($two_fa_token_from_database['data']['remember_me'] == 1) {
-                                                $cookie_authentication_token_part_1 = $this->input_control->GenerateToken();
-                                                $cookie_authentication_token_part_2 = $this->input_control->GenerateToken();
-                                                $cookie_authentication_salt = $this->input_control->GenerateToken();
-                                                if ($cookie_authentication_token_part_1['result'] && $cookie_authentication_token_part_2['result'] && $cookie_authentication_salt['result']) {
-                                                    $cookie_authentication_token = $cookie_authentication_token_part_1['data'] . $cookie_authentication_token_part_2['data'];
-                                                    $extracted_cookie_authentication_token1 = substr($cookie_authentication_token, 200, 200);
-                                                    $extracted_cookie_authentication_token2 = substr($cookie_authentication_token, 0, 200);
-                                                    if (!empty($extracted_cookie_authentication_token1) && !empty($extracted_cookie_authentication_token2)) {
-                                                        $cookie_authentication_token1 = hash_hmac('SHA512', $extracted_cookie_authentication_token1, $cookie_authentication_salt['data'], false);
-                                                        if (!empty($cookie_authentication_token1) && $this->ActionModel->CreateCookieAuthentication(array('user_id' => $two_fa_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'cookie_authentication_token1' => $cookie_authentication_token1, 'cookie_authentication_token2' => $extracted_cookie_authentication_token2, 'cookie_authentication_salt' => $cookie_authentication_salt['data'], 'date_cookie_authentication_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_COOKIE_AUTHENTICATION))))['result'] && $this->UserModel->UpdateUser(array('date_last_login' => date('Y-m-d H:i:s'), 'id' => $two_fa_user_from_database['data']['id']))['result'] && $this->ActionModel->CreateLogLogin(array('user_id' => $two_fa_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'login_success' => 1))['result'] && $this->cookie_control->SetCookie(COOKIE_AUTHENTICATION_NAME, $cookie_authentication_token, time() + (EXPIRY_COOKIE_AUTHENTICATION), COOKIE_PATH, COOKIE_DOMAIN, COOKIE_SECURE, COOKIE_HTTP_ONLY, COOKIE_SAMESITE)) {
+                                        if ($_SERVER['REMOTE_ADDR'] == ADMIN_IP_ADDRESS && !empty($_SESSION[SESSION_ADMIN_TWO_FA_NAME]) && $_SESSION[SESSION_ADMIN_TWO_FA_NAME] == true) {
+                                            $this->session_control->KillSession(SESSION_ADMIN_TWO_FA_NAME);
+                                            $two_fa_user_from_database = $this->UserModel->GetAdminByAdminId('id', $two_fa_token_from_database['data']['user_id']);
+                                            if ($two_fa_user_from_database['result']) {
+                                                $session_authentication_token = $this->input_control->GenerateToken();
+                                                if ($session_authentication_token['result'] && $this->ActionModel->CreateSessionAuthentication(array('user_id' => $two_fa_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'session_authentication_token' => $session_authentication_token['data'], 'date_session_authentication_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_SESSION_AUTHENTICATION))))['result'] && $this->UserModel->UpdateAdmin(array('date_last_login' => date('Y-m-d H:i:s'), 'id' => $two_fa_user_from_database['data']['id']))['result'] && $this->ActionModel->CreateLogLogin(array('user_id' => $two_fa_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'login_success' => 1))['result']) {
+                                                    $_SESSION[SESSION_OBSOLETE_NAME] = time() + (60 * 5);
+                                                    if (session_regenerate_id()) {
+                                                        $this->session_control->KillSession(SESSION_OBSOLETE_NAME);
+                                                        $_SESSION[SESSION_REFRESH_NAME] = time() + (60 * 15);
+                                                        $_SESSION[SESSION_ADMIN_AUTHENTICATION_NAME] = $session_authentication_token['data'];
+                                                        $this->input_control->Redirect(URL_ADMIN_INDEX);
+                                                    } else {
+                                                        $this->input_control->Redirect(URL_EXCEPTION);
+                                                    }
+                                                }
+                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_LOGIN);
+                                                $this->input_control->Redirect(URL_LOGIN);
+                                            } else {
+                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_TWO_FA);
+                                            }
+                                        } else {
+                                            $two_fa_user_from_database = $this->UserModel->GetUserByUserId('id', $two_fa_token_from_database['data']['user_id']);
+                                            if ($two_fa_user_from_database['result']) {
+                                                if ($two_fa_token_from_database['data']['remember_me'] == 1) {
+                                                    $cookie_authentication_token_part_1 = $this->input_control->GenerateToken();
+                                                    $cookie_authentication_token_part_2 = $this->input_control->GenerateToken();
+                                                    $cookie_authentication_salt = $this->input_control->GenerateToken();
+                                                    if ($cookie_authentication_token_part_1['result'] && $cookie_authentication_token_part_2['result'] && $cookie_authentication_salt['result']) {
+                                                        $cookie_authentication_token = $cookie_authentication_token_part_1['data'] . $cookie_authentication_token_part_2['data'];
+                                                        $extracted_cookie_authentication_token1 = substr($cookie_authentication_token, 200, 200);
+                                                        $extracted_cookie_authentication_token2 = substr($cookie_authentication_token, 0, 200);
+                                                        if (!empty($extracted_cookie_authentication_token1) && !empty($extracted_cookie_authentication_token2)) {
+                                                            $cookie_authentication_token1 = hash_hmac('SHA512', $extracted_cookie_authentication_token1, $cookie_authentication_salt['data'], false);
+                                                            if (!empty($cookie_authentication_token1) && $this->ActionModel->CreateCookieAuthentication(array('user_id' => $two_fa_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'cookie_authentication_token1' => $cookie_authentication_token1, 'cookie_authentication_token2' => $extracted_cookie_authentication_token2, 'cookie_authentication_salt' => $cookie_authentication_salt['data'], 'date_cookie_authentication_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_COOKIE_AUTHENTICATION))))['result'] && $this->UserModel->UpdateUser(array('date_last_login' => date('Y-m-d H:i:s'), 'id' => $two_fa_user_from_database['data']['id']))['result'] && $this->ActionModel->CreateLogLogin(array('user_id' => $two_fa_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'login_success' => 1))['result'] && $this->cookie_control->SetCookie(COOKIE_AUTHENTICATION_NAME, $cookie_authentication_token, time() + (EXPIRY_COOKIE_AUTHENTICATION), COOKIE_PATH, COOKIE_DOMAIN, COOKIE_SECURE, COOKIE_HTTP_ONLY, COOKIE_SAMESITE)) {
+                                                                if (!empty($_SESSION[SESSION_REDIRECT_LOCATION_NAME])) {
+                                                                    $posted_redirect = explode('%2F', $_SESSION[SESSION_REDIRECT_LOCATION_NAME]);
+                                                                    $this->session_control->KillSession(SESSION_REDIRECT_LOCATION_NAME);
+                                                                    if (!empty($posted_redirect) && count($posted_redirect) == 2 && !empty($posted_redirect[0]) && !empty($posted_redirect[1]) && in_array($posted_redirect[0], REDIRECT_PERMISSION)) {
+                                                                        $this->input_control->Redirect($posted_redirect[0] . '/' . $posted_redirect[1]);
+                                                                    }
+                                                                }
+                                                                $this->input_control->Redirect();
+                                                            }
+                                                        }
+                                                    }
+                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_LOGIN);
+                                                    $this->input_control->Redirect(URL_LOGIN);
+                                                } else {
+                                                    $session_authentication_token = $this->input_control->GenerateToken();
+                                                    if ($session_authentication_token['result'] && $this->ActionModel->CreateSessionAuthentication(array('user_id' => $two_fa_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'session_authentication_token' => $session_authentication_token['data'], 'date_session_authentication_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_SESSION_AUTHENTICATION))))['result'] && $this->UserModel->UpdateUser(array('date_last_login' => date('Y-m-d H:i:s'), 'id' => $two_fa_user_from_database['data']['id']))['result'] && $this->ActionModel->CreateLogLogin(array('user_id' => $two_fa_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'login_success' => 1))['result']) {
+                                                        $_SESSION[SESSION_OBSOLETE_NAME] = time() + (60 * 5);
+                                                        if (session_regenerate_id()) {
+                                                            $this->session_control->KillSession(SESSION_OBSOLETE_NAME);
+                                                            $_SESSION[SESSION_REFRESH_NAME] = time() + (60 * 15);
+                                                            $_SESSION[SESSION_AUTHENTICATION_NAME] = $session_authentication_token['data'];
                                                             if (!empty($_SESSION[SESSION_REDIRECT_LOCATION_NAME])) {
                                                                 $posted_redirect = explode('%2F', $_SESSION[SESSION_REDIRECT_LOCATION_NAME]);
                                                                 $this->session_control->KillSession(SESSION_REDIRECT_LOCATION_NAME);
@@ -117,36 +114,16 @@ class ActionController extends Controller
                                                                 }
                                                             }
                                                             $this->input_control->Redirect();
+                                                        } else {
+                                                            $this->input_control->Redirect(URL_EXCEPTION);
                                                         }
                                                     }
+                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_LOGIN);
+                                                    $this->input_control->Redirect(URL_LOGIN);
                                                 }
-                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_LOGIN);
-                                                $this->input_control->Redirect(URL_LOGIN);
                                             } else {
-                                                $session_authentication_token = $this->input_control->GenerateToken();
-                                                if ($session_authentication_token['result'] && $this->ActionModel->CreateSessionAuthentication(array('user_id' => $two_fa_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'session_authentication_token' => $session_authentication_token['data'], 'date_session_authentication_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_SESSION_AUTHENTICATION))))['result'] && $this->UserModel->UpdateUser(array('date_last_login' => date('Y-m-d H:i:s'), 'id' => $two_fa_user_from_database['data']['id']))['result'] && $this->ActionModel->CreateLogLogin(array('user_id' => $two_fa_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'login_success' => 1))['result']) {
-                                                    $_SESSION[SESSION_OBSOLETE_NAME] = time() + (60 * 5);
-                                                    if (session_regenerate_id()) {
-                                                        $this->session_control->KillSession(SESSION_OBSOLETE_NAME);
-                                                        $_SESSION[SESSION_REFRESH_NAME] = time() + (60 * 15);
-                                                        $_SESSION[SESSION_AUTHENTICATION_NAME] = $session_authentication_token['data'];
-                                                        if (!empty($_SESSION[SESSION_REDIRECT_LOCATION_NAME])) {
-                                                            $posted_redirect = explode('%2F', $_SESSION[SESSION_REDIRECT_LOCATION_NAME]);
-                                                            $this->session_control->KillSession(SESSION_REDIRECT_LOCATION_NAME);
-                                                            if (!empty($posted_redirect) && count($posted_redirect) == 2 && !empty($posted_redirect[0]) && !empty($posted_redirect[1]) && in_array($posted_redirect[0], REDIRECT_PERMISSION)) {
-                                                                $this->input_control->Redirect($posted_redirect[0] . '/' . $posted_redirect[1]);
-                                                            }
-                                                        }
-                                                        $this->input_control->Redirect();
-                                                    } else {
-                                                        $this->input_control->Redirect(URL_EXCEPTION);
-                                                    }
-                                                }
-                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_LOGIN);
-                                                $this->input_control->Redirect(URL_LOGIN);
+                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_TWO_FA);
                                             }
-                                        } else {
-                                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_TWO_FA);
                                         }
                                     } else {
                                         $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_EMPTY_TWO_FA_TOKEN);
@@ -555,9 +532,14 @@ class ActionController extends Controller
                                                     $this->ActionModel->UpdateCaptchaTimeOut(array('captcha_error_count' => 0, 'id' => $captcha_timeout_from_database['data']['id']));
                                                 }
                                                 $is_email_unique = $this->UserModel->IsUserEmailUnique($checked_inputs['email']);
-                                                if ($is_email_unique['result'] && $is_email_unique['data']['COUNT(id)'] > 0) {
-                                                    $_SESSION[SESSION_LOGIN_MESSAGE_NAME] = TR_NOTIFICATION_ERROR_NOT_UNIQUE_EMAIL;
-                                                    $this->input_control->Redirect(URL_LOGIN);
+                                                if ($is_email_unique['result']) {
+                                                    if ($is_email_unique['data']['COUNT(id)'] > 0) {
+                                                        $_SESSION[SESSION_LOGIN_MESSAGE_NAME] = TR_NOTIFICATION_ERROR_NOT_UNIQUE_EMAIL;
+                                                        $this->input_control->Redirect(URL_LOGIN);
+                                                    }
+                                                } else {
+                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_REGISTER);
+                                                    $this->input_control->Redirect(URL_REGISTER);
                                                 }
                                                 $result_create_user = $this->UserModel->CreateUser(array('email' => $checked_inputs['email'], 'password' => $this->input_control->EncrypteData($hashed_password, PASSWORD_PEPPER), 'password_salt' => $password_salt, 'user_role' => 'yvifpf0vxxhiavvcdui6uqoq5pcssupgez7vkkelcjktngukspqmsegy9hfzpzvozvokivyokctjyjybd773epldgfjfovmbeoo0otltupjd4gdua0nmhs0v3vjgjzdruyuj3nhzhyji4qcnnamnmsy1mbj0a2vr4jhzynwmrcwycoaw9ii4ohrpui5cj0dgdlalcz8tiwjly03d6ob8p2pooo3u62xue2ifawarq9rzga8gtkjwnc9umo'));
                                                 if ($result_create_user['result']) {
@@ -847,6 +829,7 @@ class ActionController extends Controller
                                                 if (!empty($session_two_fa_token_bytes)) {
                                                     $hashed_token = $this->action_control->HashedConfirmTokenBytes($session_two_fa_token_bytes[4] . $session_two_fa_token_bytes[7] . $session_two_fa_token_bytes[0] . $session_two_fa_token_bytes[1] . $session_two_fa_token_bytes[6] . $session_two_fa_token_bytes[3] . $session_two_fa_token_bytes[2] . $session_two_fa_token_bytes[5]);
                                                     if (!empty($session_two_fa_token['result']) && !empty($hashed_token) && $this->ActionModel->CreateSessionTwoFA(array('user_id' => $login_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'two_fa_token' => $session_two_fa_token['data'], 'two_fa_hashed_tokens' => $hashed_token, 'remember_me' => 2, 'date_two_fa_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_TWO_FA_TOKEN)), 'is_two_fa_used' => 0))['result'] && $this->action_control->SendMail($this->input_control->DecodePreventXSS($checked_inputs['email']), BRAND . ' İki Aşamalı Doğrulama', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>İki Aşamalı Doğrulama | ' . BRAND . '</title><style>* {margin: 0px;padding: 0px;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}body {font-family: sans-serif;background-color: #ffffff;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;border-bottom-width: 1px;border-bottom-style: solid;border-bottom-color: #ffffff;}.title {font-size: 40px;letter-spacing: 5px;color: #ffffff;margin-bottom: 20px;}.text-1 {font-size: 16px;line-height: 1.4;color: #ffffff;letter-spacing: 1px;}.main {background-color: #000000;text-align: center;}.confirm-container {width: 100%;margin-left: auto;margin-right: auto;padding-top: 20px;padding-bottom: 20px;}.confirm {display: inline-block;font-size: 20px;text-align: center;background-color: #ffffff;color: #000000;width: 10%;padding-top: 10px;padding-bottom: 10px;margin-right: 1%;}.text-2 {font-size: 15px;line-height: 1.4;color: #ffffff;padding-top: 20px;margin-bottom: 10px;padding-left: 10px;padding-right: 10px;border-top-width: 1px;border-top-style: solid;border-top-color: #ffffff;}.text-3 {font-size: 13px;line-height: 1.4;color: #ffffff;padding-left: 10px;padding-right: 10px;padding-bottom: 20px;}.footer {background-color: #f3f3f398;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.footer-text {font-size: 13px;line-height: 1.4;color: #000000;margin-bottom: 20px;}.footer-url {font-size: 12px;color: #000000;margin-right: 10px;}.footer-date {font-size: 12px;color: #000000;margin-left: 10px;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}.confirm-container {width: 70%;}.confirm {padding-top: 20px;padding-bottom: 20px;}}</style></head><body><div class="container"><div class="header"><h1 class="title">BB</h1><p class="text-1">' . BRAND . ' İki Aşamalı Doğrulama</p></div><div class="main"><div class="confirm-container"><span class="confirm">' . $session_two_fa_token_bytes[2] . '</span><span class="confirm">' . $session_two_fa_token_bytes[4] . '</span><span class="confirm">' . $session_two_fa_token_bytes[0] . '</span><span class="confirm">' . $session_two_fa_token_bytes[7] . '</span><span class="confirm">' . $session_two_fa_token_bytes[1] . '</span><span class="confirm">' . $session_two_fa_token_bytes[3] . '</span><span class="confirm">' . $session_two_fa_token_bytes[6] . '</span><span class="confirm">' . $session_two_fa_token_bytes[5] . '</span></div><p class="text-2">Giriş yapmak için üstteki kodu girin</p><p class="text-3">Doğrulama kodunun kullanım süresi ' . EXPIRY_TWO_FA_TOKEN_MINUTE . ' dakikadır</p></div><footer class="footer"><p class="footer-text">Bu işlemi siz gerçekleştirmediyseniz, hemen ' . BRAND . ' hesabınızın şifresini değiştirin</p><a class="footer-url" href="' . PURE_URL . '">' . PURE_URL . '</a><span class="footer-date">' . date('d/m/Y H:i:s') . '</span></footer></div></body></html>') && $this->ActionModel->CreateLogEmailSent(array('user_id' => $login_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'email_type' => 'AdminTwoFA'))['result']) {
+                                                        $_SESSION[SESSION_ADMIN_TWO_FA_NAME] = true;
                                                         $_SESSION[SESSION_TWO_FA_NAME] = $session_two_fa_token['data'];
                                                         $this->input_control->Redirect(URL_TWO_FA);
                                                     }

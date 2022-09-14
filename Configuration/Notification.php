@@ -35,6 +35,7 @@ define('TR_NOTIFICATION_SUCCESS_EMPTY_CART', 'Sepet başarıyla boşaltıldı');
 define('TR_NOTIFICATION_ERROR_UPDATE_CART', 'Sepet güncellenirken bir hata oldu');
 // Profile
 define('URL_PROFILE_INFO_TITLE', 'Profil');
+define('URL_PROFILE_ADDRESS_TITLE', 'Adres - Profil');
 define('URL_PROFILE_PWD_TITLE', 'Şifre - Profil');
 define('URL_PROFILE_EMAIL_TITLE', 'Email - Profil');
 define('URL_PROFILE_TEL_TITLE', 'Telefon Numarası - Profil');
@@ -73,3 +74,25 @@ define('TR_NOTIFICATION_ERROR_LOGIN_INFORMATIONS', 'Kullanıcı bilgileri yanlı
 define('TR_NOTIFICATION_ERROR_TWO_FA_TOKEN_EXPIRIED', 'İki aşamalı doğrulama kodu zaman aşımına uğradı. Lütfen giriş yaparak tekrar deneyin.');
 define('TR_NOTIFICATION_ERROR_EMPTY_TWO_FA_TOKEN', 'İki aşamalı doğrulama kodunu hatalı girdiniz. Lütfen giriş yaparak tekrar deneyin.');
 define('TR_NOTIFICATION_ERROR_TWO_FA', 'İki aşamalı doğrulama sırasında bir hata oldu. Lütfen daha sonra giriş yaparak tekrar deneyin.');
+// Profile
+define('TR_NOTIFICATION_SUCCESS_ACCOUNT_DELETE', BRAND . ' hesabınız başarıyla sonlandırıldı.');
+define('TR_NOTIFICATION_ERROR_WRONG_OLD_PASSWORD', 'Güncel şifrenizi hatalı girdiniz');
+define('TR_NOTIFICATION_SUCCESS_PROFILE_PASSWORD_UPDATE', 'Şifreniz başarıyla değiştirldi');
+define('TR_NOTIFICATION_ERROR_PROFILE_PASSWORD_UPDATE', 'Şifreniz değiştirilirken bir hata oldu. Lütfen daha sonra tekrar deneyin.');
+define('TR_NOTIFICATION_ERROR_EMPTY_USER_NAME', 'İsminizi girin');
+define('TR_NOTIFICATION_ERROR_EMPTY_USER_LAST_NAME', 'Soy isminizi girin');
+define('TR_NOTIFICATION_ERROR_NOT_VALID_USER_NAME', 'İsminiz boşluk karakteri içeremez');
+define('TR_NOTIFICATION_ERROR_NOT_VALID_USER_LAST_NAME', 'Soy isminiz boşluk karakteri içeremez');
+define('TR_NOTIFICATION_ERROR_MAX_LIMIT_USER_NAME', 'İsminiz karakter sınırını geçmemelidir');
+define('TR_NOTIFICATION_ERROR_MAX_LIMIT_USER_LAST_NAME', 'Soy isminiz karakter sınırını geçmemelidir');
+define('TR_NOTIFICATION_SUCCESS_PROFILE_USER_NAME_UPDATE', 'İsminiz başarıyla güncellendi');
+define('TR_NOTIFICATION_ERROR_NEW_USER_NAME', 'Yeni isminizi girin');
+define('TR_NOTIFICATION_ERROR_PROFILE_NOT_UNIQUE_EMAIL', 'Email adresi zaten kayıtlı');
+define('TR_NOTIFICATION_ERROR_PROFILE_NEW_EMAIL', 'Yeni email adresinizi girin');
+define('TR_NOTIFICATION_ERROR_EMAIL_UPDATE', 'Email adresiniz güncellenirken bir hata oldu. Lütfen daha sonra tekrar deneyin.');
+define('TR_NOTIFICATION_ERROR_EMPTY_PHONE', 'Telefon numaranızı girin');
+define('TR_NOTIFICATION_ERROR_NOT_VALID_PHONE', 'Girdiğiniz telefon numarası geçerli değil');
+define('TR_NOTIFICATION_ERROR_EMPTY_EMAIL_UPDATE_TOKEN', 'Email doğrulama kodunu hatalı girdiniz. Lütfen tekrar deneyin.');
+define('TR_NOTIFICATION_ERROR_EMAIL_UPDATE_TOKEN_EXPIRIED', 'Email doğrulama kodu zaman aşımına uğradı. Lütfen tekrar deneyin.');
+define('TR_NOTIFICATION_SUCCESS_EMAIL_UPDATE', 'Email adresiniz başarıyla değiştirildi');
+define('TR_NOTIFICATION_SUCCESS_PROFILE_PHOTO_UPDATE', 'Profil fotoğrafı başarıyla değiştirildi');

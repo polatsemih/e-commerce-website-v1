@@ -4,110 +4,9 @@ class AccountController extends Controller
     function __construct()
     {
         parent::__construct();
-        // user_block
-        // if (!empty($_SESSION[SESSION_AUTHENTICATION_NAME]) && !empty($_COOKIE[COOKIE_AUTHENTICATION_NAME])) {
-        //     $this->session_control->KillSession(SESSION_AUTHENTICATION_NAME);
-        //     $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME);
-        //     $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_SUCCESS_AUTHENTICATION_KILLED);
-        //     $this->input_control->Redirect(URL_LOGIN);
-        // } elseif (!empty($_SESSION[SESSION_AUTHENTICATION_NAME])) {
-        //     $session_authentication_error = true;
-        //     $checked_session_authentication_token = $this->input_control->CheckInputWithLength($_SESSION[SESSION_AUTHENTICATION_NAME], 255);
-        //     if (!is_null($checked_session_authentication_token)) {
-        //         $session_authentication_from_database = $this->ActionModel->GetSessionAuthentication(array($_SERVER['REMOTE_ADDR'], $checked_session_authentication_token));
-        //         if (!empty($session_authentication_from_database) && $session_authentication_from_database['date_session_authentication_expiry'] > date('Y-m-d H:i:s') && $session_authentication_from_database['is_session_authentication_logout'] == 0) {
-        //             $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id', $session_authentication_from_database['user_id']);
-        //             if (!empty($authenticated_user_from_database)) {
-        //                 if (session_regenerate_id(true)) {
-        //                     $session_authentication_error = false;
-        //                     $this->web_data['authenticated_user'] = $authenticated_user_from_database['id'];
-        //                     $this->web_data['session_authentication_id'] = $session_authentication_from_database['id'];
-        //                 }
-        //             }
-        //             if ($session_authentication_error && $this->ActionModel->UpdateSessionAuthentication(array('is_session_authentication_killed' => 1, 'session_authentication_killed_function' => 'AccountController __construct', 'date_session_authentication_killed' => date('Y-m-d H:i:s'), 'id' => $session_authentication_from_database['id']))['result']) {
-        //                 $this->session_control->KillSession(SESSION_AUTHENTICATION_NAME);
-        //                 $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_SUCCESS_AUTHENTICATION_KILLED);
-        //                 $this->input_control->Redirect(URL_LOGIN);
-        //             }
-        //         }
-        //     }
-        //     if ($session_authentication_error) {
-        //         $this->session_control->KillSession(SESSION_AUTHENTICATION_NAME);
-        //         $this->input_control->Redirect();
-        //     }
-        // } elseif (!empty($_COOKIE[COOKIE_AUTHENTICATION_NAME])) {
-        //     $cookie_authentication_error = true;
-        //     $checked_cookie_authentication = $this->input_control->CheckInputWithLength($_COOKIE[COOKIE_AUTHENTICATION_NAME], 500);
-        //     if (!is_null($checked_cookie_authentication)) {
-        //         $cookie_authentication_from_database = $this->ActionModel->GetCookieAuthentication(array($_SERVER['REMOTE_ADDR'], substr($checked_cookie_authentication, 0, 247)));
-        //         if (!empty($cookie_authentication_from_database) && $cookie_authentication_from_database['date_cookie_authentication_expiry'] > date('Y-m-d H:i:s') && $cookie_authentication_from_database['is_cookie_authentication_logout'] == 0) {
-        //             try {
-        //                 $cookie_authentication_token1 = hash_hmac('SHA512', substr($checked_cookie_authentication, 247, 253), $cookie_authentication_from_database['cookie_authentication_salt'], false);
-        //                 if (hash_equals($cookie_authentication_from_database['cookie_authentication_token1'], $cookie_authentication_token1)) {
-        //                     $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id', $cookie_authentication_from_database['user_id']);
-        //                     if (!empty($authenticated_user_from_database)) {
-        //                         if (session_regenerate_id(true)) {
-        //                             $cookie_authentication_error = false;
-        //                             $this->web_data['authenticated_user'] = $authenticated_user_from_database['id'];
-        //                             $this->web_data['cookie_authentication_id'] = $cookie_authentication_from_database['id'];
-        //                         }
-        //                     }
-        //                 }
-        //                 if ($cookie_authentication_error && $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME) && $this->ActionModel->UpdateCookieAuthentication(array('is_cookie_authentication_killed' => 1, 'cookie_authentication_killed_function' => 'AccountController __construct', 'date_cookie_authentication_killed' => date('Y-m-d H:i:s'), 'id' => $cookie_authentication_from_database['id']))['result']) {
-        //                     $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_SUCCESS_AUTHENTICATION_KILLED);
-        //                     $this->input_control->Redirect(URL_LOGIN);
-        //                 }
-        //             } catch (\Throwable $th) {
-        //                 $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function __construct COOKIE | ' . $th));
-        //                 $this->GetView('Error/NotResponse');
-        //             }
-        //         }
-        //     }
-        //     if ($cookie_authentication_error) {
-        //         $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME);
-        //         $this->input_control->Redirect();
-        //     }
-        // } else {
-        //     $this->input_control->Redirect(URL_LOGIN);
-        // }
-
-        // $this->web_data['authenticated_user'] = '2BEV2kDDjyZ1Qb3APgxurvkDrW7biovabxUNnNJgd1B1X4sF12oVCKd9xKNIKcDEuzZzODIw7IcuEqYFgmudVWxnLPA5OJyZexfrTpQTqbntSMHx2um2j740phOJqmQERfUqkj0JobJyeiS5G0k7LySjiBEVtAbvhQm8HgdrlPG6KS4vthDRUIo9GuJhooVBBlJgyrJxCrPjJCclTgNUvHLJlOCiF7ddGaz3JX8LjE2NTg1Njk4Mzc4NTU';
-    }
-    function KillAuthentication(string $killed_function)
-    {
-        if (!empty($this->web_data['session_authentication_id'])) {
-            $this->ActionModel->UpdateSessionAuthentication(array('is_session_authentication_killed' => 1, 'date_session_authentication_killed' => date('Y-m-d H:i:s'), 'session_authentication_killed_function' => $killed_function, 'id' => $this->web_data['session_authentication_id']));
-            $this->session_control->KillSession(SESSION_AUTHENTICATION_NAME);
-            $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_SUCCESS_AUTHENTICATION_KILLED);
-        }
-        if (!empty($this->web_data['cookie_authentication_id'])) {
-            $this->ActionModel->UpdateCookieAuthentication(array('is_cookie_authentication_killed' => 1, 'date_cookie_authentication_killed' => date('Y-m-d H:i:s'), 'cookie_authentication_killed_function' => $killed_function, 'id' => $this->web_data['cookie_authentication_id']));
-            $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME);
-            $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_SUCCESS_AUTHENTICATION_KILLED);
-        }
-    }
-    function LogOut()
-    {
-        try {
-            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-                if (!empty($this->web_data['session_authentication_id'])) {
-                    $this->ActionModel->UpdateSessionAuthentication(array('is_session_authentication_logout' => 1, 'date_session_authentication_logout' => date('Y-m-d H:i:s'), 'id' => $this->web_data['session_authentication_id']));
-                    $this->session_control->KillSession(SESSION_AUTHENTICATION_NAME);
-                    $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_LOG_OUT);
-                }
-                if (!empty($this->web_data['cookie_authentication_id'])) {
-                    $this->ActionModel->UpdateCookieAuthentication(array('is_cookie_authentication_logout' => 1, 'date_cookie_authentication_logout' => date('Y-m-d H:i:s'), 'id' => $this->web_data['cookie_authentication_id']));
-                    $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME);
-                    $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_LOG_OUT);
-                }
-            }
-            $this->input_control->Redirect();
-        } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function LogOut | ' . $th))['result']) {
-                $this->input_control->Redirect(URL_EXCEPTION);
-            } else {
-                $this->input_control->Redirect(URL_SHUTDOWN);
-            }
+        if (!empty($this->web_data['authenticated_user'])) {
+            echo '{"reset":true}';
+            exit(0);
         }
     }
     function AddFavorites()
@@ -145,7 +44,7 @@ class AccountController extends Controller
                     $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
             } else {
-                $this->KillAuthentication('AddToFavorites');
+                parent::KillAuthentication('AccountController AddToFavorites');
             }
             $jsoned_response = json_encode($response);
             if (!empty($jsoned_response)) {
@@ -199,7 +98,7 @@ class AccountController extends Controller
                     $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
             } else {
-                $this->KillAuthentication('RemoveFavorite');
+                parent::KillAuthentication('AccountController RemoveFavorite');
             }
             $jsoned_response = json_encode($response);
             if (!empty($jsoned_response)) {
@@ -283,7 +182,7 @@ class AccountController extends Controller
                     $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
             } else {
-                $this->KillAuthentication('CommentCreate');
+                parent::KillAuthentication('AccountController CommentCreate');
             }
             $jsoned_response = json_encode($response);
             if (!empty($jsoned_response)) {
@@ -339,7 +238,7 @@ class AccountController extends Controller
                     $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
             } else {
-                $this->KillAuthentication('CommentUpdate');
+                parent::KillAuthentication('AccountController CommentUpdate');
             }
             $jsoned_response = json_encode($response);
             if (!empty($jsoned_response)) {
@@ -399,7 +298,7 @@ class AccountController extends Controller
                     $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
             } else {
-                $this->KillAuthentication('CommentDelete');
+                parent::KillAuthentication('AccountController CommentDelete');
             }
             $jsoned_response = json_encode($response);
             if (!empty($jsoned_response)) {
@@ -478,7 +377,7 @@ class AccountController extends Controller
                     $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
             } else {
-                $this->KillAuthentication('CommentReplyCreate');
+                parent::KillAuthentication('AccountController CommentReplyCreate');
             }
             $jsoned_response = json_encode($response);
             if (!empty($jsoned_response)) {
@@ -535,7 +434,7 @@ class AccountController extends Controller
                     $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
             } else {
-                $this->KillAuthentication('CommentReplyUpdate');
+                parent::KillAuthentication('AccountController CommentReplyUpdate');
             }
             $jsoned_response = json_encode($response);
             if (!empty($jsoned_response)) {
@@ -590,7 +489,7 @@ class AccountController extends Controller
                     $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
             } else {
-                $this->KillAuthentication('CommentReplyDelete');
+                parent::KillAuthentication('AccountController CommentReplyDelete');
             }
             $jsoned_response = json_encode($response);
             if (!empty($jsoned_response)) {
@@ -610,49 +509,47 @@ class AccountController extends Controller
     function AdminCommentDelete()
     {
         try {
-            if ($this->web_data['authenticated_user'] == ADMIN_ID) {
-                $response = array();
-                $response['reset'] = true;
-                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    $checked_inputs = $this->input_control->CheckPostedInputs(array(
-                        'comment_id' => array('input' => isset($_POST['comment_id']) ? $_POST['comment_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
-                        'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
-                    ));
-                    if (empty($checked_inputs['error_message'])) {
-                        if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'ItemDetails')) {
-                            parent::GetModel('CommentModel');
-                            $comment_has_reply = $this->CommentModel->CommentHasReply($checked_inputs['comment_id']);
-                            if ($comment_has_reply['result']) {
-                                foreach ($comment_has_reply['data'] as $comment_reply) {
-                                    $this->CommentModel->UpdateCommentReply(array('is_comment_reply_deleted' => 1, 'date_comment_reply_deleted' => date('Y-m-d H:i:s'), 'id' => $comment_reply['id']));
-                                }
-                            }
-                            if ($this->CommentModel->UpdateComment(array('is_comment_deleted' => 1, 'date_comment_deleted' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_id']))['result']) {
-                                $result_set_csrf_token = parent::SetCSRFTokenjQ('ItemDetails');
-                                if ($result_set_csrf_token['result']) {
-                                    $response['reset'] = false;
-                                    $response['form_token'] = $result_set_csrf_token['csrf_token'];
-                                    $response['notification'] = $this->notification_control->SetNotificationForjQ('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_DELETE);
-                                    $response['comment_id'] = $checked_inputs['comment_id'];
-                                } else {
-                                    echo '{"shutdown":"shutdown"}';
-                                    exit(0);
-                                }
-                            } else {
-                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+            $response = array();
+            $response['reset'] = true;
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && $this->web_data['authenticated_user'] == ADMIN_ID) {
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'comment_id' => array('input' => isset($_POST['comment_id']) ? $_POST['comment_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'ItemDetails')) {
+                        parent::GetModel('CommentModel');
+                        $comment_has_reply = $this->CommentModel->CommentHasReply($checked_inputs['comment_id']);
+                        if ($comment_has_reply['result']) {
+                            foreach ($comment_has_reply['data'] as $comment_reply) {
+                                $this->CommentModel->UpdateCommentReply(array('is_comment_reply_deleted' => 1, 'date_comment_reply_deleted' => date('Y-m-d H:i:s'), 'id' => $comment_reply['id']));
                             }
                         }
-                    } else {
-                        $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                        if ($this->CommentModel->UpdateComment(array('is_comment_deleted' => 1, 'date_comment_deleted' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_id']))['result']) {
+                            $result_set_csrf_token = parent::SetCSRFTokenjQ('ItemDetails');
+                            if ($result_set_csrf_token['result']) {
+                                $response['reset'] = false;
+                                $response['form_token'] = $result_set_csrf_token['csrf_token'];
+                                $response['notification'] = $this->notification_control->SetNotificationForjQ('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_DELETE);
+                                $response['comment_id'] = $checked_inputs['comment_id'];
+                            } else {
+                                echo '{"shutdown":"shutdown"}';
+                                exit(0);
+                            }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                        }
                     }
                 } else {
-                    $this->KillAuthentication('AdminCommentDelete');
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
-                $jsoned_response = json_encode($response);
-                if (!empty($jsoned_response)) {
-                    echo $jsoned_response;
-                    exit(0);
-                }
+            } else {
+                parent::KillAuthentication('AccountController AdminCommentDelete');
+            }
+            $jsoned_response = json_encode($response);
+            if (!empty($jsoned_response)) {
+                echo $jsoned_response;
+                exit(0);
             }
         } catch (\Throwable $th) {
             if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function AdminCommentDelete | ' . $th))['result']) {
@@ -667,44 +564,42 @@ class AccountController extends Controller
     function AdminCommentReplyDelete()
     {
         try {
-            if ($this->web_data['authenticated_user'] == ADMIN_ID) {
-                $response = array();
-                $response['reset'] = true;
-                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    $checked_inputs = $this->input_control->CheckPostedInputs(array(
-                        'comment_reply_id' => array('input' => isset($_POST['comment_reply_id']) ? $_POST['comment_reply_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
-                        'comment_id' => array('input' => isset($_POST['comment_id']) ? $_POST['comment_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
-                        'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
-                    ));
-                    if (empty($checked_inputs['error_message'])) {
-                        if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'ItemDetails')) {
-                            parent::GetModel('CommentModel');
-                            if ($this->CommentModel->UpdateCommentReply(array('is_comment_reply_deleted' => 1, 'date_comment_reply_deleted' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_reply_id']))['result']) {
-                                $result_set_csrf_token = parent::SetCSRFTokenjQ('ItemDetails');
-                                if ($result_set_csrf_token['result']) {
-                                    $response['reset'] = false;
-                                    $response['form_token'] = $result_set_csrf_token['csrf_token'];
-                                    $response['notification'] = $this->notification_control->SetNotificationForjQ('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_DELETE);
-                                    $response['comment'] = array('comment_reply_id' => $checked_inputs['comment_reply_id'], 'comment_id' => $checked_inputs['comment_id']);
-                                } else {
-                                    echo '{"shutdown":"shutdown"}';
-                                    exit(0);
-                                }
+            $response = array();
+            $response['reset'] = true;
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && $this->web_data['authenticated_user'] == ADMIN_ID) {
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'comment_reply_id' => array('input' => isset($_POST['comment_reply_id']) ? $_POST['comment_reply_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
+                    'comment_id' => array('input' => isset($_POST['comment_id']) ? $_POST['comment_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'ItemDetails')) {
+                        parent::GetModel('CommentModel');
+                        if ($this->CommentModel->UpdateCommentReply(array('is_comment_reply_deleted' => 1, 'date_comment_reply_deleted' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_reply_id']))['result']) {
+                            $result_set_csrf_token = parent::SetCSRFTokenjQ('ItemDetails');
+                            if ($result_set_csrf_token['result']) {
+                                $response['reset'] = false;
+                                $response['form_token'] = $result_set_csrf_token['csrf_token'];
+                                $response['notification'] = $this->notification_control->SetNotificationForjQ('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_DELETE);
+                                $response['comment'] = array('comment_reply_id' => $checked_inputs['comment_reply_id'], 'comment_id' => $checked_inputs['comment_id']);
                             } else {
-                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                echo '{"shutdown":"shutdown"}';
+                                exit(0);
                             }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
                         }
-                    } else {
-                        $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                     }
                 } else {
-                    $this->KillAuthentication('AdminCommentReplyDelete');
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
-                $jsoned_response = json_encode($response);
-                if (!empty($jsoned_response)) {
-                    echo $jsoned_response;
-                    exit(0);
-                }
+            } else {
+                parent::KillAuthentication('AccountController AdminCommentReplyDelete');
+            }
+            $jsoned_response = json_encode($response);
+            if (!empty($jsoned_response)) {
+                echo $jsoned_response;
+                exit(0);
             }
         } catch (\Throwable $th) {
             if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function AdminCommentReplyDelete | ' . $th))['result']) {
@@ -719,54 +614,52 @@ class AccountController extends Controller
     function AdminCommentApprove()
     {
         try {
-            if ($this->web_data['authenticated_user'] == ADMIN_ID) {
-                $response = array();
-                $response['reset'] = true;
-                if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-                    $is_comment_approved = isset($_POST['is_comment_approved']) ? 0 : 1;
-                    $checked_inputs = $this->input_control->CheckPostedInputs(array(
-                        'comment_id' => array('input' => isset($_POST['comment_id']) ? $_POST['comment_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
-                        'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
-                    ));
-                    if (empty($checked_inputs['error_message'])) {
-                        if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'ItemDetails')) {
-                            parent::GetModel('CommentModel');
-                            if ($is_comment_approved == 1) {
-                                $result_approve_comment = $this->CommentModel->UpdateComment(array('is_comment_approved' => 1, 'date_comment_approved' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_id']))['result'];
-                            } else {
-                                $result_approve_comment = $this->CommentModel->UpdateComment(array('is_comment_approved' => 0, 'date_comment_approved' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_id']))['result'];
-                            }
-                            if ($result_approve_comment) {
-                                $result_set_csrf_token = parent::SetCSRFTokenjQ('ItemDetails');
-                                if ($result_set_csrf_token['result']) {
-                                    $response['reset'] = false;
-                                    $response['form_token'] = $result_set_csrf_token['csrf_token'];
-                                    if ($is_comment_approved == 1) {
-                                        $response['notification'] = $this->notification_control->SetNotificationForjQ('WARNING', TR_NOTIFICATION_SUCCESS_COMMENT_APPROVED);
-                                        $response['is_approved'] = 1;
-                                    } else {
-                                        $response['notification'] = $this->notification_control->SetNotificationForjQ('WARNING', TR_NOTIFICATION_SUCCESS_COMMENT_DISAPPROVED);
-                                        $response['is_approved'] = 0;
-                                    }
+            $response = array();
+            $response['reset'] = true;
+            if ($_SERVER['REQUEST_METHOD'] == 'POST' && $this->web_data['authenticated_user'] == ADMIN_ID) {
+                $is_comment_approved = isset($_POST['is_comment_approved']) ? 0 : 1;
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'comment_id' => array('input' => isset($_POST['comment_id']) ? $_POST['comment_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'ItemDetails')) {
+                        parent::GetModel('CommentModel');
+                        if ($is_comment_approved == 1) {
+                            $result_approve_comment = $this->CommentModel->UpdateComment(array('is_comment_approved' => 1, 'date_comment_approved' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_id']))['result'];
+                        } else {
+                            $result_approve_comment = $this->CommentModel->UpdateComment(array('is_comment_approved' => 0, 'date_comment_approved' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_id']))['result'];
+                        }
+                        if ($result_approve_comment) {
+                            $result_set_csrf_token = parent::SetCSRFTokenjQ('ItemDetails');
+                            if ($result_set_csrf_token['result']) {
+                                $response['reset'] = false;
+                                $response['form_token'] = $result_set_csrf_token['csrf_token'];
+                                if ($is_comment_approved == 1) {
+                                    $response['notification'] = $this->notification_control->SetNotificationForjQ('WARNING', TR_NOTIFICATION_SUCCESS_COMMENT_APPROVED);
+                                    $response['is_approved'] = 1;
                                 } else {
-                                    echo '{"shutdown":"shutdown"}';
-                                    exit(0);
+                                    $response['notification'] = $this->notification_control->SetNotificationForjQ('WARNING', TR_NOTIFICATION_SUCCESS_COMMENT_DISAPPROVED);
+                                    $response['is_approved'] = 0;
                                 }
                             } else {
-                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                echo '{"shutdown":"shutdown"}';
+                                exit(0);
                             }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
                         }
-                    } else {
-                        $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                     }
                 } else {
-                    $this->KillAuthentication('AdminCommentApprove');
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
-                $jsoned_response = json_encode($response);
-                if (!empty($jsoned_response)) {
-                    echo $jsoned_response;
-                    exit(0);
-                }
+            } else {
+                parent::KillAuthentication('AccountController AdminCommentApprove');
+            }
+            $jsoned_response = json_encode($response);
+            if (!empty($jsoned_response)) {
+                echo $jsoned_response;
+                exit(0);
             }
         } catch (\Throwable $th) {
             if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function AdminCommentApprove | ' . $th))['result']) {
@@ -781,54 +674,52 @@ class AccountController extends Controller
     function AdminCommentReplyApprove()
     {
         try {
-            if ($this->web_data['authenticated_user'] == ADMIN_ID) {
-                $response = array();
-                $response['reset'] = true;
-                if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-                    $is_comment_reply_approved = isset($_POST['is_comment_reply_approved']) ? 0 : 1;
-                    $checked_inputs = $this->input_control->CheckPostedInputs(array(
-                        'comment_reply_id' => array('input' => isset($_POST['comment_reply_id']) ? $_POST['comment_reply_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
-                        'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
-                    ));
-                    if (empty($checked_inputs['error_message'])) {
-                        if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'ItemDetails')) {
-                            parent::GetModel('CommentModel');
-                            if ($is_comment_reply_approved == 1) {
-                                $result_approve_comment_reply = $this->CommentModel->UpdateCommentReply(array('is_comment_reply_approved' => 1, 'date_comment_reply_approved' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_reply_id']))['result'];
-                            } else {
-                                $result_approve_comment_reply = $this->CommentModel->UpdateCommentReply(array('is_comment_reply_approved' => 0, 'date_comment_reply_approved' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_reply_id']))['result'];
-                            }
-                            if ($result_approve_comment_reply) {
-                                $result_set_csrf_token = parent::SetCSRFTokenjQ('ItemDetails');
-                                if ($result_set_csrf_token['result']) {
-                                    $response['reset'] = false;
-                                    $response['form_token'] = $result_set_csrf_token['csrf_token'];
-                                    if ($is_comment_reply_approved == 1) {
-                                        $response['notification'] = $this->notification_control->SetNotificationForjQ('WARNING', TR_NOTIFICATION_SUCCESS_COMMENT_APPROVED);
-                                        $response['is_comment_reply_approved'] = 1;
-                                    } else {
-                                        $response['notification'] = $this->notification_control->SetNotificationForjQ('WARNING', TR_NOTIFICATION_SUCCESS_COMMENT_DISAPPROVED);
-                                        $response['is_comment_reply_approved'] = 0;
-                                    }
+            $response = array();
+            $response['reset'] = true;
+            if ($_SERVER['REQUEST_METHOD'] == 'POST' && $this->web_data['authenticated_user'] == ADMIN_ID) {
+                $is_comment_reply_approved = isset($_POST['is_comment_reply_approved']) ? 0 : 1;
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'comment_reply_id' => array('input' => isset($_POST['comment_reply_id']) ? $_POST['comment_reply_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'ItemDetails')) {
+                        parent::GetModel('CommentModel');
+                        if ($is_comment_reply_approved == 1) {
+                            $result_approve_comment_reply = $this->CommentModel->UpdateCommentReply(array('is_comment_reply_approved' => 1, 'date_comment_reply_approved' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_reply_id']))['result'];
+                        } else {
+                            $result_approve_comment_reply = $this->CommentModel->UpdateCommentReply(array('is_comment_reply_approved' => 0, 'date_comment_reply_approved' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_reply_id']))['result'];
+                        }
+                        if ($result_approve_comment_reply) {
+                            $result_set_csrf_token = parent::SetCSRFTokenjQ('ItemDetails');
+                            if ($result_set_csrf_token['result']) {
+                                $response['reset'] = false;
+                                $response['form_token'] = $result_set_csrf_token['csrf_token'];
+                                if ($is_comment_reply_approved == 1) {
+                                    $response['notification'] = $this->notification_control->SetNotificationForjQ('WARNING', TR_NOTIFICATION_SUCCESS_COMMENT_APPROVED);
+                                    $response['is_comment_reply_approved'] = 1;
                                 } else {
-                                    echo '{"shutdown":"shutdown"}';
-                                    exit(0);
+                                    $response['notification'] = $this->notification_control->SetNotificationForjQ('WARNING', TR_NOTIFICATION_SUCCESS_COMMENT_DISAPPROVED);
+                                    $response['is_comment_reply_approved'] = 0;
                                 }
                             } else {
-                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                echo '{"shutdown":"shutdown"}';
+                                exit(0);
                             }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
                         }
-                    } else {
-                        $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                     }
                 } else {
-                    $this->KillAuthentication('AdminCommentReplyApprove');
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
-                $jsoned_response = json_encode($response);
-                if (!empty($jsoned_response)) {
-                    echo $jsoned_response;
-                    exit(0);
-                }
+            } else {
+                parent::KillAuthentication('AccountController AdminCommentReplyApprove');
+            }
+            $jsoned_response = json_encode($response);
+            if (!empty($jsoned_response)) {
+                echo $jsoned_response;
+                exit(0);
             }
         } catch (\Throwable $th) {
             if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function AdminCommentReplyApprove | ' . $th))['result']) {
@@ -839,119 +730,5 @@ class AccountController extends Controller
                 exit(0);
             }
         }
-    }
-
-
-    function Profile(string $profile_url)
-    {
-        try {
-            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-                $this->input_control->CheckUrl();
-                parent::LogView('Home-Profile-' . $profile_url);
-                $case_matched = false;
-                switch ($profile_url) {
-                    case URL_PROFILE_INFORMATIONS:
-                        $case_matched = true;
-                        $this->web_data['profile_type'] = URL_PROFILE_INFORMATIONS;
-                        $this->web_data['profile_title'] = URL_PROFILE_INFO_TITLE;
-                        $user_from_database = $this->UserModel->GetUserByUserId('id,first_name,last_name,address,user_delete_able', $this->web_data['authenticated_user']);
-                        break;
-                    case URL_PROFILE_PASSWORD:
-                        $case_matched = true;
-                        $this->web_data['profile_type'] = URL_PROFILE_PASSWORD;
-                        $this->web_data['profile_title'] = URL_PROFILE_PWD_TITLE;
-                        $user_from_database = $this->UserModel->GetUserByUserId('id', $this->web_data['authenticated_user']);
-                        break;
-                    case URL_PROFILE_EMAIL:
-                        $case_matched = true;
-                        $this->web_data['profile_type'] = URL_PROFILE_EMAIL;
-                        $this->web_data['profile_title'] = URL_PROFILE_EMAIL_TITLE;
-                        $user_from_database = $this->UserModel->GetUserByUserId('id,email', $this->web_data['authenticated_user']);
-                        break;
-                    case URL_PROFILE_PHONE:
-                        $case_matched = true;
-                        $this->web_data['profile_type'] = URL_PROFILE_PHONE;
-                        $this->web_data['profile_title'] = URL_PROFILE_TEL_TITLE;
-                        $user_from_database = $this->UserModel->GetUserByUserId('id,phone_number', $this->web_data['authenticated_user']);
-                        break;
-                    case URL_PROFILE_PHOTO:
-                        $case_matched = true;
-                        $this->web_data['profile_type'] = URL_PROFILE_PHOTO;
-                        $this->web_data['profile_title'] = URL_PROFILE_PHOTO_TITLE;
-                        $user_from_database = $this->UserModel->GetUserByUserId('id,profile_image_path,profile_image', $this->web_data['authenticated_user']);
-                        break;
-                    case URL_PROFILE_ORDERS:
-                        $case_matched = true;
-                        $this->web_data['profile_type'] = URL_PROFILE_ORDERS;
-                        $this->web_data['profile_title'] = URL_PROFILE_ORDERS_TITLE;
-                        $user_from_database = $this->UserModel->GetUserByUserId('id', $this->web_data['authenticated_user']);
-                        break;
-                }
-                if ($case_matched) {
-                    if ($user_from_database['result']) {
-                        $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
-                        $this->web_data['authenticated_user'] = $user_from_database['data'];
-                        $this->web_data['form_token'] = parent::SetCSRFToken('Profile');
-                        parent::GetView('Home/Profile', $this->web_data);
-                    }
-                }
-            } else {
-                $this->KillAuthentication('Profile');
-            }
-            $this->input_control->Redirect();
-        } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function Index | ' . $th))['result']) {
-                $this->input_control->Redirect(URL_EXCEPTION);
-            } else {
-                $this->input_control->Redirect(URL_SHUTDOWN);
-            }
-        }
-    }
-    function ProfileInformationsUpdate()
-    {
-    }
-    function ProfilePasswordUpdate()
-    {
-    }
-    function ProfileEmailUpdate()
-    {
-    }
-    function ProfilePhotoUpdate()
-    {
-    }
-    function ProfilePhoneUpdate()
-    {
-    }
-    function ProfileDelete()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_user_delete'])) {
-            $checked_inputs = $this->input_control->CheckPostedInputs(array(
-                'user_id' => array('input' => isset($_POST['user_id']) ? $_POST['user_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
-                'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
-            ));
-            if (empty($checked_inputs['error_message'])) {
-                if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'Profile')) {
-                    $confirmed_user_from_db = $this->UserModel->GetUserByUserIdById('id', $checked_inputs['user_id']);
-                    if (!empty($confirmed_user_from_db)) {
-                        $result_account_delete = $this->UserModel->UpdateUser(array(
-                            'is_user_deleted' => 1,
-                            'date_user_deleted' => date('Y-m-d H:i:s'),
-                            'id' => $confirmed_user_from_db['id']
-                        ));
-                        if ($result_account_delete['result']) {
-                            // $this->notification_control->SetNotification('SUCCESS', SUCCESS_ACCOUNT_DELETE);
-                            $this->input_control->Redirect(URL_LOGOUT);
-                        } else {
-                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
-                        }
-                    }
-                }
-            } else {
-                $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
-            }
-            $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_INFORMATIONS);
-        }
-        $this->session_control->KillSession();
-        $this->input_control->Redirect();
     }
 }
