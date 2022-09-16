@@ -79,7 +79,8 @@ class Database extends PDO
     {
         do {
             $id = strtolower(strtr(sodium_bin2base64(random_bytes(187), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING),  array('-' => '5', '_' => 'w')));
-            if (!$this->GET($table, 'id', 'WHERE id=?', $id, 'SINGULAR')['result']) {
+            $is_id_umique = $this->GET($table, 'id', 'WHERE id=?', $id, 'SINGULAR');
+            if (!$is_id_umique['result'] && !empty($is_id_umique['empty'])) {
                 $columns = 'id,';
                 $question_marks = '?,';
                 $values = array($id);

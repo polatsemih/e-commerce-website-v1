@@ -45,7 +45,7 @@
                             <?php endif; ?>
                             <div class="form-row">
                                 <span class="label">İsim</span>
-                                <input class="input" type="text" id="first-name" name="user_first_name" value="<?php echo $web_data['authenticated_user']['first_name']; ?>" placeholder="İsminizi Girin">
+                                <input class="input" type="text" id="first-name" name="user_first_name" value="<?php echo $web_data['authenticated_user']['first_name']; ?>" placeholder="İsminizi Girin" autofocus>
                             </div>
                             <div class="form-row">
                                 <span class="label">Soy İsim</span>
@@ -57,22 +57,204 @@
                                 </div>
                             </div>
                         </form>
+                        <div class="row-space">
+                            <div class="left">
+                                <form id="form-two-fa" action="<?php echo URL . URL_PROFILE_2FA; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                                    <label for="mfa-id" class="mfa-checkbox-wrapper">
+                                        <?php if (!empty($web_data['form_token'])) : ?>
+                                            <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
+                                        <?php endif; ?>
+                                        <input class="mfa-checkbox" id="mfa-id" type="checkbox" name="mfa"<?php echo $web_data['authenticated_user']['two_fa_enable'] == 0 ? '' : ' checked'; ?>>
+                                        <div class="mfa-bg">
+                                            <?php if ($web_data['authenticated_user']['two_fa_enable'] == 0) : ?>
+                                                <span class="mfa-inner-text">Kapalı</span>
+                                            <?php else : ?>
+                                                <span class="mfa-inner-text">Açık</span>
+                                            <?php endif; ?>
+                                            <div class="mfa-ball"></div>
+                                        </div>
+                                        <span class="mfa-text">2 Aşamalı Doğrulama</span>
+                                    </label>
+                                </form>
+                            </div>
+                        </div>
                     <?php elseif ($web_data['profile_type'] == URL_PROFILE_ADDRESS) : ?>
-                        <h1 class="title mb">Adreslerim</h1>
-                        <form action="<?php echo URL . URL_PROFILE_UPDATE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
-                            <?php if (!empty($web_data['form_token'])) : ?>
-                                <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
-                            <?php endif; ?>
-                            <div class="form-row">
-                                <span class="label-textarea">Adres</span>
-                                <textarea class="textarea" name="user_address" placeholder="Adresinizi Girin"><?php echo $web_data['authenticated_user']['address']; ?></textarea>
+                        <div class="row-space">
+                            <div class="left">
+                                <h1 class="title mb">Adreslerim</h1>
                             </div>
-                            <div class="row-space">
-                                <div class="right">
-                                    <input class="btn-warning" type="submit" name="submit_address_update" value="Bilgilerimi Güncelle" title="Bilgilerimi Güncelle">
+                            <div class="right">
+                                <button id="btn-create-address" class="btn-success btn-delete-account mb" title="Yeni Adres Ekle">Adres Ekle</button>
+                            </div>
+                        </div>
+                        <div id="popup-wrapper" class="create-address-wrapper<?php echo !empty($web_data['address']) ? '' : ' disable'; ?>">
+                            <div class="popup-container">
+                                <div id="create-address-wrapper-exit" class="popup-exit">
+                                    <div class="exit">
+                                        <i class="fas fa-times"></i>
+                                    </div>
                                 </div>
+                                <h4 class="title">Yeni Adres Ekle</h4>
+                                <form class="form-creare-address" action="<?php echo URL . URL_ADDRESS_CREATE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                                    <?php if (!empty($web_data['form_token'])) : ?>
+                                        <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
+                                    <?php endif; ?>
+                                    <div class="form-row">
+                                        <span class="label">Ülke</span>
+                                        <input class="input" type="text" value="Türkiye" readonly>
+                                    </div>
+                                    <div class="form-row">
+                                        <span class="label">İl</span>
+                                        <?php if (!empty($web_data['city'])) : ?>
+                                            <input class="input" id="address-autofocus" type="text" name="city" value="<?php echo $web_data['city']; ?>">
+                                        <?php else : ?>
+                                            <input class="input" id="address-autofocus" type="text" name="city">
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="form-row">
+                                        <span class="label">İlçe</span>
+                                        <?php if (!empty($web_data['county'])) : ?>
+                                            <input class="input" type="text" name="county" value="<?php echo $web_data['county']; ?>">
+                                        <?php else : ?>
+                                            <input class="input" type="text" name="county">
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="form-row">
+                                        <span class="label">Mahalle</span>
+                                        <?php if (!empty($web_data['neighborhood'])) : ?>
+                                            <input class="input" type="text" name="neighborhood" value="<?php echo $web_data['neighborhood']; ?>">
+                                        <?php else : ?>
+                                            <input class="input" type="text" name="neighborhood">
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="form-row">
+                                        <span class="label">Cadde/Sokak</span>
+                                        <?php if (!empty($web_data['street'])) : ?>
+                                            <input class="input" type="text" name="street" value="<?php echo $web_data['street']; ?>">
+                                        <?php else : ?>
+                                            <input class="input" type="text" name="street">
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="form-row">
+                                        <span class="label label-spec">Apartman Numarası</span>
+                                        <?php if (!empty($web_data['building_no'])) : ?>
+                                            <input class="input" type="text" name="building_no" value="<?php echo $web_data['building_no']; ?>">
+                                        <?php else : ?>
+                                            <input class="input" type="text" name="building_no">
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="form-row">
+                                        <span class="label">Daire Numarası</span>
+                                        <?php if (!empty($web_data['apartment_no'])) : ?>
+                                            <input class="input" type="text" name="apartment_no" value="<?php echo $web_data['apartment_no']; ?>">
+                                        <?php else : ?>
+                                            <input class="input" type="text" name="apartment_no">
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="form-row">
+                                        <span class="label">ZİP Numarası</span>
+                                        <?php if (!empty($web_data['zip_no'])) : ?>
+                                            <input class="input" type="text" name="zip_no" value="<?php echo $web_data['zip_no']; ?>">
+                                        <?php else : ?>
+                                            <input class="input" type="text" name="zip_no">
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="row-space">
+                                        <div class="right">
+                                            <input class="btn-success" type="submit" name="submit_address_create" value="Adres Ekle" title="Yeni Adres Ekle">
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
-                        </form>
+                        </div>
+                        <div id="popup-wrapper" class="update-address-wrapper disable">
+                            <div class="popup-container">
+                                <div id="update-address-wrapper-exit" class="popup-exit">
+                                    <div class="exit">
+                                        <i class="fas fa-times"></i>
+                                    </div>
+                                </div>
+                                <h4 class="title">Adresi Düzenle</h4>
+                                <form class="form-creare-address" action="<?php echo URL . URL_ADDRESS_UPDATE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                                    <?php if (!empty($web_data['form_token'])) : ?>
+                                        <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
+                                    <?php endif; ?>
+                                    <input id="update-id" class="input" type="hidden" name="id">
+                                    <div class="form-row">
+                                        <span class="label">Ülke</span>
+                                        <input class="input" type="text" value="Türkiye" readonly>
+                                    </div>
+                                    <div class="form-row">
+                                        <span class="label">İl</span>
+                                        <input id="update-city" class="input" type="text" name="city">
+                                    </div>
+                                    <div class="form-row">
+                                        <span class="label">İlçe</span>
+                                        <input id="update-county" class="input" type="text" name="county">
+                                    </div>
+                                    <div class="form-row">
+                                        <span class="label">Mahalle</span>
+                                        <input id="update-neighborhood" class="input" type="text" name="neighborhood">
+                                    </div>
+                                    <div class="form-row">
+                                        <span class="label">Cadde/Sokak</span>
+                                        <input id="update-street" class="input" type="text" name="street">
+                                    </div>
+                                    <div class="form-row">
+                                        <span class="label label-spec">Apartman Numarası</span>
+                                        <input id="update-building_no" class="input" type="text" name="building_no">
+                                    </div>
+                                    <div class="form-row">
+                                        <span class="label">Daire Numarası</span>
+                                        <input id="update-apartment_no" class="input" type="text" name="apartment_no">
+                                    </div>
+                                    <div class="form-row">
+                                        <span class="label">ZİP Numarası</span>
+                                        <input id="update-zip_no" class="input" type="text" name="zip_no">
+                                    </div>
+                                    <div class="row-space">
+                                        <div class="right">
+                                            <input class="btn-warning" type="submit" name="submit_address_update" value="Adresi Düzenle" title="Adresi Düzenle">
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div id="popup-wrapper" class="delete-address-wrapper disable">
+                            <div class="popup-container">
+                                <div id="delete-address-wrapper-exit" class="popup-exit">
+                                    <div class="exit">
+                                        <i class="fas fa-times"></i>
+                                    </div>
+                                </div>
+                                <h4 class="title center">Adresi Silmek İstediğinizden Emin Misiniz?</h4>
+                                <form id="form-address-delete" action="<?php echo URL . URL_ADDRESS_DELETE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                                    <?php if (!empty($web_data['form_token'])) : ?>
+                                        <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
+                                    <?php endif; ?>
+                                    <input id="input-address-id" type="hidden" name="address_id">
+                                    <div class="delete-row">
+                                        <button id="btn-address-delete-cancel" class="btn-warning padding m-right" title="Silme İşlemini İptal Et">İPTAL</button>
+                                        <button type="submit" name="submit-delete-address" class="btn-danger padding btn-address-delete" title="Silme İşlemini Onayla">SİL</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="address-container">
+                            <?php if (!empty($web_data['user_address'])) : ?>
+                                <?php foreach ($web_data['user_address'] as $address) : ?>
+                                    <div class="address-box">
+                                        <span class="address-text"><?php echo $address['address_neighborhood'] . ', ' . $address['address_street'] . ', Apartman No: ' . $address['address_building_no'] . ' Daire No: ' . $address['address_apartment_no'] . ' ' . $address['address_county'] . '/' . $address['address_city'] . '/' . $address['address_country'] . ' ZIP Kodu:' . $address['address_zip_no']; ?></span>
+                                        <div class="address-btn-row">
+                                            <span class="btn-update-address btn-warning mr" data-id="<?php echo $address['id']; ?>" data-neighborhood="<?php echo $address['address_neighborhood']; ?>" data-street="<?php echo $address['address_street']; ?>" data-building_no="<?php echo $address['address_building_no']; ?>" data-apartment_no="<?php echo $address['address_apartment_no']; ?>" data-county="<?php echo $address['address_county']; ?>" data-city="<?php echo $address['address_city']; ?>" data-zip_no="<?php echo $address['address_zip_no']; ?>">Düzenle</span>
+                                            <span class="btn-danger btn-address-remove btn-delete-address" data-id="<?php echo $address['id']; ?>">Sil</span>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else : ?>
+                                <span class="address-danger-text">Kayıtlı Adresiniz Yok</span>
+                            <?php endif; ?>
+                        </div>
                     <?php elseif ($web_data['profile_type'] == URL_PROFILE_PASSWORD) : ?>
                         <h1 class="title">Şifremi Değiştir</h1>
                         <form id="form-password-update" action="<?php echo URL . URL_PASSWORD_UPDATE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
@@ -82,7 +264,7 @@
                             <div class="form-update-wrapper">
                                 <div class="form-row form-password-row relative-password-row">
                                     <span class="label">Güncel Şifre</span>
-                                    <input class="input" id="input-oldpassword" type="password" name="user_old_password" placeholder="Güncel Şifrenizi Girin">
+                                    <input class="input" id="input-oldpassword" type="password" name="user_old_password" placeholder="Güncel Şifrenizi Girin" autofocus>
                                     <i class="btn-action-password fas fa-eye-slash" title="Şifreyi Göster"></i>
                                 </div>
                                 <div class="form-row form-password-row">
@@ -120,7 +302,7 @@
                             <div class="form-update-wrapper">
                                 <div class="form-row">
                                     <span class="label">Email</span>
-                                    <input class="input" type="email" id="user-email" name="user_email" value="<?php echo $web_data['authenticated_user']['email']; ?>" placeholder="Yeni Emailinizi Girin">
+                                    <input class="input" type="email" id="user-email" name="user_email" value="<?php echo $web_data['authenticated_user']['email']; ?>" placeholder="Yeni Emailinizi Girin" autofocus>
                                 </div>
                             </div>
                             <div class="row-space">
@@ -131,14 +313,15 @@
                         </form>
                     <?php elseif ($web_data['profile_type'] == URL_PROFILE_PHONE) : ?>
                         <h1 class="title">Telefon Numaramı Değiştir</h1>
-                        <form id="form-update-phone" action="<?php echo URL . URL_EMAIL_UPDATE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                        <form id="form-update-phone" action="<?php echo URL . URL_PHONE_UPDATE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
                             <?php if (!empty($web_data['form_token'])) : ?>
                                 <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
                             <?php endif; ?>
                             <div class="form-update-wrapper">
                                 <div class="form-row">
                                     <span class="label">Telefon Numarası</span>
-                                    <input class="input" id="user-phone" type="tel" name="user_phone_number" value="<?php echo $web_data['authenticated_user']['phone_number']; ?>" placeholder="Yeni Telefon Numaranızı Girin">
+                                    <span class="label-phone">(+90)</span>
+                                    <input class="input input-phone" id="user-phone" type="tel" name="user_phone_number" maxlength="10" value="<?php echo $web_data['authenticated_user']['phone_number']; ?>" placeholder="Telefon Numaranızı Girin" autofocus>
                                 </div>
                             </div>
                             <div class="row-space">
@@ -159,10 +342,7 @@
                                     <i class="fas fa-camera upload-image-icon"></i>
                                 </div>
                             </label>
-                            <input id="upload-image-1" class="item-image-input" type="file" name="user_image" accept=".jpg, .jpeg, .png">
-                            <div class="form-row form-password-row">
-                                <span class="input-message" id="user-image-message"></span>
-                            </div>
+                            <input id="upload-image-1" class="input-user-image" type="file" name="user_image" accept=".jpg, .jpeg, .png">
                             <div class="row-space">
                                 <div class="right">
                                     <input class="btn-warning mt-2" type="submit" name="update_profile_photo" value="Profil Fotoğrafını Güncelle" title="Profil Fotoğrafını Güncelle">
@@ -179,6 +359,91 @@
     <?php require_once 'View/SharedHome/_home_footer.php'; ?>
     <?php if (!empty($web_data['cookie_cart'])) : ?>
         <script src="<?php echo URL; ?>assets/js/header_cart.js"></script>
+    <?php endif; ?>
+    <?php if ($web_data['profile_type'] == URL_PROFILE_ADDRESS) : ?>
+        <script>
+            const createAddressWrapper = document.querySelector('.create-address-wrapper');
+            document.getElementById('btn-create-address').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (createAddressWrapper.classList.contains('disable')) {
+                    createAddressWrapper.classList.remove('disable');
+                    document.getElementById('address-autofocus').focus();
+                }
+                if (!bodyElement.classList.contains('noscroll')) {
+                    bodyElement.classList.add('noscroll');
+                }
+            });
+            document.getElementById('create-address-wrapper-exit').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!createAddressWrapper.classList.contains('disable')) {
+                    createAddressWrapper.classList.add('disable');
+                }
+                if (bodyElement.classList.contains('noscroll')) {
+                    bodyElement.classList.remove('noscroll');
+                }
+            });
+            const updateAddressWrapper = document.querySelector('.update-address-wrapper');
+            document.querySelectorAll('.btn-update-address').forEach(element => {
+                element.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('update-id').value = element.dataset.id;
+                    document.getElementById('update-city').value = element.dataset.city;
+                    document.getElementById('update-county').value = element.dataset.county;
+                    document.getElementById('update-neighborhood').value = element.dataset.neighborhood;
+                    document.getElementById('update-street').value = element.dataset.street;
+                    document.getElementById('update-building_no').value = element.dataset.building_no;
+                    document.getElementById('update-apartment_no').value = element.dataset.apartment_no;
+                    document.getElementById('update-zip_no').value = element.dataset.zip_no;
+                    if (updateAddressWrapper.classList.contains('disable')) {
+                        updateAddressWrapper.classList.remove('disable');
+                    }
+                    if (!bodyElement.classList.contains('noscroll')) {
+                        bodyElement.classList.add('noscroll');
+                    }
+                });
+            });
+            document.getElementById('update-address-wrapper-exit').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!updateAddressWrapper.classList.contains('disable')) {
+                    updateAddressWrapper.classList.add('disable');
+                }
+                if (bodyElement.classList.contains('noscroll')) {
+                    bodyElement.classList.remove('noscroll');
+                }
+            });
+            const deleteAddressWrapper = document.querySelector('.delete-address-wrapper');
+            document.querySelectorAll('.btn-delete-address').forEach(element => {
+                element.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('input-address-id').value = element.dataset.id;
+                    if (deleteAddressWrapper.classList.contains('disable')) {
+                        deleteAddressWrapper.classList.remove('disable');
+                        document.getElementById('address-autofocus').focus();
+                    }
+                    if (!bodyElement.classList.contains('noscroll')) {
+                        bodyElement.classList.add('noscroll');
+                    }
+                });
+            });
+            document.getElementById('delete-address-wrapper-exit').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!deleteAddressWrapper.classList.contains('disable')) {
+                    deleteAddressWrapper.classList.add('disable');
+                }
+                if (bodyElement.classList.contains('noscroll')) {
+                    bodyElement.classList.remove('noscroll');
+                }
+            });
+            document.getElementById('btn-address-delete-cancel').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!deleteAddressWrapper.classList.contains('disable')) {
+                    deleteAddressWrapper.classList.add('disable');
+                }
+                if (bodyElement.classList.contains('noscroll')) {
+                    bodyElement.classList.remove('noscroll');
+                }
+            });
+        </script>
     <?php endif; ?>
     <?php if ($web_data['profile_type'] == URL_PROFILE_PASSWORD) : ?>
         <script>
@@ -201,27 +466,20 @@
     <?php endif; ?>
     <?php if ($web_data['profile_type'] == URL_PROFILE_PHOTO) : ?>
         <script>
-            const imageInput = document.querySelector('.item-image-input');
-            const uploadedImage = document.querySelector('.profile-image');
-            imageInput.onchange = function() {
-                var item = this.files[0];
+            document.querySelector('.input-user-image').onchange = function() {
+                var user_image = this.files[0];
                 var reader = new FileReader();
-                reader.readAsDataURL(item);
-                reader.name = item.name;
-                reader.size = item.size;
-                reader.onload = function(event) {
-                    var img = new Image();
-                    img.src = event.target.result;
-                    img.name = event.target.name;
-                    img.size = event.target.size;
-                    img.onload = function(el) {
-                        var elem = document.createElement('canvas');
-                        elem.width = 200;
-                        elem.height = 200;
-                        var ctx = elem.getContext('2d');
-                        ctx.drawImage(el.target, 0, 0, elem.width, elem.height);
-                        var srcEncoded = ctx.canvas.toDataURL('image/png', 1);
-                        uploadedImage.src = srcEncoded;
+                reader.readAsDataURL(user_image);
+                reader.onload = function(e) {
+                    var image = new Image();
+                    image.src = e.target.result;
+                    image.onload = function(e2) {
+                        var created_image = document.createElement('canvas');
+                        created_image.width = 200;
+                        created_image.height = 200;
+                        var context = created_image.getContext('2d');
+                        context.drawImage(e2.target, 0, 0, created_image.width, created_image.height);
+                        document.querySelector('.profile-image').src = context.canvas.toDataURL('image/png', 1);
                     }
                 }
             };
@@ -354,6 +612,15 @@
                         $('#form-user-update').submit();
                     }
                 });
+                $('.mfa-checkbox').change(function() {
+                    if ($('.loader-wrapper').hasClass('hidden')) {
+                        $('.loader-wrapper').removeClass('hidden');
+                    }
+                    if (!$('body').hasClass('noscroll')) {
+                        $('body').addClass('noscroll');
+                    }
+                    $('#form-two-fa').submit();
+                });
             <?php endif; ?>
             <?php if ($web_data['profile_type'] == URL_PROFILE_PASSWORD) : ?>
                 const inputOldPassword = $('#input-oldpassword');
@@ -460,7 +727,7 @@
                     } else if ($.trim(userPhone.val()).indexOf(' ') >= 0) {
                         userPhone.focus();
                         setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_NOT_VALID_PHONE; ?></span></div>');
-                    } else if ($.trim(userPhone.val()).length <= <?php echo PHONE_LIMIT; ?>) {
+                    } else if ($.trim(userPhone.val()).length < <?php echo PHONE_LIMIT; ?>) {
                         userPhone.focus();
                         setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_NOT_VALID_PHONE; ?></span></div>');
                     } else {

@@ -68,8 +68,8 @@ class StartUp
     function CheckUrl($url)
     {
         $url = str_replace(array('<', '>', '£', '#', '$', '½', '{', '[', ']', '}', '|', '"', 'é', '!', "'", '^', '+', '%', '&', '(', ')', '=', '*', '?', '_', '@', '€', '₺', '¨', '~', 'æ', 'ß', '´', '`', ',', ';', '.', ':'), '', $url);
-        $old = array('ş', 'Ş', 'ı', 'I', 'İ', 'ğ', 'Ğ', 'ü', 'Ü', 'ö', 'Ö', 'Ç', 'ç', 'x', 'X', 'w', 'W', 'q', 'Q');
-        $new = array('s', 's', 'i', 'i', 'i', 'g', 'g', 'u', 'u', 'o', 'o', 'c', 'c', '', '', '', '', '', '');
+        $old = array('ş', 'Ş', 'ı', 'I', 'İ', 'ğ', 'Ğ', 'ü', 'Ü', 'ö', 'Ö', 'Ç', 'ç');
+        $new = array('s', 's', 'i', 'i', 'i', 'g', 'g', 'u', 'u', 'o', 'o', 'c', 'c');
         $url = str_replace($old, $new, $url);
         $url = strtolower($url);
         $url = preg_replace('/&amp;amp;amp;amp;amp;amp;amp;amp;amp;.+?;/', '', $url);

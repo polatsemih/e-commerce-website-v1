@@ -37,9 +37,21 @@ class UserModel extends Model
     {
         return $this->database->Update(TABLE_SESSION_UPDATE_EMAIL, $inputs);
     }
+    function IsProfileImagePathUnique(string $profile_image_path)
+    {
+        return $this->database->GET(TABLE_USER, 'id', 'WHERE profile_image_path=?', $profile_image_path, 'SINGULAR');
+    }
+    function GetAddressCount(string $user_id)
+    {
+        return $this->database->Get(TABLE_ADDRESS, 'COUNT(id)', 'WHERE user_id=? AND is_address_removed=0', $user_id, 'SINGULAR');
+    }
     function GetAddress(string $user_id)
     {
-        return $this->database->Get(TABLE_ADDRESS, 'id,address', 'WHERE user_id=? ORDER BY address_created DESC', $user_id, 'PLURAL');
+        return $this->database->Get(TABLE_ADDRESS, 'id,address_country,address_city,address_county,address_neighborhood,address_street,address_building_no,address_apartment_no,address_zip_no', 'WHERE user_id=? AND is_address_removed=0 ORDER BY address_created DESC', $user_id, 'PLURAL');
+    }
+    function GetAddressById(array $inputs)
+    {
+        return $this->database->Get(TABLE_ADDRESS, 'id', 'WHERE id=? AND user_id=? AND is_address_removed=0', $inputs, 'SINGULAR');
     }
     function CreateAddress(array $inputs)
     {

@@ -574,15 +574,6 @@
                 }
                 removeNoScroll();
             });
-            commentCreateWrapper.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                if (e.target.classList == 'comment-create-wrapper') {
-                    if (!commentCreateWrapper.classList.contains('disable')) {
-                        commentCreateWrapper.classList.add('disable');
-                    }
-                    removeNoScroll();
-                }
-            });
             const commentReplyCreateWrapper = document.querySelector('.comment-reply-create-wrapper');
             document.getElementById('comment-reply-create-exit').addEventListener('click', (e) => {
                 e.preventDefault();
@@ -590,15 +581,6 @@
                     commentReplyCreateWrapper.classList.add('disable');
                 }
                 removeNoScroll();
-            });
-            commentReplyCreateWrapper.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                if (e.target.classList == 'comment-reply-create-wrapper') {
-                    if (!commentReplyCreateWrapper.classList.contains('disable')) {
-                        commentReplyCreateWrapper.classList.add('disable');
-                    }
-                    removeNoScroll();
-                }
             });
             const commentUpdateWrapper = document.querySelector('.comment-update-wrapper');
             document.getElementById('comment-update-exit').addEventListener('click', (e) => {
@@ -608,15 +590,6 @@
                 }
                 removeNoScroll();
             });
-            commentUpdateWrapper.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                if (e.target.classList == 'comment-update-wrapper') {
-                    if (!commentUpdateWrapper.classList.contains('disable')) {
-                        commentUpdateWrapper.classList.add('disable');
-                    }
-                    removeNoScroll();
-                }
-            });
             const commentReplyUpdateWrapper = document.querySelector('.comment-reply-update-wrapper');
             document.getElementById('comment-reply-update-exit').addEventListener('click', (e) => {
                 e.preventDefault();
@@ -625,15 +598,6 @@
                 }
                 removeNoScroll();
             });
-            commentReplyUpdateWrapper.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                if (e.target.classList == 'comment-reply-update-wrapper') {
-                    if (!commentReplyUpdateWrapper.classList.contains('disable')) {
-                        commentReplyUpdateWrapper.classList.add('disable');
-                    }
-                    removeNoScroll();
-                }
-            });
             const commentDeleteWrapper = document.querySelector('.comment-delete-wrapper');
             document.getElementById('comment-delete-exit').addEventListener('click', (e) => {
                 e.preventDefault();
@@ -641,15 +605,6 @@
                     commentDeleteWrapper.classList.add('disable');
                 }
                 removeNoScroll();
-            });
-            commentDeleteWrapper.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                if (e.target.classList == 'comment-delete-wrapper') {
-                    if (!commentDeleteWrapper.classList.contains('disable')) {
-                        commentDeleteWrapper.classList.add('disable');
-                    }
-                    removeNoScroll();
-                }
             });
             document.getElementById('btn-comment-delete-cancel').addEventListener('click', (e) => {
                 e.preventDefault();
@@ -665,15 +620,6 @@
                     commentReplyDeleteWrapper.classList.add('disable');
                 }
                 removeNoScroll();
-            });
-            commentReplyDeleteWrapper.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                if (e.target.classList == 'comment-reply-delete-wrapper') {
-                    if (!commentReplyDeleteWrapper.classList.contains('disable')) {
-                        commentReplyDeleteWrapper.classList.add('disable');
-                    }
-                    removeNoScroll();
-                }
             });
             document.getElementById('btn-comment-reply-delete-cancel').addEventListener('click', (e) => {
                 e.preventDefault();
@@ -1314,6 +1260,8 @@
                                 window.location.href = '<?php echo URL . URL_SHUTDOWN; ?>';
                             } else if (response.hasOwnProperty('exception')) {
                                 window.location.href = '<?php echo URL . URL_EXCEPTION; ?>';
+                            } else if (response.hasOwnProperty('profil')) {
+                                window.location.href = '<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_INFORMATIONS; ?>';
                             } else if (response.hasOwnProperty('reset') && response['reset'] == false) {
                                 if (response.hasOwnProperty('notification')) {
                                     setClientNotification(response['notification']);
@@ -1480,6 +1428,8 @@
                                 window.location.href = '<?php echo URL . URL_SHUTDOWN; ?>';
                             } else if (response.hasOwnProperty('exception')) {
                                 window.location.href = '<?php echo URL . URL_EXCEPTION; ?>';
+                            } else if (response.hasOwnProperty('profil')) {
+                                window.location.href = '<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_INFORMATIONS; ?>';
                             } else if (response.hasOwnProperty('reset') && response['reset'] == false) {
                                 if (response.hasOwnProperty('notification')) {
                                     setClientNotification(response['notification']);

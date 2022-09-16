@@ -68,7 +68,7 @@ class Input
         }
         return null;
     }
-    function CheckEmail(string $e)
+    function IsEmail(string $e)
     {
         $email = filter_var($e, FILTER_SANITIZE_EMAIL);
         if (!empty($email)) {
@@ -82,6 +82,14 @@ class Input
                     }
                 }
             }
+        }
+        return null;
+    }
+    function IsPhoneNumber(string $phone_number)
+    {
+        $result = preg_match('/^(5)([0-9]{2})\s?([0-9]{3})\s?([0-9]{2})\s?([0-9]{2})$/', $phone_number, $valid_number);
+        if (!empty($result)) {
+            return $valid_number[0];
         }
         return null;
     }
@@ -123,7 +131,7 @@ class Input
         $input = $this->IsString($input);
         if (!is_null($input)) {
             if (strlen($input) == $input_length) {
-                return $this->PreventXSS(urlencode($input));
+                return $this->PreventXSSForId(urlencode($input));
             }
         }
         return null;
@@ -157,7 +165,7 @@ class Input
                     }
                 }
                 if (!empty($posted_input['is_email'])) {
-                    $input = $this->CheckEmail($input);
+                    $input = $this->IsEmail($input);
                     if (is_null($input)) {
                         $error['error_message'] = $posted_input['error_message_is_email'];
                         return $error;
@@ -200,6 +208,13 @@ class Input
                     $input = $this->IsIntegerAndPositive($input);
                     if (is_null($input)) {
                         $error['error_message'] = $posted_input['error_message_is_integer_and_positive'];
+                        return $error;
+                    }
+                }
+                if (!empty($posted_input['is_phone_number'])) {
+                    $input = $this->IsPhoneNumber($input);
+                    if (is_null($input)) {
+                        $error['error_message'] = $posted_input['error_message_is_phone_number'];
                         return $error;
                     }
                 }
@@ -318,8 +333,22 @@ class Input
         }
         return array('result' => false);
     }
-
-
+    function GenerateFolderName()
+    {
+        $generated_token = strtolower(strtr(sodium_bin2base64(random_bytes(15), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING),  array('-' => 'r', '_' => 'f')));
+        if (!empty($generated_token) && strlen($generated_token) == 20) {
+            return array('result' => true, 'data' => $generated_token);
+        }
+        return array('result' => false);
+    }
+    function GenerateFileName()
+    {
+        $generated_token = strtolower(strtr(sodium_bin2base64(random_bytes(11), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING),  array('-' => 'r', '_' => 'f')));
+        if (!empty($generated_token) && strlen($generated_token) == 15) {
+            return array('result' => true, 'data' => $generated_token);
+        }
+        return array('result' => false);
+    }
 
     
     
@@ -367,9 +396,5 @@ class Input
         $url = trim($url, '-');
         $url = stripslashes($url);
         return $url;
-    }
-    function CheckPhoneNumber(string $phone)
-    {
-        return preg_match('/^(5)([0-9]{2})\s?([0-9]{3})\s?([0-9]{2})\s?([0-9]{2})$/', $phone, $matches) ? $matches[0] : null;
     }
 }

@@ -25,6 +25,10 @@ define('URL_PROFILE_PHONE', 'telefonum');
 define('URL_PROFILE_PHOTO', 'profil-fotom');
 define('URL_PROFILE_ORDERS', 'siparislerim');
 define('URL_PROFILE_UPDATE', 'bilgilerimi-guncelle');
+define('URL_PROFILE_2FA', 'iki-asamali-dogrulama-aktif');
+define('URL_ADDRESS_CREATE', 'adres-ekle');
+define('URL_ADDRESS_UPDATE', 'adres-guncelle');
+define('URL_ADDRESS_DELETE', 'adres-kaldir');
 define('URL_PASSWORD_UPDATE', 'sifremi-guncelle');
 define('URL_EMAIL_UPDATE', 'emailimi-guncelle');
 define('URL_EMAIL_UPDATE_CONFIRM', 'yeni-email-dogrulama');
@@ -73,6 +77,10 @@ define('URL_MAPS', array(
     array('url' => 'cikis', 'controller' => 'HomeController', 'action' => 'LogOut'),
     array('url_pattern' => 'profil/?', 'controller' => 'HomeController', 'action' => 'Profile'),
     array('url' => 'bilgilerimi-guncelle', 'controller' => 'HomeController', 'action' => 'ProfileInformationsUpdate'),
+    array('url' => 'iki-asamali-dogrulama-aktif', 'controller' => 'HomeController', 'action' => 'ProfileTwoFa'),
+    array('url' => 'adres-ekle', 'controller' => 'HomeController', 'action' => 'ProfileCreateAddress'),
+    array('url' => 'adres-guncelle', 'controller' => 'HomeController', 'action' => 'ProfileUpdateAddress'),
+    array('url' => 'adres-kaldir', 'controller' => 'HomeController', 'action' => 'ProfileDeleteAddress'),
     array('url' => 'sifremi-guncelle', 'controller' => 'HomeController', 'action' => 'ProfilePasswordUpdate'),
     array('url' => 'emailimi-guncelle', 'controller' => 'HomeController', 'action' => 'ProfileEmailUpdate'),
     array('url' => 'yeni-email-dogrulama', 'controller' => 'HomeController', 'action' => 'EmailUpdateConfirm'),

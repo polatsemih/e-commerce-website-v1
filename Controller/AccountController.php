@@ -4,7 +4,7 @@ class AccountController extends Controller
     function __construct()
     {
         parent::__construct();
-        if (!empty($this->web_data['authenticated_user'])) {
+        if (empty($this->web_data['authenticated_user'])) {
             echo '{"reset":true}';
             exit(0);
         }
@@ -129,50 +129,61 @@ class AccountController extends Controller
                 ));
                 if (empty($checked_inputs['error_message'])) {
                     if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'ItemDetails')) {
-                        $item_id_from_database = $this->ItemModel->GetItemIdByItemUrl($checked_inputs['item_url']);
-                        if ($item_id_from_database['result']) {
-                            parent::GetModel('CommentModel');
-                            $comment_create_result = $this->CommentModel->CreateComment(array(
-                                'user_id' => $this->web_data['authenticated_user'],
-                                'item_id' => $item_id_from_database['data']['id'],
-                                'comment' => $checked_inputs['comment'],
-                                'is_comment_approved' => 0
-                            ));
-                            if ($comment_create_result['result']) {
-                                $created_comment_from_database = $this->CommentModel->GetCommentById($comment_create_result['id']);
-                                if ($created_comment_from_database['result']) {
-                                    $created_comment_from_database['data']['comment'] = stripslashes($comment);
-                                    $a = date('d/m/Y', strtotime($created_comment_from_database['data']['date_comment_created']));
-                                    if (!empty($a)) {
-                                        $created_comment_from_database['data']['date_comment_created'] = $a;
-                                        $result_set_csrf_token = parent::SetCSRFTokenjQ('ItemDetails');
-                                        if ($result_set_csrf_token['result']) {
-                                            $user_form_database = $this->UserModel->GetUserByUserId('first_name,last_name,profile_image_path,profile_image', $this->web_data['authenticated_user']);
-                                            if ($user_form_database['result']) {
-                                                $response['reset'] = false;
-                                                $response['form_token'] = $result_set_csrf_token['csrf_token'];
-                                                $response['notification'] = $this->notification_control->SetNotificationForjQ('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_CREATE);
-                                                $response['comment'] = $created_comment_from_database['data'];
-                                                $response['comment_user'] = array(
-                                                    'user_first_name' => $user_form_database['data']['first_name'],
-                                                    'user_last_name' => $user_form_database['data']['last_name'],
-                                                    'user_profile_image_path' => $user_form_database['data']['profile_image_path'],
-                                                    'user_profile_image' => $user_form_database['data']['profile_image']
-                                                );
+                        $user_form_database = $this->UserModel->GetUserByUserId('first_name,last_name,profile_image_path,profile_image,is_user_blocked', $this->web_data['authenticated_user']);
+                        if ($user_form_database['result']) {
+                            if ($user_form_database['data']['is_user_blocked'] == 0) {
+                                if (!empty($user_form_database['data']['first_name']) || !empty($user_form_database['data']['last_name'])) {
+                                    $item_id_from_database = $this->ItemModel->GetItemIdByItemUrl($checked_inputs['item_url']);
+                                    if ($item_id_from_database['result']) {
+                                        parent::GetModel('CommentModel');
+                                        $comment_create_result = $this->CommentModel->CreateComment(array(
+                                            'user_id' => $this->web_data['authenticated_user'],
+                                            'item_id' => $item_id_from_database['data']['id'],
+                                            'comment' => $checked_inputs['comment'],
+                                            'is_comment_approved' => 0
+                                        ));
+                                        if ($comment_create_result['result']) {
+                                            $created_comment_from_database = $this->CommentModel->GetCommentById($comment_create_result['id']);
+                                            if ($created_comment_from_database['result']) {
+                                                $created_comment_from_database['data']['comment'] = stripslashes($comment);
+                                                $a = date('d/m/Y', strtotime($created_comment_from_database['data']['date_comment_created']));
+                                                if (!empty($a)) {
+                                                    $created_comment_from_database['data']['date_comment_created'] = $a;
+                                                    $result_set_csrf_token = parent::SetCSRFTokenjQ('ItemDetails');
+                                                    if ($result_set_csrf_token['result']) {
+                                                        $response['reset'] = false;
+                                                        $response['form_token'] = $result_set_csrf_token['csrf_token'];
+                                                        $response['notification'] = $this->notification_control->SetNotificationForjQ('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_CREATE);
+                                                        $response['comment'] = $created_comment_from_database['data'];
+                                                        $response['comment_user'] = array(
+                                                            'user_first_name' => strtoupper(substr($user_form_database['data']['first_name'], 0, 1)) . '***',
+                                                            'user_last_name' => strtoupper(substr($user_form_database['data']['last_name'], 0, 1)) . '***',
+                                                            'user_profile_image_path' => $user_form_database['data']['profile_image_path'],
+                                                            'user_profile_image' => $user_form_database['data']['profile_image']
+                                                        );
+                                                    } else {
+                                                        echo '{"shutdown":"shutdown"}';
+                                                        exit(0);
+                                                    }
+                                                } else {
+                                                    echo '{"shutdown":"shutdown"}';
+                                                    exit(0);
+                                                }
+                                            } else {
+                                                $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_CREATE);
                                             }
                                         } else {
-                                            echo '{"shutdown":"shutdown"}';
-                                            exit(0);
+                                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
                                         }
                                     } else {
-                                        echo '{"shutdown":"shutdown"}';
-                                        exit(0);
+                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_COMMENT_CREATE);
                                     }
                                 } else {
-                                    $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_CREATE);
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_COMMENT_USER_EMPTY_NAME);
+                                    $response['profil'] = true;
                                 }
                             } else {
-                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_COMMENT_USER_BLOCKED);
                             }
                         } else {
                             $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_COMMENT_CREATE);
@@ -329,45 +340,56 @@ class AccountController extends Controller
                 ));
                 if (empty($checked_inputs['error_message'])) {
                     if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'ItemDetails')) {
-                        parent::GetModel('CommentModel');
-                        $comment_reply_create_result = $this->CommentModel->CreateCommentReply(array(
-                            'comment_id' => $checked_inputs['comment_id'],
-                            'user_id' => $this->web_data['authenticated_user'],
-                            'comment_reply' => $checked_inputs['comment_reply'],
-                            'is_comment_reply_approved' => 0
-                        ));
-                        if ($comment_reply_create_result['result']) {
-                            $created_comment_from_database = $this->CommentModel->GetCommentReplyById($comment_reply_create_result['id']);
-                            if ($created_comment_from_database['result']) {
-                                $created_comment_from_database['data']['comment_reply'] = stripslashes($comment_reply);
-                                $b = date('d/m/Y', strtotime($created_comment_from_database['data']['date_comment_reply_created']));
-                                if (!empty($b)) {
-                                    $created_comment_from_database['data']['date_comment_reply_created'] = $b;
-                                    $result_set_csrf_token = parent::SetCSRFTokenjQ('ItemDetails');
-                                    if ($result_set_csrf_token['result']) {
-                                        $user_form_database = $this->UserModel->GetUserByUserId('first_name,last_name,profile_image_path,profile_image', $this->web_data['authenticated_user']);
-                                        if ($user_form_database['result']) {
-                                            $response['reset'] = false;
-                                            $response['form_token'] = $result_set_csrf_token['csrf_token'];
-                                            $response['notification'] = $this->notification_control->SetNotificationForjQ('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_CREATE);
-                                            $response['comment_reply'] = $created_comment_from_database['data'];
-                                            $response['comment_reply_user'] = array(
-                                                'user_first_name' => $user_form_database['data']['first_name'],
-                                                'user_last_name' => $user_form_database['data']['last_name'],
-                                                'user_profile_image_path' => $user_form_database['data']['profile_image_path'],
-                                                'user_profile_image' => $user_form_database['data']['profile_image']
-                                            );
+                        $user_form_database = $this->UserModel->GetUserByUserId('first_name,last_name,profile_image_path,profile_image,is_user_blocked', $this->web_data['authenticated_user']);
+                        if ($user_form_database['result']) {
+                            if ($user_form_database['data']['is_user_blocked'] == 0) {
+                                if (!empty($user_form_database['data']['first_name']) || !empty($user_form_database['data']['last_name'])) {
+                                    parent::GetModel('CommentModel');
+                                    $comment_reply_create_result = $this->CommentModel->CreateCommentReply(array(
+                                        'comment_id' => $checked_inputs['comment_id'],
+                                        'user_id' => $this->web_data['authenticated_user'],
+                                        'comment_reply' => $checked_inputs['comment_reply'],
+                                        'is_comment_reply_approved' => 0
+                                    ));
+                                    if ($comment_reply_create_result['result']) {
+                                        $created_comment_from_database = $this->CommentModel->GetCommentReplyById($comment_reply_create_result['id']);
+                                        if ($created_comment_from_database['result']) {
+                                            $created_comment_from_database['data']['comment_reply'] = stripslashes($comment_reply);
+                                            $b = date('d/m/Y', strtotime($created_comment_from_database['data']['date_comment_reply_created']));
+                                            if (!empty($b)) {
+                                                $created_comment_from_database['data']['date_comment_reply_created'] = $b;
+                                                $result_set_csrf_token = parent::SetCSRFTokenjQ('ItemDetails');
+                                                if ($result_set_csrf_token['result']) {
+                                                    $response['reset'] = false;
+                                                    $response['form_token'] = $result_set_csrf_token['csrf_token'];
+                                                    $response['notification'] = $this->notification_control->SetNotificationForjQ('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_CREATE);
+                                                    $response['comment_reply'] = $created_comment_from_database['data'];
+                                                    $response['comment_reply_user'] = array(
+                                                        'user_first_name' => strtoupper(substr($user_form_database['data']['first_name'], 0, 1)) . '***',
+                                                        'user_last_name' => strtoupper(substr($user_form_database['data']['last_name'], 0, 1)) . '***',
+                                                        'user_profile_image_path' => $user_form_database['data']['profile_image_path'],
+                                                        'user_profile_image' => $user_form_database['data']['profile_image']
+                                                    );
+                                                } else {
+                                                    echo '{"shutdown":"shutdown"}';
+                                                    exit(0);
+                                                }
+                                            } else {
+                                                echo '{"shutdown":"shutdown"}';
+                                                exit(0);
+                                            }
+                                        } else {
+                                            $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_CREATE);
                                         }
                                     } else {
-                                        echo '{"shutdown":"shutdown"}';
-                                        exit(0);
+                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
                                     }
                                 } else {
-                                    echo '{"shutdown":"shutdown"}';
-                                    exit(0);
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_COMMENT_USER_EMPTY_NAME);
+                                    $response['profil'] = true;
                                 }
                             } else {
-                                $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_CREATE);
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_COMMENT_USER_BLOCKED);
                             }
                         } else {
                             $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);

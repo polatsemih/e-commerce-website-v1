@@ -18,7 +18,6 @@ class HomeController extends Controller
                         $this->web_data['home_items'] = $formatted_home_items['data'];
                     }
                 }
-
                 $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url,gender_home_image');
                 parent::GetView('Home/Index', $this->web_data);
             }
@@ -398,8 +397,8 @@ class HomeController extends Controller
                                     if ($user_comment_from_db['result'] && !empty($a)) {
                                         $comments_from_db['data'][$key]['date_comment_created'] = $a;
                                         $comments_from_db['data'][$key]['user_id'] = $comment_from_db['user_id'];
-                                        $comments_from_db['data'][$key]['user_first_name'] = $user_comment_from_db['data']['first_name'];
-                                        $comments_from_db['data'][$key]['user_last_name'] = $user_comment_from_db['data']['last_name'];
+                                        $comments_from_db['data'][$key]['user_first_name'] = strtoupper(substr($user_comment_from_db['data']['first_name'], 0, 1)) . '***';
+                                        $comments_from_db['data'][$key]['user_last_name'] = strtoupper(substr($user_comment_from_db['data']['last_name'], 0, 1)) . '***';
                                         $comments_from_db['data'][$key]['user_profile_image_path'] = $user_comment_from_db['data']['profile_image_path'];
                                         $comments_from_db['data'][$key]['user_profile_image'] = $user_comment_from_db['data']['profile_image'];
                                         if (!empty($this->web_data['authenticated_user'])) {
@@ -421,8 +420,8 @@ class HomeController extends Controller
                                                 if ($user_comment_reply_from_db['result'] && !empty($b)) {
                                                     $comments_reply_from_db['data'][$key2]['date_comment_reply_created'] = $b;
                                                     $comments_reply_from_db['data'][$key2]['user_id'] = $comment_reply_from_db['user_id'];
-                                                    $comments_reply_from_db['data'][$key2]['user_first_name'] = $user_comment_reply_from_db['data']['first_name'];
-                                                    $comments_reply_from_db['data'][$key2]['user_last_name'] = $user_comment_reply_from_db['data']['last_name'];
+                                                    $comments_reply_from_db['data'][$key2]['user_first_name'] = strtoupper(substr($user_comment_reply_from_db['data']['first_name'], 0, 1)) . '***';
+                                                    $comments_reply_from_db['data'][$key2]['user_last_name'] = strtoupper(substr($user_comment_reply_from_db['data']['last_name'], 0, 1)) . '***';
                                                     $comments_reply_from_db['data'][$key2]['user_profile_image_path'] = $user_comment_reply_from_db['data']['profile_image_path'];
                                                     $comments_reply_from_db['data'][$key2]['user_profile_image'] = $user_comment_reply_from_db['data']['profile_image'];
                                                 } else {
@@ -872,13 +871,29 @@ class HomeController extends Controller
                         $case_matched = true;
                         $this->web_data['profile_type'] = URL_PROFILE_INFORMATIONS;
                         $this->web_data['profile_title'] = URL_PROFILE_INFO_TITLE;
-                        $user_from_database = $this->UserModel->GetUserByUserId('first_name,last_name,user_delete_able', $this->web_data['authenticated_user']);
+                        $user_from_database = $this->UserModel->GetUserByUserId('first_name,last_name,two_fa_enable,user_delete_able', $this->web_data['authenticated_user']);
                         break;
                     case URL_PROFILE_ADDRESS:
                         $case_matched = true;
                         $this->web_data['profile_type'] = URL_PROFILE_ADDRESS;
                         $this->web_data['profile_title'] = URL_PROFILE_ADDRESS_TITLE;
-                        $user_from_database = $this->UserModel->GetUserByUserId('address', $this->web_data['authenticated_user']);
+                        $address_from_db = $this->UserModel->GetAddress($this->web_data['authenticated_user']);
+                        if ($address_from_db['result']) {
+                            $this->web_data['user_address'] = $address_from_db['data'];
+                        }
+                        if (!empty($_SESSION[SESSION_WEB_DATA_NAME])) {
+                            if (isset($_SESSION[SESSION_WEB_DATA_NAME]['city']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['county']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['neighborhood']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['street']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['building_no']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['apartment_no']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['zip_no'])) {
+                                $this->web_data['address'] = true;
+                                $this->web_data['city'] = $_SESSION[SESSION_WEB_DATA_NAME]['city'];
+                                $this->web_data['county'] = $_SESSION[SESSION_WEB_DATA_NAME]['county'];
+                                $this->web_data['neighborhood'] = $_SESSION[SESSION_WEB_DATA_NAME]['neighborhood'];
+                                $this->web_data['street'] = $_SESSION[SESSION_WEB_DATA_NAME]['street'];
+                                $this->web_data['building_no'] = $_SESSION[SESSION_WEB_DATA_NAME]['building_no'];
+                                $this->web_data['apartment_no'] = $_SESSION[SESSION_WEB_DATA_NAME]['apartment_no'];
+                                $this->web_data['zip_no'] = $_SESSION[SESSION_WEB_DATA_NAME]['zip_no'];
+                            }
+                            $this->session_control->KillSession(SESSION_WEB_DATA_NAME);
+                        }
                         break;
                     case URL_PROFILE_PASSWORD:
                         $case_matched = true;
@@ -966,6 +981,208 @@ class HomeController extends Controller
             $this->input_control->Redirect();
         } catch (\Throwable $th) {
             if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function ProfileInformationsUpdate | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function ProfileTwoFa()
+    {
+        try {
+            if (empty($this->web_data['authenticated_user'])) {
+                $this->input_control->Redirect();
+            }
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'Profile')) {
+                        $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id,two_fa_enable', $this->web_data['authenticated_user']);
+                        if ($confirmed_user_from_db['result']) {
+                            if ($confirmed_user_from_db['data']['two_fa_enable'] == 1) {
+                                $new_two_fa = 0;
+                                $two_fa_sta = 'WARNING';
+                                $two_fa_not = TR_NOTIFICATION_SUCCESS_PROFILE_2FA_DEACTIVE;
+                            } else {
+                                $new_two_fa = 1;
+                                $two_fa_sta = 'SUCCESS';
+                                $two_fa_not = TR_NOTIFICATION_SUCCESS_PROFILE_2FA_ACTIVE;
+                            }
+                            if (isset($new_two_fa) && !empty($two_fa_sta) && !empty($two_fa_not)) {
+                                if ($this->UserModel->UpdateUser(array('two_fa_enable' => $new_two_fa, 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                                    $this->notification_control->SetNotification($two_fa_sta, $two_fa_not);
+                                } else {
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                }
+                            }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                        }
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                }
+                $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_INFORMATIONS);
+            }
+            parent::KillAuthentication('HomeController ProfileTwoFa');
+            $this->input_control->Redirect();
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function ProfileTwoFa | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function ProfileCreateAddress()
+    {
+        try {
+            if (empty($this->web_data['authenticated_user'])) {
+                $this->input_control->Redirect();
+            }
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_address_create'])) {
+                $city = isset($_POST['city']) ? $_POST['city'] : '';
+                $county = isset($_POST['county']) ? $_POST['county'] : '';
+                $neighborhood = isset($_POST['neighborhood']) ? $_POST['neighborhood'] : '';
+                $street = isset($_POST['street']) ? $_POST['street'] : '';
+                $building_no = isset($_POST['building_no']) ? $_POST['building_no'] : '';
+                $apartment_no = isset($_POST['apartment_no']) ? $_POST['apartment_no'] : '';
+                $zip_no = isset($_POST['zip_no']) ? $_POST['zip_no'] : '';
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'address_city' => array('input' => $city, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_CITY, 'length_control' => true, 'max_length' => ADDRESS_1_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_CITY, 'preventxss' => true, 'length_limit' => ADDRESS_1_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_CITY),
+                    'address_county' => array('input' => $county, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_COUNTY, 'length_control' => true, 'max_length' => ADDRESS_1_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_COUNTY, 'preventxss' => true, 'length_limit' => ADDRESS_1_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_COUNTY),
+                    'address_neighborhood' => array('input' => $neighborhood, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_NEIGHBORHOOD, 'length_control' => true, 'max_length' => ADDRESS_2_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_NEIGHBORHOOD, 'preventxss' => true, 'length_limit' => ADDRESS_2_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_NEIGHBORHOOD),
+                    'address_street' => array('input' => $street, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_STREET, 'length_control' => true, 'max_length' => ADDRESS_2_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_STREET, 'preventxss' => true, 'length_limit' => ADDRESS_2_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_STREET),
+                    'address_building_no' => array('input' => $building_no, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_BUILDING_NO, 'length_control' => true, 'max_length' => ADDRESS_3_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_BUILDING_NO, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ERROR_NOT_VALID_BUILDING_NO, 'length_limit' => ADDRESS_3_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_BUILDING_NO),
+                    'address_apartment_no' => array('input' => $apartment_no, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_APARTMENT_NO, 'length_control' => true, 'max_length' => ADDRESS_3_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_APARTMENT_NO, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ERROR_NOT_VALID_APARTMENT_NO, 'length_limit' => ADDRESS_3_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_APARTMENT_NO),
+                    'address_zip_no' => array('input' => $zip_no, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_ZIP_NO, 'length_control' => true, 'min_length' => ADDRESS_ZIP_LIMIT, 'error_message_min_length' => TR_NOTIFICATION_ERROR_NOT_VALID_ZIP_NO, 'max_length' => ADDRESS_ZIP_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_ZIP_NO, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ERROR_NOT_VALID_ZIP_NO, 'length_limit' => ADDRESS_ZIP_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_ZIP_NO),
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'Profile')) {
+                        $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id', $this->web_data['authenticated_user']);
+                        if ($confirmed_user_from_db['result']) {
+                            $address_count = $this->UserModel->GetAddressCount($confirmed_user_from_db['data']['id']);
+                            if ($address_count['result'] && $address_count['data']['COUNT(id)'] < 5) {
+                                if ($this->UserModel->CreateAddress(array('user_id' => $confirmed_user_from_db['data']['id'], 'address_city' => $checked_inputs['address_city'], 'address_county' => $checked_inputs['address_county'], 'address_neighborhood' => $checked_inputs['address_neighborhood'], 'address_street' => $checked_inputs['address_street'], 'address_building_no' => $checked_inputs['address_building_no'], 'address_apartment_no' => $checked_inputs['address_apartment_no'], 'address_zip_no' => $checked_inputs['address_zip_no']))['result']) {
+                                    $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_CREATE_ADDRESS);
+                                } else {
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_CREATE_ADDRESS);
+                                }
+                            } else {
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_CREATE_ADDRESS_LIMIT);
+                            }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                        }
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                    $_SESSION[SESSION_WEB_DATA_NAME] = array('city' => $city, 'county' => $county, 'neighborhood' => $neighborhood, 'street' => $street, 'building_no' => $building_no, 'apartment_no' => $apartment_no, 'zip_no' => $zip_no);
+                }
+                $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_ADDRESS);
+            }
+            parent::KillAuthentication('HomeController ProfileCreateAddress');
+            $this->input_control->Redirect();
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function ProfileCreateAddress | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function ProfileUpdateAddress()
+    {
+        try {
+            if (empty($this->web_data['authenticated_user'])) {
+                $this->input_control->Redirect();
+            }
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_address_update'])) {
+                $id = isset($_POST['id']) ? $_POST['id'] : '';
+                $city = isset($_POST['city']) ? $_POST['city'] : '';
+                $county = isset($_POST['county']) ? $_POST['county'] : '';
+                $neighborhood = isset($_POST['neighborhood']) ? $_POST['neighborhood'] : '';
+                $street = isset($_POST['street']) ? $_POST['street'] : '';
+                $building_no = isset($_POST['building_no']) ? $_POST['building_no'] : '';
+                $apartment_no = isset($_POST['apartment_no']) ? $_POST['apartment_no'] : '';
+                $zip_no = isset($_POST['zip_no']) ? $_POST['zip_no'] : '';
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'id' => array('input' => $id, 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
+                    'address_city' => array('input' => $city, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_CITY, 'length_control' => true, 'max_length' => ADDRESS_1_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_CITY, 'preventxss' => true, 'length_limit' => ADDRESS_1_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_CITY),
+                    'address_county' => array('input' => $county, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_COUNTY, 'length_control' => true, 'max_length' => ADDRESS_1_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_COUNTY, 'preventxss' => true, 'length_limit' => ADDRESS_1_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_COUNTY),
+                    'address_neighborhood' => array('input' => $neighborhood, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_NEIGHBORHOOD, 'length_control' => true, 'max_length' => ADDRESS_2_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_NEIGHBORHOOD, 'preventxss' => true, 'length_limit' => ADDRESS_2_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_NEIGHBORHOOD),
+                    'address_street' => array('input' => $street, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_STREET, 'length_control' => true, 'max_length' => ADDRESS_2_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_STREET, 'preventxss' => true, 'length_limit' => ADDRESS_2_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_STREET),
+                    'address_building_no' => array('input' => $building_no, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_BUILDING_NO, 'length_control' => true, 'max_length' => ADDRESS_3_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_BUILDING_NO, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ERROR_NOT_VALID_BUILDING_NO, 'length_limit' => ADDRESS_3_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_BUILDING_NO),
+                    'address_apartment_no' => array('input' => $apartment_no, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_APARTMENT_NO, 'length_control' => true, 'max_length' => ADDRESS_3_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_APARTMENT_NO, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ERROR_NOT_VALID_APARTMENT_NO, 'length_limit' => ADDRESS_3_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_APARTMENT_NO),
+                    'address_zip_no' => array('input' => $zip_no, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_ZIP_NO, 'length_control' => true, 'min_length' => ADDRESS_ZIP_LIMIT, 'error_message_min_length' => TR_NOTIFICATION_ERROR_NOT_VALID_ZIP_NO, 'max_length' => ADDRESS_ZIP_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_ZIP_NO, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ERROR_NOT_VALID_ZIP_NO, 'length_limit' => ADDRESS_ZIP_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_ZIP_NO),
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'Profile')) {
+                        $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id', $this->web_data['authenticated_user']);
+                        if ($confirmed_user_from_db['result']) {
+                            $address_confirm = $this->UserModel->GetAddressById(array($checked_inputs['id'], $confirmed_user_from_db['data']['id']));
+                            if ($address_confirm['result'] && $this->UserModel->UpdateAddress(array('address_city' => $checked_inputs['address_city'], 'address_county' => $checked_inputs['address_county'], 'address_neighborhood' => $checked_inputs['address_neighborhood'], 'address_street' => $checked_inputs['address_street'], 'address_building_no' => $checked_inputs['address_building_no'], 'address_apartment_no' => $checked_inputs['address_apartment_no'], 'address_zip_no' => $checked_inputs['address_zip_no'], 'id' => $checked_inputs['id']))['result']) {
+                                $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_UPDATE_ADDRESS);
+                            } else {
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_UPDATE_ADDRESS);
+                            }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                        }
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                }
+                $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_ADDRESS);
+            }
+            parent::KillAuthentication('HomeController ProfileUpdateAddress');
+            $this->input_control->Redirect();
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function ProfileUpdateAddress | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function ProfileDeleteAddress()
+    {
+        try {
+            if (empty($this->web_data['authenticated_user'])) {
+                $this->input_control->Redirect();
+            }
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit-delete-address'])) {
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'id' => array('input' => isset($_POST['address_id']) ? $_POST['address_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'Profile')) {
+                        $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id', $this->web_data['authenticated_user']);
+                        if ($confirmed_user_from_db['result']) {
+                            $address_confirm = $this->UserModel->GetAddressById(array($checked_inputs['id'], $confirmed_user_from_db['data']['id']));
+                            if ($address_confirm['result'] && $this->UserModel->UpdateAddress(array('is_address_removed' => 1, 'date_address_removed' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['id']))['result']) {
+                                $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_DELETE_ADDRESS);
+                            } else {
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DELETE_ADDRESS);
+                            }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                        }
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                }
+                $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_ADDRESS);
+            }
+            parent::KillAuthentication('HomeController ProfileDeleteAddress');
+            $this->input_control->Redirect();
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function ProfileDeleteAddress | ' . $th))['result']) {
                 $this->input_control->Redirect(URL_EXCEPTION);
             } else {
                 $this->input_control->Redirect(URL_SHUTDOWN);
@@ -1177,6 +1394,46 @@ class HomeController extends Controller
     }
     function ProfilePhoneUpdate()
     {
+        try {
+            if (empty($this->web_data['authenticated_user'])) {
+                $this->input_control->Redirect();
+            }
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'user_phone_number' => array('input' => isset($_POST['user_phone_number']) ? $_POST['user_phone_number'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_PHONE, 'no_white_space' => true, 'error_message_no_white_space' => TR_NOTIFICATION_ERROR_NOT_VALID_PHONE, 'length_control' => true, 'min_length' => PHONE_LIMIT, 'error_message_min_length' => TR_NOTIFICATION_ERROR_NOT_VALID_PHONE, 'max_length' => PHONE_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_PHONE, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ERROR_NOT_VALID_PHONE, 'is_phone_number' => true, 'error_message_is_phone_number' => TR_NOTIFICATION_ERROR_NOT_VALID_PHONE),
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'Profile')) {
+                        $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id,phone_number', $this->web_data['authenticated_user']);
+                        if ($confirmed_user_from_db['result']) {
+                            if ($confirmed_user_from_db['data']['phone_number'] == $checked_inputs['user_phone_number']) {
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_NEW_PHONE_NUMBER);
+                            } else {
+                                if ($this->UserModel->UpdateUser(array('phone_number' => $checked_inputs['user_phone_number'], 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                                    $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_PROFILE_PHONE_NUMBER_UPDATE);
+                                } else {
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                }
+                            }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                        }
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                }
+                $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_PHONE);
+            }
+            parent::KillAuthentication('HomeController ProfilePhoneUpdate');
+            $this->input_control->Redirect();
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function ProfilePhoneUpdate | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
     }
     function ProfilePhotoUpdate()
     {
@@ -1190,78 +1447,109 @@ class HomeController extends Controller
                 ));
                 if (empty($checked_inputs['error_message'])) {
                     if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'Profile')) {
-                        $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id', $this->web_data['authenticated_user']);
+                        $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id,profile_image_path,profile_image', $this->web_data['authenticated_user']);
                         if ($confirmed_user_from_db['result']) {
-                            print_r($_FILES);
-                            exit(0);
-
-
-
-
-
-                            if (isset($_FILES['user_image'])) {
-                                $user_image = $_FILES['user_image'];
-                                if ($user_image['error'] == 0) {
-                                    if ($user_image['size'] <= (1024 * 1024 * 20)) {
-                                        $accepted_image_types = array('image/png', 'image/jpeg');
-                                        if (in_array($user_image['type'], $accepted_image_types)) {
-                                            $user_name = explode(".", $user_image['name']);
-                                            $new_image_folder = USER_IMAGES_PATH . $this->authenticated_user['id'];
-                                            $filename = $user_image['tmp_name'];
-                                            if (!is_dir($new_image_folder)) {
-                                                mkdir($new_image_folder, 0777, true);
-                                            }
-                                            $image_random_name = strtolower(substr(strtr(base64_encode(hash_hmac('SHA512', time(), base64_encode(random_bytes(128)), true)), array('+' => 't', '=' => 's', '/' => '9', '.' => '2', '_' => 'g')), 21, 30));
-                                            $width = 100;
-                                            $height = 100;
-                                            $dst_image = imagecreatetruecolor($width, $height);
-                                            $image_infos = getimagesize($filename);
-                                            $image_width = $image_infos[0];
-                                            $image_height = $image_infos[1];
-                                            $uploadImageType = $image_infos[2];
-                                            if ($uploadImageType == 2) {
-                                                $src_image = imagecreatefromjpeg($filename);
-                                                imagecopyresampled($dst_image, $src_image, 0, 0, 0, 0, $width, $height, $image_width, $image_height);
-                                                imagejpeg($dst_image, $new_image_folder . '/' . $image_random_name . '.' . $user_name[count($user_name) - 1], 100);
-                                            } elseif ($uploadImageType == 3) {
-                                                $src_image = imagecreatefrompng($filename);
-                                                imagecopyresampled($dst_image, $src_image, 0, 0, 0, 0, $width, $height, $image_width, $image_height);
-                                                imagepng($dst_image, $new_image_folder . '/' . $image_random_name . '.' . $user_name[count($user_name) - 1], 9);
-                                            }
-                                            imagedestroy($src_image);
-                                            $user_images_db = $image_random_name . '.' . $user_name[count($user_name) - 1] . '-';
-                                            $success = true;
-                                        } else {
-                                            $data['image_error_message'] = 'Fotoğrafın Uzantısı Desteklenmiyor (Desteklenen Uzantılar: jpeg, png)';
-                                        }
+                            if (isset($_FILES['user_image']) && $_FILES['user_image']['error'] == 0) {
+                                if ($_FILES['user_image']['size'] <= (1024 * 1024 * 2)) {
+                                    if ($_FILES['user_image']['type'] == 'image/png') {
+                                        $image_type = 'png';
+                                    } elseif ($_FILES['user_image']['type'] == 'image/jpeg') {
+                                        $image_type = 'jpg';
                                     } else {
-                                        $data['image_error_message'] = 'Fotoğrafın Boyutu 20mb dan Fazla Olamaz';
+                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_EXTENSION_PROFILE_PHOTO_UPDATE);
+                                    }
+                                    if (!empty($image_type)) {
+                                        do {
+                                            $folder_name = $this->input_control->GenerateFolderName();
+                                            $image_file_name = $this->input_control->GenerateFileName();
+                                            if ($folder_name['result'] && $image_file_name['result']) {
+                                                $is_folder_unique = $this->UserModel->IsProfileImagePathUnique($folder_name['data']);
+                                                if (!$is_folder_unique['result'] && !empty($is_folder_unique['empty'])) {
+                                                    $new_image_folder_name = 'assets/images/users/' . $folder_name['data'];
+                                                    if (!is_dir($new_image_folder_name)) {
+                                                        $dst_width = 200;
+                                                        $dst_height = 200;
+                                                        $dst_image = imagecreatetruecolor($dst_width, $dst_height);
+                                                        $image_infos = getimagesize($_FILES['user_image']['tmp_name']);
+                                                        if (!empty($dst_image) && !empty($image_infos)) {
+                                                            if ($image_infos[2] == 2) {
+                                                                $src_image = imagecreatefromjpeg($_FILES['user_image']['tmp_name']);
+                                                                $error = true;
+                                                                if (!empty($src_image) && imagecopyresampled($dst_image, $src_image, 0, 0, 0, 0, $dst_width, $dst_height, $image_infos[0], $image_infos[1])) {
+                                                                    $success = true;
+                                                                    if ($confirmed_user_from_db['data']['profile_image'] != 'b6lfjkh5q9qfmfq.jpg' &&  $confirmed_user_from_db['data']['profile_image_path'] != '1qiunjdt0p8cao66xoz') {
+                                                                        if (unlink('assets/images/users/' . $confirmed_user_from_db['data']['profile_image_path'] . '/' . $confirmed_user_from_db['data']['profile_image']) && rmdir('assets/images/users/' . $confirmed_user_from_db['data']['profile_image_path'])) {
+                                                                            $success = true;
+                                                                        } else {
+                                                                            $success = false;
+                                                                        }
+                                                                    }
+                                                                    if ($success && mkdir($new_image_folder_name, 0777, true) && imagejpeg($dst_image, $new_image_folder_name . '/' . $image_file_name['data'] . '.' . $image_type, 100)) {
+                                                                        $error = false;
+                                                                    }
+                                                                }
+                                                                imagedestroy($src_image);
+                                                                if ($error) {
+                                                                    echo 'a';
+                                                                    exit(0);
+                                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
+                                                                    break;
+                                                                }
+                                                            } elseif ($image_infos[2] == 3) {
+                                                                $src_image = imagecreatefrompng($_FILES['user_image']['tmp_name']);
+                                                                $error = true;
+                                                                if (!empty($src_image) && imagecopyresampled($dst_image, $src_image, 0, 0, 0, 0, $dst_width, $dst_height, $image_infos[0], $image_infos[1])) {
+                                                                    $success = true;
+                                                                    if ($confirmed_user_from_db['data']['profile_image'] != 'b6lfjkh5q9qfmfq.jpg' &&  $confirmed_user_from_db['data']['profile_image_path'] != '1qiunjdt0p8cao66xoz') {
+                                                                        if (unlink('assets/images/users/' . $confirmed_user_from_db['data']['profile_image_path'] . '/' . $confirmed_user_from_db['data']['profile_image']) && rmdir('assets/images/users/' . $confirmed_user_from_db['data']['profile_image_path'])) {
+                                                                            $success = true;
+                                                                        } else {
+                                                                            $success = false;
+                                                                        }
+                                                                    }
+                                                                    if ($success && mkdir($new_image_folder_name, 0777, true) && imagepng($dst_image, $new_image_folder_name . '/' . $image_file_name['data'] . '.' . $image_type, 9)) {
+                                                                        $error = false;
+                                                                    }
+                                                                }
+                                                                imagedestroy($src_image);
+                                                                if ($error) {
+                                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
+                                                                    break;
+                                                                }
+                                                            } else {
+                                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
+                                                                break;
+                                                            }
+                                                            if ($this->UserModel->UpdateUser(array('profile_image_path' => $folder_name['data'], 'profile_image' => $image_file_name['data'] . '.' . $image_type, 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                                                                $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_PROFILE_PHOTO_UPDATE);
+                                                                break;
+                                                            } else {
+                                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
+                                                                break;
+                                                            }
+                                                        } else {
+                                                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
+                                                            break;
+                                                        }
+                                                    } else {
+                                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
+                                                        break;
+                                                    }
+                                                }
+                                            } else {
+                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
+                                                break;
+                                            }
+                                        } while (true);
                                     }
                                 } else {
-                                    $data['image_error_message'] = 'Profil Fotoğrafını Yükleyin';
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_LIMIT_PROFILE_PHOTO_UPDATE);
                                 }
                             } else {
-                                $data['image_error_message'] = 'Profil Fotoğrafını Yükleyin';
-                            }
-
-
-
-
-
-
-
-
-
-
-
-
-                            if ($this->UserModel->UpdateUser(array('profile_image_path' => '', 'profile_image' => '', 'id' => $confirmed_user_from_db['data']['id']))['result']) {
-                                $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_PROFILE_PHOTO_UPDATE);
-                            } else {
-                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_PROFILE_PHOTO_UPDATE);
                             }
                         } else {
-                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
                         }
                     }
                 } else {
@@ -1320,5 +1608,13 @@ class HomeController extends Controller
                 $this->input_control->Redirect(URL_SHUTDOWN);
             }
         }
+    }
+    function OrderCredit()
+    {
+
+    }
+    function OrderComplete()
+    {
+
     }
 }
