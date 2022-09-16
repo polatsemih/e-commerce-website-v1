@@ -3702,7 +3702,8 @@ a {
 }
 
 .profile-section .profile-container .btn-danger,
-.profile-section .profile-container .btn-warning {
+.profile-section .profile-container .btn-warning,
+.profile-section .profile-container .btn-success {
     font-size: 1.3rem;
     border-radius: 1rem;
     padding-left: 1rem;
@@ -3745,6 +3746,16 @@ a {
 
 .profile-section .profile-container .btn-warning:hover {
     background-color: var(--hover-warning);
+    cursor: pointer;
+}
+
+.profile-section .profile-container .btn-success {
+    color: var(--color-primary-light);
+    background-color: var(--success);
+}
+
+.profile-section .profile-container .btn-success:hover {
+    background-color: var(--hover-success);
     cursor: pointer;
 }
 
@@ -3870,12 +3881,252 @@ a {
     opacity: 1 !important;
 }
 
-.profile-section .item-image-input {
+.profile-section .input-user-image {
     display: none;
 }
 
 .profile-section .mt-2 {
     margin-top: 2rem;
+}
+
+.profile-section .label-phone {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 3rem;
+    padding-left: 1rem;
+    font-size: 1.2rem;
+    border-top-width: 2px;
+    border-top-style: solid;
+    border-top-color: var(--color-primary-dark);
+    border-bottom-width: 2px;
+    border-bottom-style: solid;
+    border-bottom-color: var(--color-primary-dark);
+    color: var(--color-primary-dark);
+}
+
+.profile-section .profile-container .form-row .input.input-phone {
+    border-left: none !important;
+}
+
+.profile-section .mfa-checkbox-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.profile-section .mfa-checkbox-wrapper .mfa-checkbox {
+    display: none;
+}
+
+.profile-section .mfa-checkbox-wrapper .mfa-bg {
+    position: relative;
+    background-color: var(--warning);
+    box-shadow: var(--box-shadow-primary);
+    border-radius: 1rem;
+    width: 10rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.profile-section .mfa-inner-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    font-size: 1.2rem;
+    color: var(--color-primary-light);
+}
+
+.profile-section .mfa-checkbox-wrapper .mfa-bg .mfa-ball {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background-color: var(--bg-primary-light);
+    -webkit-transition-property: transform;
+    -moz-transition-property: transform;
+    -o-transition-property: transform;
+    transition-property: transform;
+    -webkit-transition-duration: 0.3s;
+    -moz-transition-duration: 0.3s;
+    -o-transition-duration: 0.3s;
+    transition-duration: 0.3s;
+    -webkit-transition-timing-function: ease;
+    -moz-transition-timing-function: ease;
+    -o-transition-timing-function: ease;
+    transition-timing-function: ease;
+}
+
+.profile-section .mfa-checkbox-wrapper .mfa-checkbox:checked~.mfa-bg .mfa-ball {
+    -webkit-transform: translateX(300%);
+    -moz-transform: translateX(300%);
+    -ms-transform: translateX(300%);
+    -o-transform: translateX(300%);
+    transform: translateX(300%);
+}
+
+.profile-section .mfa-checkbox-wrapper .mfa-text {
+    font-size: 1.2rem;
+    color: var(--color-primary-dark);
+}
+
+.profile-section #popup-wrapper {
+    z-index: 8880;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 5rem);
+    margin-top: 5rem;
+    background-color: #000000b3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-section #popup-wrapper.disable {
+    display: none !important;
+}
+
+.profile-section #popup-wrapper .popup-container {
+    position: relative;
+    background-color: var(--color-primary-light);
+    box-shadow: var(--box-shadow-primary);
+    width: 100%;
+    border-radius: 1rem;
+    overflow-y: auto;
+}
+
+.profile-section #popup-wrapper .popup-exit {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 3rem;
+    height: 3rem;
+    cursor: pointer;
+}
+
+.profile-section #popup-wrapper .popup-exit .exit {
+    position: fixed;
+    width: 3rem;
+    height: 3rem;
+    border-bottom-left-radius: 1.5rem;
+    background-color: #000000cc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-section #popup-wrapper .popup-exit .fa-times {
+    color: var(--color-primary-light);
+    font-size: 1.4rem;
+}
+
+.profile-section #popup-wrapper .title {
+    font-size: 1.6rem;
+    line-height: 1.4;
+    color: var(--color-primary-dark);
+    padding-top: 3rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin-bottom: 2rem;
+}
+
+.profile-section #popup-wrapper .title.center {
+    text-align: center;
+}
+
+.profile-section #popup-wrapper .text {
+    color: var(--color-primary-dark);
+    font-size: 1.2rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    text-align: justify;
+}
+
+.profile-section #popup-wrapper .delete-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 3rem;
+}
+
+.profile-section #popup-wrapper .delete-row .m-right {
+    margin-right: 5rem;
+}
+
+.profile-section #popup-wrapper .delete-row .padding {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+}
+
+.profile-section .btn-address-delete:hover {
+    cursor: pointer;
+    background-color: var(--hover-danger);
+}
+
+.profile-section .form-creare-address {
+    padding-right: 1rem;
+    padding-left: 1rem;
+    padding-bottom: 1rem;
+}
+
+.profile-section .address-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.profile-section .address-danger-text {
+    font-size: 1.4rem;
+    color: var(--danger);
+    box-shadow: var(--box-shadow-primary);
+    padding: 1rem;
+}
+
+.profile-section .address-box {
+    box-shadow: var(--box-shadow-primary);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.profile-section .address-box .address-text {
+    font-size: 1.5rem;
+    line-height: 1.4;
+    color: var(--color-primary-dark);
+    padding-right: 2rem;
+}
+
+.profile-section .address-btn-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-section .address-box .mr {
+    margin-right: 0.5rem;
+}
+
+.profile-section .address-box .btn-address-remove:hover {
+    cursor: pointer;
+    background-color: var(--hover-danger);
+}
+
+.profile-section .label-spec {
+    font-size: 1.1rem !important;
 }
 
 /* Action Settings */
@@ -4902,6 +5153,16 @@ a {
         font-size: 1.2rem;
     }
 
+    /* Profile Settings */
+    .profile-section .mfa-checkbox-wrapper {
+        flex-direction: row;
+    }
+    
+    .profile-section .mfa-checkbox-wrapper .mfa-bg {
+        margin-right: 0.5rem;
+        margin-bottom: 0;
+    }
+
     /* Action Settings */
     .action-section .action-container,
     .captcha-popup .captcha-container,
@@ -4909,7 +5170,8 @@ a {
         width: 55%;
     }
 
-    .action-section #popup-wrapper .popup-container {
+    .action-section #popup-wrapper .popup-container,
+    .profile-section #popup-wrapper .popup-container {
         width: 75%;
     }
 
@@ -5091,7 +5353,8 @@ a {
     }
 
     .profile-section .profile-container .form-row .input,
-    .profile-section .profile-container .form-row .textarea {
+    .profile-section .profile-container .form-row .textarea,
+    .profile-section .label-phone {
         font-size: 1.4rem;
     }
 
@@ -5099,6 +5362,11 @@ a {
     .action-details-main #popup-wrapper .popup-container {
         width: 55%;
         height: 80%;
+    }
+
+    /* Profile Settings */
+    .profile-section #popup-wrapper .popup-container {
+        width: 60%;
     }
 }
 
@@ -5148,7 +5416,8 @@ a {
         width: 35%;
     }
 
-    .action-section #popup-wrapper .popup-container {
+    .action-section #popup-wrapper .popup-container,
+    .profile-section #popup-wrapper .popup-container {
         width: 45%;
     }
 }
