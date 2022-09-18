@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <title>Sepet Onay | <?php echo BRAND; ?></title>
+    <meta name="robots" content="none" />
+    <?php require_once 'View/SharedHome/_home_head.php'; ?>
+</head>
+
+<body class="noscroll">
+    <div class="notification-client"></div>
+    <?php require_once 'View/SharedHome/_home_body.php'; ?>
+    <main>
+        <section class="order-section container">
+            <?php if (!empty($_SESSION[SESSION_COMPLETE_PROFILE_NAME])) : ?>
+                <div id="popup-wrapper" class="name-wrapper">
+                    <div class="popup-container">
+                        <h4 class="title">Siparişe Devam Etmeden Önce Profil Bilgilerinizi Tamamlayın</h4>
+                        <form class="form-name" id="form-user-update" action="<?php echo URL . URL_PROFILE_UPDATE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                            <?php if (!empty($web_data['form_token'])) : ?>
+                                <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
+                            <?php endif; ?>
+                            <div class="form-row">
+                                <span class="label">İsim</span>
+                                <input class="input" type="text" id="first-name" name="user_first_name" placeholder="İsminizi Girin" autofocus>
+                            </div>
+                            <div class="form-row">
+                                <span class="label">Soy İsim</span>
+                                <input class="input" type="text" id="last-name" name="user_last_name" placeholder="Soy İsminizi Girin">
+                            </div>
+                            <div class="row-space">
+                                <div class="right">
+                                    <input class="btn-success" id="btn-user-update" type="submit" value="Devam Et" title="Siparişe Devam Et">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            <?php elseif (!empty($_SESSION[SESSION_SELECT_ADDRESS_NAME])) : ?>
+                <div id="popup-wrapper" class="create-address-wrapper<?php echo !empty($web_data['address']) ? '' : ' disable'; ?>">
+                    <div class="popup-container">
+                        <div id="create-address-wrapper-exit" class="popup-exit">
+                            <div class="exit">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        </div>
+                        <h4 class="title">Yeni Adres Ekle</h4>
+                        <form class="form-creare-address" action="<?php echo URL . URL_ADDRESS_CREATE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                            <?php if (!empty($web_data['form_token'])) : ?>
+                                <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
+                            <?php endif; ?>
+                            <div class="form-row">
+                                <span class="label">Ülke</span>
+                                <input class="input" type="text" value="Türkiye" readonly>
+                            </div>
+                            <div class="form-row">
+                                <span class="label">İl</span>
+                                <?php if (!empty($web_data['city'])) : ?>
+                                    <input class="input" id="address-autofocus" type="text" name="city" value="<?php echo $web_data['city']; ?>">
+                                <?php else : ?>
+                                    <input class="input" id="address-autofocus" type="text" name="city">
+                                <?php endif; ?>
+                            </div>
+                            <div class="form-row">
+                                <span class="label">İlçe</span>
+                                <?php if (!empty($web_data['county'])) : ?>
+                                    <input class="input" type="text" name="county" value="<?php echo $web_data['county']; ?>">
+                                <?php else : ?>
+                                    <input class="input" type="text" name="county">
+                                <?php endif; ?>
+                            </div>
+                            <div class="form-row">
+                                <span class="label">Mahalle</span>
+                                <?php if (!empty($web_data['neighborhood'])) : ?>
+                                    <input class="input" type="text" name="neighborhood" value="<?php echo $web_data['neighborhood']; ?>">
+                                <?php else : ?>
+                                    <input class="input" type="text" name="neighborhood">
+                                <?php endif; ?>
+                            </div>
+                            <div class="form-row">
+                                <span class="label">Cadde/ Sokak</span>
+                                <?php if (!empty($web_data['street'])) : ?>
+                                    <input class="input" type="text" name="street" value="<?php echo $web_data['street']; ?>">
+                                <?php else : ?>
+                                    <input class="input" type="text" name="street">
+                                <?php endif; ?>
+                            </div>
+                            <div class="form-row">
+                                <span class="label label-spec">Apartman Numarası</span>
+                                <?php if (!empty($web_data['building_no'])) : ?>
+                                    <input class="input" type="text" name="building_no" value="<?php echo $web_data['building_no']; ?>">
+                                <?php else : ?>
+                                    <input class="input" type="text" name="building_no">
+                                <?php endif; ?>
+                            </div>
+                            <div class="form-row">
+                                <span class="label">Daire Numarası</span>
+                                <?php if (!empty($web_data['apartment_no'])) : ?>
+                                    <input class="input" type="text" name="apartment_no" value="<?php echo $web_data['apartment_no']; ?>">
+                                <?php else : ?>
+                                    <input class="input" type="text" name="apartment_no">
+                                <?php endif; ?>
+                            </div>
+                            <div class="form-row">
+                                <span class="label">ZİP Numarası</span>
+                                <?php if (!empty($web_data['zip_no'])) : ?>
+                                    <input class="input" type="text" name="zip_no" value="<?php echo $web_data['zip_no']; ?>">
+                                <?php else : ?>
+                                    <input class="input" type="text" name="zip_no">
+                                <?php endif; ?>
+                            </div>
+                            <div class="row-space">
+                                <div class="right">
+                                    <input class="btn-success" type="submit" name="submit_address_create" value="Adresi Ekle ve Siparişe Devam Et" title="Yeni Adresi Ekle Ve Bu Adres ile Siparişe Devam Et">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div id="popup-wrapper" class="update-address-wrapper disable">
+                    <div class="popup-container">
+                        <div id="update-address-wrapper-exit" class="popup-exit">
+                            <div class="exit">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        </div>
+                        <h4 class="title">Adresi Düzenle</h4>
+                        <form class="form-creare-address" action="<?php echo URL . URL_ADDRESS_UPDATE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                            <?php if (!empty($web_data['form_token'])) : ?>
+                                <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
+                            <?php endif; ?>
+                            <input id="update-id" class="input" type="hidden" name="id">
+                            <div class="form-row">
+                                <span class="label">Ülke</span>
+                                <input class="input" type="text" value="Türkiye" readonly>
+                            </div>
+                            <div class="form-row">
+                                <span class="label">İl</span>
+                                <input id="update-city" class="input" type="text" name="city">
+                            </div>
+                            <div class="form-row">
+                                <span class="label">İlçe</span>
+                                <input id="update-county" class="input" type="text" name="county">
+                            </div>
+                            <div class="form-row">
+                                <span class="label">Mahalle</span>
+                                <input id="update-neighborhood" class="input" type="text" name="neighborhood">
+                            </div>
+                            <div class="form-row">
+                                <span class="label">Cadde/ Sokak</span>
+                                <input id="update-street" class="input" type="text" name="street">
+                            </div>
+                            <div class="form-row">
+                                <span class="label label-spec">Apartman Numarası</span>
+                                <input id="update-building_no" class="input" type="text" name="building_no">
+                            </div>
+                            <div class="form-row">
+                                <span class="label">Daire Numarası</span>
+                                <input id="update-apartment_no" class="input" type="text" name="apartment_no">
+                            </div>
+                            <div class="form-row">
+                                <span class="label">ZİP Numarası</span>
+                                <input id="update-zip_no" class="input" type="text" name="zip_no">
+                            </div>
+                            <div class="row-space">
+                                <div class="right">
+                                    <input class="btn-warning" type="submit" name="submit_address_update" value="Adresi Düzenle ve Siparişe Devam Et" title="Adresi Düzenle ve Bu Adres ile Siparişe Devam Et">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div id="popup-wrapper" class="delete-address-wrapper disable">
+                    <div class="popup-container">
+                        <div id="delete-address-wrapper-exit" class="popup-exit">
+                            <div class="exit">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        </div>
+                        <h4 class="title center">Adresi Silmek İstediğinizden Emin Misiniz?</h4>
+                        <form id="form-address-delete" action="<?php echo URL . URL_ADDRESS_DELETE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                            <?php if (!empty($web_data['form_token'])) : ?>
+                                <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
+                            <?php endif; ?>
+                            <input id="input-address-id" type="hidden" name="address_id">
+                            <div class="delete-row">
+                                <button id="btn-address-delete-cancel" class="btn-warning padding m-right" title="Silme İşlemini İptal Et">İPTAL</button>
+                                <button type="submit" name="submit-delete-address" class="btn-danger padding btn-address-delete" title="Silme İşlemini Onayla">SİL</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div id="popup-wrapper" class="name-wrapper<?php echo !empty($web_data['address']) ? ' disable' : ''; ?>">
+                    <div class="popup-container">
+                        <div class="row-space">
+                            <div class="left">
+                                <h4 class="title">Teslimatın Yapılacağı Adresi Seçin</h4>
+                            </div>
+                            <div class="right">
+                                <button id="btn-create-address" class="btn-success btn-add-address" title="Yeni Adres Ekle">Adres Ekle</button>
+                            </div>
+                        </div>
+                        <?php if (!empty($web_data['select_address'])) : ?>
+                            <form action="<?php echo URL . URL_ORDER_CREDIT; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                                <?php $i = 0; ?>
+                                <?php foreach ($web_data['select_address'] as $address) : ?>
+                                    <?php $i++; ?>
+                                    <label for="selected-address-<?php echo $i; ?>">
+                                        <input class="selected-address-checkbox" type="radio" name="selected_address" value="<?php echo $address['id']; ?>" id="selected-address-<?php echo $i; ?>">
+                                        <div class="address-box">
+                                            <span class="selected-address-box"></span>
+                                            <span class="address-text"><?php echo $address['address_neighborhood'] . ', ' . $address['address_street'] . ', Apartman No: ' . $address['address_building_no'] . ' Daire No: ' . $address['address_apartment_no'] . ' ' . $address['address_county'] . '/' . $address['address_city'] . '/' . $address['address_country'] . ' ZIP Kodu:' . $address['address_zip_no']; ?></span>
+                                            <div class="address-btn-row">
+                                                <span class="btn-update-address btn-warning mr" data-id="<?php echo $address['id']; ?>" data-neighborhood="<?php echo $address['address_neighborhood']; ?>" data-street="<?php echo $address['address_street']; ?>" data-building_no="<?php echo $address['address_building_no']; ?>" data-apartment_no="<?php echo $address['address_apartment_no']; ?>" data-county="<?php echo $address['address_county']; ?>" data-city="<?php echo $address['address_city']; ?>" data-zip_no="<?php echo $address['address_zip_no']; ?>">Düzenle</span>
+                                                <span class="btn-danger btn-delete-address" data-id="<?php echo $address['id']; ?>">Sil</span>
+                                            </div>
+                                        </div>
+                                    </label>
+                                <?php endforeach; ?>
+                                <div class="row-space">
+                                    <div class="right">
+                                        <input class="btn-success btn-address-continue disable" id="btn-user-update" type="submit" value="Siparişe Devam Et" title="Bir Adres Seçin Veya Adres Ekleyin" disabled>
+                                    </div>
+                                </div>
+                            </form>
+                        <?php else : ?>
+                            <span class="address-danger-text">Kayıtlı Adresiniz Yok</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php elseif (!empty($web_data['iyzico_form'])) : ?>
+                <div class="row">
+                    <div class="col-items">
+                        <h1 class="title">Sipariş Onay</h1>
+                        <div id="iyzipay-checkout-form" class="responsive"></div>
+                    </div>
+                    <div class="col-cart-price">
+
+                    </div>
+                </div>
+            <?php endif; ?>
+        </section>
+    </main>
+    <?php require_once 'View/SharedHome/_home_footer.php'; ?>
+    <?php if (!empty($_SESSION[SESSION_COMPLETE_PROFILE_NAME])) : ?>
+        <script>
+            window.onload = function() {
+                if (!loaderWrapper.classList.contains('hidden')) {
+                    loaderWrapper.classList.add('hidden');
+                }
+                setTimeout(() => {
+                    if (!notificationWrapper.classList.contains('hidden')) {
+                        notificationWrapper.classList.add('hidden');
+                    }
+                    setTimeout(() => {
+                        notificationWrapper.remove();
+                    }, 1500);
+                }, 10000);
+            };
+        </script>
+    <?php endif; ?>
+    <?php if (!empty($_SESSION[SESSION_SELECT_ADDRESS_NAME])) : ?>
+        <script>
+            window.onload = function() {
+                if (!loaderWrapper.classList.contains('hidden')) {
+                    loaderWrapper.classList.add('hidden');
+                }
+                setTimeout(() => {
+                    if (!notificationWrapper.classList.contains('hidden')) {
+                        notificationWrapper.classList.add('hidden');
+                    }
+                    setTimeout(() => {
+                        notificationWrapper.remove();
+                    }, 1500);
+                }, 10000);
+            };
+            const createAddressWrapper = document.querySelector('.create-address-wrapper');
+            const nameWrapper = document.querySelector('.name-wrapper');
+            document.getElementById('btn-create-address').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!nameWrapper.classList.contains('disable')) {
+                    nameWrapper.classList.add('disable');
+                }
+                if (createAddressWrapper.classList.contains('disable')) {
+                    createAddressWrapper.classList.remove('disable');
+                    document.getElementById('address-autofocus').focus();
+                }
+            });
+            document.getElementById('create-address-wrapper-exit').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!createAddressWrapper.classList.contains('disable')) {
+                    createAddressWrapper.classList.add('disable');
+                }
+                if (nameWrapper.classList.contains('disable')) {
+                    nameWrapper.classList.remove('disable');
+                }
+            });
+            const updateAddressWrapper = document.querySelector('.update-address-wrapper');
+            document.querySelectorAll('.btn-update-address').forEach(element => {
+                element.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('update-id').value = element.dataset.id;
+                    document.getElementById('update-city').value = element.dataset.city;
+                    document.getElementById('update-county').value = element.dataset.county;
+                    document.getElementById('update-neighborhood').value = element.dataset.neighborhood;
+                    document.getElementById('update-street').value = element.dataset.street;
+                    document.getElementById('update-building_no').value = element.dataset.building_no;
+                    document.getElementById('update-apartment_no').value = element.dataset.apartment_no;
+                    document.getElementById('update-zip_no').value = element.dataset.zip_no;
+                    if (!nameWrapper.classList.contains('disable')) {
+                        nameWrapper.classList.add('disable');
+                    }
+                    if (updateAddressWrapper.classList.contains('disable')) {
+                        updateAddressWrapper.classList.remove('disable');
+                    }
+                });
+            });
+            document.getElementById('update-address-wrapper-exit').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!updateAddressWrapper.classList.contains('disable')) {
+                    updateAddressWrapper.classList.add('disable');
+                }
+                if (nameWrapper.classList.contains('disable')) {
+                    nameWrapper.classList.remove('disable');
+                }
+            });
+            const deleteAddressWrapper = document.querySelector('.delete-address-wrapper');
+            document.querySelectorAll('.btn-delete-address').forEach(element => {
+                element.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('input-address-id').value = element.dataset.id;
+                    if (!nameWrapper.classList.contains('disable')) {
+                        nameWrapper.classList.add('disable');
+                    }
+                    if (deleteAddressWrapper.classList.contains('disable')) {
+                        deleteAddressWrapper.classList.remove('disable');
+                        document.getElementById('address-autofocus').focus();
+                    }
+                });
+            });
+            document.getElementById('delete-address-wrapper-exit').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!deleteAddressWrapper.classList.contains('disable')) {
+                    deleteAddressWrapper.classList.add('disable');
+                }
+                if (nameWrapper.classList.contains('disable')) {
+                    nameWrapper.classList.remove('disable');
+                }
+            });
+            document.getElementById('btn-address-delete-cancel').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!deleteAddressWrapper.classList.contains('disable')) {
+                    deleteAddressWrapper.classList.add('disable');
+                }
+                if (nameWrapper.classList.contains('disable')) {
+                    nameWrapper.classList.remove('disable');
+                }
+            });
+            const btnAddressContinue = document.querySelector('.btn-address-continue');
+            document.querySelectorAll('.selected-address-checkbox').forEach(element => {
+                element.addEventListener('change', (e) => {
+                    if (e.currentTarget.checked) {
+                        if (btnAddressContinue.classList.contains('disable')) {
+                            btnAddressContinue.classList.remove('disable');
+                        }
+                        btnAddressContinue.disabled = false;
+                    }
+                });
+            });
+        </script>
+    <?php endif; ?>
+    <script>
+        $(document).ready(function() {
+            var notificationClient = $('.notification-client');
+            var notificationHidden = 0;
+            var notificationRemoved = 0;
+
+            function setClientNotification(notificationMessage) {
+                clearTimeout(notificationHidden);
+                clearTimeout(notificationRemoved);
+                notificationClient.html(notificationMessage);
+                if (notificationClient.hasClass('hidden')) {
+                    notificationClient.removeClass('hidden');
+                }
+                if (notificationClient.hasClass('removed')) {
+                    notificationClient.removeClass('removed');
+                }
+                notificationHidden = setTimeout(() => {
+                    if (!notificationClient.hasClass('hidden')) {
+                        notificationClient.addClass('hidden');
+                    }
+                    notificationRemoved = setTimeout(() => {
+                        if (!notificationClient.hasClass('removed')) {
+                            notificationClient.addClass('removed');
+                        }
+                    }, 1500);
+                }, 10000);
+            }
+            $(window).scroll(function() {
+                if ($(window).scrollTop() > 0) {
+                    notificationClient.addClass('sticky');
+                } else {
+                    notificationClient.removeClass('sticky');
+                }
+            });
+            var request;
+            var requestUsable = true;
+            var inputSearch = $('#input-search');
+            var navSearch = $('.nav-search');
+            var navSearchPopular = $('.nav-search-popular');
+            inputSearch.on('input', function(e) {
+                e.preventDefault();
+                if (!$.trim(inputSearch.val())) {
+                    $('#nav-search-wrapper').remove();
+                    if (navSearchPopular.hasClass('hidden')) {
+                        navSearchPopular.removeClass('hidden');
+                    }
+                    if (!navSearch.hasClass('hidden')) {
+                        navSearch.addClass('hidden');
+                    }
+                } else if (requestUsable) {
+                    requestUsable = false;
+                    const formSearch = $('#form-search');
+                    const inputsformSearch = formSearch.find('input');
+                    request = $.ajax({
+                        url: '<?php echo URL . URL_ITEM_SEARCH; ?>',
+                        type: 'POST',
+                        data: formSearch.serialize()
+                    });
+                    inputsformSearch.prop('disabled', true);
+                    request.done(function(response) {
+                        requestUsable = true;
+                        if (!navSearchPopular.hasClass('hidden')) {
+                            navSearchPopular.addClass('hidden');
+                        }
+                        if (navSearch.hasClass('hidden')) {
+                            navSearch.removeClass('hidden');
+                        }
+                        response = jQuery.parseJSON(response);
+                        if (response.hasOwnProperty('shutdown')) {
+                            window.location.href = '<?php echo URL . URL_SHUTDOWN; ?>';
+                        } else if (response.hasOwnProperty('exception')) {
+                            window.location.href = '<?php echo URL . URL_EXCEPTION; ?>';
+                        } else if (response.hasOwnProperty('stop')) {
+
+                        } else if (response.hasOwnProperty('not_found_search_item')) {
+                            $('#nav-search-wrapper').remove();
+                            let ss1 = $("<div></div>").attr('id', 'nav-search-wrapper');
+                            let ss2 = $("<li></li>").addClass('search-item');
+                            ss1.append(ss2);
+                            let ss3 = $("<a></a>").addClass('not-found-search').text('Aranılan kriterde ürün bulunamadı');
+                            ss2.append(ss3);
+                            navSearch.append(ss1);
+                        } else if (response.hasOwnProperty('searched_items')) {
+                            $('#nav-search-wrapper').remove();
+                            let s1 = $("<div></div>").attr('id', 'nav-search-wrapper');
+                            $.each(response['searched_items'], function(key, searchitem) {
+                                let s2 = $("<li></li>").addClass('search-item');
+                                s1.append(s2);
+                                let s3 = $("<a></a>").addClass('search-link').attr('href', '<?php echo URL . URL_ITEM_DETAILS . '/' ?>' + searchitem['item_url']).append(searchitem['item_name']);
+                                s2.append(s3);
+                            });
+                            navSearch.append(s1);
+                        }
+                    });
+                    request.always(function() {
+                        inputsformSearch.prop('disabled', false);
+                        inputSearch.focus();
+                    });
+                }
+            });
+            <?php if (!empty($_SESSION[SESSION_COMPLETE_PROFILE_NAME])) : ?>
+                if (!$('body').hasClass('noscroll')) {
+                    $('body').addClass('noscroll');
+                }
+                const firstName = $('#first-name');
+                const lastName = $('#last-name');
+                $('#btn-user-update').click(function(e) {
+                    e.preventDefault();
+                    if (firstName.val() == '') {
+                        firstName.focus();
+                        setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_EMPTY_USER_NAME; ?></span></div>');
+                    } else if ($.trim(firstName.val()).indexOf(' ') >= 0) {
+                        firstName.focus();
+                        setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_NOT_VALID_USER_NAME; ?></span></div>');
+                    } else if (lastName.val() == '') {
+                        lastName.focus();
+                        setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_EMPTY_USER_LAST_NAME; ?></span></div>');
+                    } else if ($.trim(lastName.val()).indexOf(' ') >= 0) {
+                        lastName.focus();
+                        setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_NOT_VALID_USER_LAST_NAME; ?></span></div>');
+                    } else {
+                        if ($('.loader-wrapper').hasClass('hidden')) {
+                            $('.loader-wrapper').removeClass('hidden');
+                        }
+                        if (!$('body').hasClass('noscroll')) {
+                            $('body').addClass('noscroll');
+                        }
+                        $('#form-user-update').submit();
+                    }
+                });
+            <?php endif; ?>
+            <?php if (!empty($_SESSION[SESSION_SELECT_ADDRESS_NAME])) : ?>
+                if (!$('body').hasClass('noscroll')) {
+                    $('body').addClass('noscroll');
+                }
+            <?php endif; ?>
+        });
+    </script>
+    <?php if (!empty($web_data['iyzico_form'])) : ?>
+        <?php echo $web_data['iyzico_form']; ?>
+    <?php endif; ?>
+</body>
+
+</html>

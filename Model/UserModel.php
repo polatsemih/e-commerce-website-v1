@@ -49,9 +49,9 @@ class UserModel extends Model
     {
         return $this->database->Get(TABLE_ADDRESS, 'id,address_country,address_city,address_county,address_neighborhood,address_street,address_building_no,address_apartment_no,address_zip_no', 'WHERE user_id=? AND is_address_removed=0 ORDER BY address_created DESC', $user_id, 'PLURAL');
     }
-    function GetAddressById(array $inputs)
+    function GetAddressById(string $columns, array $inputs)
     {
-        return $this->database->Get(TABLE_ADDRESS, 'id', 'WHERE id=? AND user_id=? AND is_address_removed=0', $inputs, 'SINGULAR');
+        return $this->database->Get(TABLE_ADDRESS, $columns, 'WHERE id=? AND user_id=? AND is_address_removed=0', $inputs, 'SINGULAR');
     }
     function CreateAddress(array $inputs)
     {

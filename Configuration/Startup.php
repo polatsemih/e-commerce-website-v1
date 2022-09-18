@@ -35,6 +35,8 @@ define('URL_EMAIL_UPDATE_CONFIRM', 'yeni-email-dogrulama');
 define('URL_PHONE_UPDATE', 'telefon-numarami-guncelle');
 define('URL_PROFILE_PHOTO_UPDATE', 'resmimi-guncelle');
 define('URL_PROFILE_DELETE', 'hesabimi-sil');
+define('URL_ORDER_CREDIT', 'siparis-ver');
+define('URL_ORDER_COMPLETE', 'siparis-sonuc');
 // ActionController
 define('URL_LOGIN', 'giris');
 define('URL_TWO_FA', 'iki-asamali-dogrulama');
@@ -87,6 +89,8 @@ define('URL_MAPS', array(
     array('url' => 'telefon-numarami-guncelle', 'controller' => 'HomeController', 'action' => 'ProfilePhoneUpdate'),
     array('url' => 'resmimi-guncelle', 'controller' => 'HomeController', 'action' => 'ProfilePhotoUpdate'),
     array('url' => 'hesabimi-sil', 'controller' => 'HomeController', 'action' => 'ProfileDelete'),
+    array('url' => 'siparis-ver', 'controller' => 'HomeController', 'action' => 'OrderCredit'),
+    array('url' => 'siparis-sonuc', 'controller' => 'HomeController', 'action' => 'OrderComplete'),
     // ActionController
     array('url' => 'giris', 'controller' => 'ActionController', 'action' => 'Login'),
     array('url' => 'iki-asamali-dogrulama', 'controller' => 'ActionController', 'action' => 'TwoFA'),

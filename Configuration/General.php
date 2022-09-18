@@ -27,6 +27,9 @@ define('ADMIN_ID', 'iev5ozcgtjitdm8wx6p5xyqtgiwfn5hkwe05twafh8mw57dh7l5uby5paoan
 define('BRAND_INSTAGRAM', '#');
 define('BRAND_TWITTER', '#');
 
+define('IYZIPAY_FOLDER_NAME', 'iyzipay-php-2.0.51');
+define('IYZIPAY_API_KEY', 'sandbox-nPHgmmpVjtnwlCVBxOUF49vKJMK5xYP8');
+define('IYZIPAY_SECRET_KEY', 'sandbox-wKIo4n4BhIy3OGMPs2erkAORePgJMdeZ');
 
 
 

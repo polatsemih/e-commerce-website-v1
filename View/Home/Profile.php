@@ -84,7 +84,7 @@
                                 <h1 class="title mb">Adreslerim</h1>
                             </div>
                             <div class="right">
-                                <button id="btn-create-address" class="btn-success btn-delete-account mb" title="Yeni Adres Ekle">Adres Ekle</button>
+                                <button id="btn-create-address" class="btn-success mb" title="Yeni Adres Ekle">Adres Ekle</button>
                             </div>
                         </div>
                         <div id="popup-wrapper" class="create-address-wrapper<?php echo !empty($web_data['address']) ? '' : ' disable'; ?>">
@@ -128,7 +128,7 @@
                                         <?php endif; ?>
                                     </div>
                                     <div class="form-row">
-                                        <span class="label">Cadde/Sokak</span>
+                                        <span class="label">Cadde/ Sokak</span>
                                         <?php if (!empty($web_data['street'])) : ?>
                                             <input class="input" type="text" name="street" value="<?php echo $web_data['street']; ?>">
                                         <?php else : ?>
@@ -197,7 +197,7 @@
                                         <input id="update-neighborhood" class="input" type="text" name="neighborhood">
                                     </div>
                                     <div class="form-row">
-                                        <span class="label">Cadde/Sokak</span>
+                                        <span class="label">Cadde/ Sokak</span>
                                         <input id="update-street" class="input" type="text" name="street">
                                     </div>
                                     <div class="form-row">

@@ -860,7 +860,7 @@ class HomeController extends Controller
     {
         try {
             if (empty($this->web_data['authenticated_user'])) {
-                $this->input_control->Redirect();
+                $this->input_control->Redirect(URL_LOGIN);
             }
             if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $this->input_control->CheckUrl();
@@ -947,7 +947,7 @@ class HomeController extends Controller
     {
         try {
             if (empty($this->web_data['authenticated_user'])) {
-                $this->input_control->Redirect();
+                $this->input_control->Redirect(URL_LOGIN);
             }
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $checked_inputs = $this->input_control->CheckPostedInputs(array(
@@ -975,7 +975,12 @@ class HomeController extends Controller
                 } else {
                     $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
-                $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_INFORMATIONS);
+                if (!empty($_SESSION[SESSION_COMPLETE_PROFILE_NAME])) {
+                    $this->session_control->KillSession(SESSION_COMPLETE_PROFILE_NAME);
+                    $this->input_control->Redirect(URL_ORDER_CREDIT);
+                } else {
+                    $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_INFORMATIONS);
+                }
             }
             parent::KillAuthentication('HomeController ProfileInformationsUpdate');
             $this->input_control->Redirect();
@@ -991,7 +996,7 @@ class HomeController extends Controller
     {
         try {
             if (empty($this->web_data['authenticated_user'])) {
-                $this->input_control->Redirect();
+                $this->input_control->Redirect(URL_LOGIN);
             }
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $checked_inputs = $this->input_control->CheckPostedInputs(array(
@@ -1040,7 +1045,7 @@ class HomeController extends Controller
     {
         try {
             if (empty($this->web_data['authenticated_user'])) {
-                $this->input_control->Redirect();
+                $this->input_control->Redirect(URL_LOGIN);
             }
             if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_address_create'])) {
                 $city = isset($_POST['city']) ? $_POST['city'] : '';
@@ -1066,8 +1071,12 @@ class HomeController extends Controller
                         if ($confirmed_user_from_db['result']) {
                             $address_count = $this->UserModel->GetAddressCount($confirmed_user_from_db['data']['id']);
                             if ($address_count['result'] && $address_count['data']['COUNT(id)'] < 5) {
-                                if ($this->UserModel->CreateAddress(array('user_id' => $confirmed_user_from_db['data']['id'], 'address_city' => $checked_inputs['address_city'], 'address_county' => $checked_inputs['address_county'], 'address_neighborhood' => $checked_inputs['address_neighborhood'], 'address_street' => $checked_inputs['address_street'], 'address_building_no' => $checked_inputs['address_building_no'], 'address_apartment_no' => $checked_inputs['address_apartment_no'], 'address_zip_no' => $checked_inputs['address_zip_no']))['result']) {
+                                $result_create_address = $this->UserModel->CreateAddress(array('user_id' => $confirmed_user_from_db['data']['id'], 'address_city' => $checked_inputs['address_city'], 'address_county' => $checked_inputs['address_county'], 'address_neighborhood' => $checked_inputs['address_neighborhood'], 'address_street' => $checked_inputs['address_street'], 'address_building_no' => $checked_inputs['address_building_no'], 'address_apartment_no' => $checked_inputs['address_apartment_no'], 'address_zip_no' => $checked_inputs['address_zip_no']));
+                                if ($result_create_address['result']) {
                                     $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_CREATE_ADDRESS);
+                                    if (!empty($_SESSION[SESSION_SELECT_ADDRESS_NAME])) {
+                                        $_SESSION[SESSION_SELECTED_ADDRESS_ID] = $result_create_address['id'];
+                                    }
                                 } else {
                                     $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_CREATE_ADDRESS);
                                 }
@@ -1082,7 +1091,12 @@ class HomeController extends Controller
                     $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                     $_SESSION[SESSION_WEB_DATA_NAME] = array('city' => $city, 'county' => $county, 'neighborhood' => $neighborhood, 'street' => $street, 'building_no' => $building_no, 'apartment_no' => $apartment_no, 'zip_no' => $zip_no);
                 }
-                $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_ADDRESS);
+                if (!empty($_SESSION[SESSION_SELECT_ADDRESS_NAME])) {
+                    $this->session_control->KillSession(SESSION_SELECT_ADDRESS_NAME);
+                    $this->input_control->Redirect(URL_ORDER_CREDIT);
+                } else {
+                    $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_ADDRESS);
+                }
             }
             parent::KillAuthentication('HomeController ProfileCreateAddress');
             $this->input_control->Redirect();
@@ -1098,7 +1112,7 @@ class HomeController extends Controller
     {
         try {
             if (empty($this->web_data['authenticated_user'])) {
-                $this->input_control->Redirect();
+                $this->input_control->Redirect(URL_LOGIN);
             }
             if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_address_update'])) {
                 $id = isset($_POST['id']) ? $_POST['id'] : '';
@@ -1124,9 +1138,12 @@ class HomeController extends Controller
                     if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'Profile')) {
                         $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id', $this->web_data['authenticated_user']);
                         if ($confirmed_user_from_db['result']) {
-                            $address_confirm = $this->UserModel->GetAddressById(array($checked_inputs['id'], $confirmed_user_from_db['data']['id']));
-                            if ($address_confirm['result'] && $this->UserModel->UpdateAddress(array('address_city' => $checked_inputs['address_city'], 'address_county' => $checked_inputs['address_county'], 'address_neighborhood' => $checked_inputs['address_neighborhood'], 'address_street' => $checked_inputs['address_street'], 'address_building_no' => $checked_inputs['address_building_no'], 'address_apartment_no' => $checked_inputs['address_apartment_no'], 'address_zip_no' => $checked_inputs['address_zip_no'], 'id' => $checked_inputs['id']))['result']) {
+                            $address_confirm = $this->UserModel->GetAddressById('id', array($checked_inputs['id'], $confirmed_user_from_db['data']['id']));
+                            if ($address_confirm['result'] && $this->UserModel->UpdateAddress(array('address_city' => $checked_inputs['address_city'], 'address_county' => $checked_inputs['address_county'], 'address_neighborhood' => $checked_inputs['address_neighborhood'], 'address_street' => $checked_inputs['address_street'], 'address_building_no' => $checked_inputs['address_building_no'], 'address_apartment_no' => $checked_inputs['address_apartment_no'], 'address_zip_no' => $checked_inputs['address_zip_no'], 'address_last_updated' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['id']))['result']) {
                                 $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_UPDATE_ADDRESS);
+                                if (!empty($_SESSION[SESSION_SELECT_ADDRESS_NAME])) {
+                                    $_SESSION[SESSION_SELECTED_ADDRESS_ID] = $checked_inputs['id'];
+                                }
                             } else {
                                 $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_UPDATE_ADDRESS);
                             }
@@ -1137,7 +1154,12 @@ class HomeController extends Controller
                 } else {
                     $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
-                $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_ADDRESS);
+                if (!empty($_SESSION[SESSION_SELECT_ADDRESS_NAME])) {
+                    $this->session_control->KillSession(SESSION_SELECT_ADDRESS_NAME);
+                    $this->input_control->Redirect(URL_ORDER_CREDIT);
+                } else {
+                    $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_ADDRESS);
+                }
             }
             parent::KillAuthentication('HomeController ProfileUpdateAddress');
             $this->input_control->Redirect();
@@ -1153,7 +1175,7 @@ class HomeController extends Controller
     {
         try {
             if (empty($this->web_data['authenticated_user'])) {
-                $this->input_control->Redirect();
+                $this->input_control->Redirect(URL_LOGIN);
             }
             if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit-delete-address'])) {
                 $checked_inputs = $this->input_control->CheckPostedInputs(array(
@@ -1164,7 +1186,7 @@ class HomeController extends Controller
                     if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'Profile')) {
                         $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id', $this->web_data['authenticated_user']);
                         if ($confirmed_user_from_db['result']) {
-                            $address_confirm = $this->UserModel->GetAddressById(array($checked_inputs['id'], $confirmed_user_from_db['data']['id']));
+                            $address_confirm = $this->UserModel->GetAddressById('id', array($checked_inputs['id'], $confirmed_user_from_db['data']['id']));
                             if ($address_confirm['result'] && $this->UserModel->UpdateAddress(array('is_address_removed' => 1, 'date_address_removed' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['id']))['result']) {
                                 $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_DELETE_ADDRESS);
                             } else {
@@ -1177,7 +1199,12 @@ class HomeController extends Controller
                 } else {
                     $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
-                $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_ADDRESS);
+                if (!empty($_SESSION[SESSION_SELECT_ADDRESS_NAME])) {
+                    $this->session_control->KillSession(SESSION_SELECT_ADDRESS_NAME);
+                    $this->input_control->Redirect(URL_ORDER_CREDIT);
+                } else {
+                    $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_ADDRESS);
+                }
             }
             parent::KillAuthentication('HomeController ProfileDeleteAddress');
             $this->input_control->Redirect();
@@ -1193,7 +1220,7 @@ class HomeController extends Controller
     {
         try {
             if (empty($this->web_data['authenticated_user'])) {
-                $this->input_control->Redirect();
+                $this->input_control->Redirect(URL_LOGIN);
             }
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $checked_inputs = $this->input_control->CheckPostedInputs(array(
@@ -1256,7 +1283,7 @@ class HomeController extends Controller
     {
         try {
             if (empty($this->web_data['authenticated_user'])) {
-                $this->input_control->Redirect();
+                $this->input_control->Redirect(URL_LOGIN);
             }
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $checked_inputs = $this->input_control->CheckPostedInputs(array(
@@ -1313,7 +1340,7 @@ class HomeController extends Controller
     {
         try {
             if (empty($this->web_data['authenticated_user'])) {
-                $this->input_control->Redirect();
+                $this->input_control->Redirect(URL_LOGIN);
             }
             if (!empty($_SESSION[SESSION_EMAIL_UPDATE_NAME])) {
                 $email_update_token_from_database = $this->UserModel->GetSessionUpdateEmail(array($_SERVER['REMOTE_ADDR'], $_SESSION[SESSION_EMAIL_UPDATE_NAME]['token']));
@@ -1396,7 +1423,7 @@ class HomeController extends Controller
     {
         try {
             if (empty($this->web_data['authenticated_user'])) {
-                $this->input_control->Redirect();
+                $this->input_control->Redirect(URL_LOGIN);
             }
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $checked_inputs = $this->input_control->CheckPostedInputs(array(
@@ -1439,7 +1466,7 @@ class HomeController extends Controller
     {
         try {
             if (empty($this->web_data['authenticated_user'])) {
-                $this->input_control->Redirect();
+                $this->input_control->Redirect(URL_LOGIN);
             }
             if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile_photo'])) {
                 $checked_inputs = $this->input_control->CheckPostedInputs(array(
@@ -1571,7 +1598,7 @@ class HomeController extends Controller
     {
         try {
             if (empty($this->web_data['authenticated_user'])) {
-                $this->input_control->Redirect();
+                $this->input_control->Redirect(URL_LOGIN);
             }
             if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_user_delete'])) {
                 $checked_inputs = $this->input_control->CheckPostedInputs(array(
@@ -1611,10 +1638,307 @@ class HomeController extends Controller
     }
     function OrderCredit()
     {
+        try {
+            if (empty($this->web_data['authenticated_user'])) {
+                $this->input_control->Redirect(URL_LOGIN);
+            }
+            if ($_SERVER['REQUEST_METHOD'] === 'GET' || $_SERVER['REQUEST_METHOD'] === 'POST') {
+                $complete_user_profile = false;
+                $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id,first_name,last_name,email,phone_number,is_user_blocked', $this->web_data['authenticated_user']);
+                if ($confirmed_user_from_db['result']) {
+                    if ($confirmed_user_from_db['data']['is_user_blocked'] == 0) {
+                        if (empty($confirmed_user_from_db['data']['first_name'] || empty($confirmed_user_from_db['data']['last_name']))) {
+                            $_SESSION[SESSION_COMPLETE_PROFILE_NAME] = true;
+                            $complete_user_profile = true;
+                        } else {
+                            $selected_address_error = true;
+                            if (!empty($_POST['selected_address'])) {
+                                $this->session_control->KillSession(SESSION_SELECT_ADDRESS_NAME);
+                                $selected_checked_address = $this->input_control->IsString($_POST['selected_address']);
+                                if (!is_null($selected_checked_address)) {
+                                    $selected_address_id = $this->input_control->PreventXSSForId($selected_checked_address);
+                                    if (!empty($selected_address_id)) {
+                                        $selected_address = $this->UserModel->GetAddressById('address_country,address_city,address_county,address_neighborhood,address_street,address_building_no,address_apartment_no,address_zip_no', array($selected_address_id, $this->web_data['authenticated_user']));
+                                        if ($selected_address['result']) {
+                                            $user_selected_address = $selected_address['data'];
+                                            $selected_address_error = false;
+                                        } else {
+                                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                            $this->input_control->Redirect(URL_CART);
+                                        }
+                                    }
+                                }
+                            } elseif (!empty($_SESSION[SESSION_SELECTED_ADDRESS_ID])) {
+                                $selected_address = $this->UserModel->GetAddressById('address_country,address_city,address_county,address_neighborhood,address_street,address_building_no,address_apartment_no,address_zip_no', array($_SESSION[SESSION_SELECTED_ADDRESS_ID], $this->web_data['authenticated_user']));
+                                $this->session_control->KillSession(SESSION_SELECTED_ADDRESS_ID);
+                                if ($selected_address['result']) {
+                                    $user_selected_address = $selected_address['data'];
+                                    $selected_address_error = false;
+                                } else {
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                    $this->input_control->Redirect(URL_CART);
+                                }
+                            }
+                            if ($selected_address_error) {
+                                $address_from_db = $this->UserModel->GetAddress($this->web_data['authenticated_user']);
+                                if ($address_from_db['result']) {
+                                    $this->web_data['select_address'] = $address_from_db['data'];
+                                }
+                                if (!empty($_SESSION[SESSION_WEB_DATA_NAME])) {
+                                    if (isset($_SESSION[SESSION_WEB_DATA_NAME]['city']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['county']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['neighborhood']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['street']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['building_no']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['apartment_no']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['zip_no'])) {
+                                        $this->web_data['address'] = true;
+                                        $this->web_data['city'] = $_SESSION[SESSION_WEB_DATA_NAME]['city'];
+                                        $this->web_data['county'] = $_SESSION[SESSION_WEB_DATA_NAME]['county'];
+                                        $this->web_data['neighborhood'] = $_SESSION[SESSION_WEB_DATA_NAME]['neighborhood'];
+                                        $this->web_data['street'] = $_SESSION[SESSION_WEB_DATA_NAME]['street'];
+                                        $this->web_data['building_no'] = $_SESSION[SESSION_WEB_DATA_NAME]['building_no'];
+                                        $this->web_data['apartment_no'] = $_SESSION[SESSION_WEB_DATA_NAME]['apartment_no'];
+                                        $this->web_data['zip_no'] = $_SESSION[SESSION_WEB_DATA_NAME]['zip_no'];
+                                    }
+                                    $this->session_control->KillSession(SESSION_WEB_DATA_NAME);
+                                }
+                                $_SESSION[SESSION_SELECT_ADDRESS_NAME] = true;
+                                $complete_user_profile = true;
+                            }
+                        }
+                    } else {
+                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_ORDER_USER_BLOCKED);
+                        $this->input_control->Redirect(URL_CART);
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                    $this->input_control->Redirect(URL_CART);
+                }
+                if ($complete_user_profile) {
+                    parent::LogView('Home-OrderCredit-Complete-Name');
+                    $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
+                    $this->web_data['form_token'] = parent::SetCSRFToken('Profile');
+                    parent::GetView('Home/OrderCredit', $this->web_data);
+                } else {
+                    $this->input_control->CheckUrl();
 
+                    // print_r($user_selected_address);
+
+                    
+                    $cart_price = 1;
+                    $cart_final_price = 1.2;
+                    $conversation_id = $this->input_control->GenerateToken();
+                    if ($conversation_id['result'] && !empty($user_selected_address)) {
+                        require_once(IYZIPAY_FOLDER_NAME . '/IyzipayBootstrap.php');
+                        IyzipayBootstrap::init();
+                        $options = new \Iyzipay\Options();
+                        $options->setApiKey(IYZIPAY_API_KEY);
+                        $options->setSecretKey(IYZIPAY_SECRET_KEY);
+                        $options->setBaseUrl('https://sandbox-api.iyzipay.com');
+
+                        $request = new \Iyzipay\Request\CreateCheckoutFormInitializeRequest();
+                        $request->setLocale(\Iyzipay\Model\Locale::TR);
+                        $request->setConversationId($conversation_id['data']);
+                        $request->setPrice($cart_price);
+                        $request->setPaidPrice($cart_final_price);
+                        $request->setCurrency(\Iyzipay\Model\Currency::TL);
+                        $request->setCallbackUrl(URL . IYZIPAY_FOLDER_NAME);
+                        $request->setEnabledInstallments(array(1));
+
+                        $buyer = new \Iyzipay\Model\Buyer();
+                        $buyer->setId($confirmed_user_from_db['data']['id']);
+                        $buyer->setName($confirmed_user_from_db['data']['first_name']);
+                        $buyer->setSurname($confirmed_user_from_db['data']['last_name']);
+                        $buyer->setEmail($this->input_control->DecodePreventXSS($confirmed_user_from_db['data']['email']));
+                        $buyer->setIdentityNumber("74300864791");
+                        $buyer->setRegistrationAddress("Nidakule Göztepe, Merdivenköy Mah. Bora Sok. No:1");
+                        $buyer->setIp($_SERVER['REMOTE_ADDR']);
+                        $buyer->setCity("Istanbul");
+                        $buyer->setCountry("Turkey");
+                        $request->setBuyer($buyer);
+
+                        $billingAddress = new \Iyzipay\Model\Address();
+                        $billingAddress->setContactName($confirmed_user_from_db['data']['first_name'] . ' ' . $confirmed_user_from_db['data']['last_name']);
+                        $billingAddress->setCity("Istanbul");
+                        $billingAddress->setCountry("Turkey");
+                        $billingAddress->setAddress("Nidakule Göztepe, Merdivenköy Mah. Bora Sok. No:1");
+                        $request->setBillingAddress($billingAddress);
+
+                        $shippingAddress = new \Iyzipay\Model\Address();
+                        $shippingAddress->setContactName($confirmed_user_from_db['data']['first_name'] . ' ' . $confirmed_user_from_db['data']['last_name']);
+                        $shippingAddress->setCity("Istanbul");
+                        $shippingAddress->setCountry("Turkey");
+                        $shippingAddress->setAddress("Nidakule Göztepe, Merdivenköy Mah. Bora Sok. No:1");
+                        $request->setShippingAddress($shippingAddress);
+
+                        $basketItems = array();
+                        $firstBasketItem = new \Iyzipay\Model\BasketItem();
+                        $firstBasketItem->setId("BI101");
+                        $firstBasketItem->setName("Binocular");
+                        $firstBasketItem->setCategory1("Hoodie");
+                        $firstBasketItem->setItemType(\Iyzipay\Model\BasketItemType::PHYSICAL);
+                        $firstBasketItem->setPrice("0.3");
+                        $basketItems[0] = $firstBasketItem;
+
+                        $secondBasketItem = new \Iyzipay\Model\BasketItem();
+                        $secondBasketItem->setId("BI102");
+                        $secondBasketItem->setName("Game code");
+                        $secondBasketItem->setCategory1("Hoodie");
+                        $secondBasketItem->setItemType(\Iyzipay\Model\BasketItemType::PHYSICAL);
+                        $secondBasketItem->setPrice("0.5");
+                        $basketItems[1] = $secondBasketItem;
+
+                        $thirdBasketItem = new \Iyzipay\Model\BasketItem();
+                        $thirdBasketItem->setId("BI103");
+                        $thirdBasketItem->setName("Usb");
+                        $thirdBasketItem->setCategory1("Hoodie");
+                        $thirdBasketItem->setItemType(\Iyzipay\Model\BasketItemType::PHYSICAL);
+                        $thirdBasketItem->setPrice("0.2");
+                        $basketItems[2] = $thirdBasketItem;
+                        $request->setBasketItems($basketItems);
+
+                        $checkoutFormInitialize = \Iyzipay\Model\CheckoutFormInitialize::create($request, $options);
+                        // print_r($checkoutFormInitialize);
+
+                        if ($checkoutFormInitialize->getStatus() == 'success') {
+                            if ($checkoutFormInitialize->getConversationId() == $conversation_id['data']) {
+                                $this->web_data['iyzico_form'] = $checkoutFormInitialize->getCheckoutFormContent();
+                                parent::LogView('Home-OrderCredit');
+                                $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
+                                // $this->web_data['form_token'] = parent::SetCSRFToken('OrderCredit');
+                                parent::GetView('Home/OrderCredit', $this->web_data);
+                            } else {
+                                echo $checkoutFormInitialize->getConversationId();
+                                echo $conversation_id['data'];
+                            }
+                        } else {
+                            echo $checkoutFormInitialize->getStatus();
+                            echo $checkoutFormInitialize->getErrorCode();
+                            echo $checkoutFormInitialize->getErrorMessage();
+                            echo $checkoutFormInitialize->getErrorGroup();
+                        }
+                    }
+                }
+                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                $this->input_control->Redirect(URL_CART);
+            }
+            // parent::KillAuthentication('HomeController OrderCredit');
+            $this->input_control->Redirect();
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function OrderCredit | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
     }
     function OrderComplete()
     {
+        try {
+            if (empty($this->web_data['authenticated_user'])) {
+                $this->input_control->Redirect(URL_LOGIN);
+            }
+            $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id,is_user_blocked', $this->web_data['authenticated_user']);
+            if ($confirmed_user_from_db['result']) {
+                if ($confirmed_user_from_db['data']['is_user_blocked'] == 1) {
+                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_ORDER_USER_BLOCKED);
+                    $this->input_control->Redirect(URL_CART);
+                }
+            } else {
+                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                $this->input_control->Redirect(URL_CART);
+            }
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl();
+                parent::LogView('Home-OrderComplete');
+                $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
+                parent::GetView('Home/OrderComplete', $this->web_data);
+            } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (isset($_POST['token'])) {
+                    $conversation_id = $this->input_control->GenerateToken();
+                    if ($conversation_id['result']) {
+                        require_once(IYZIPAY_FOLDER_NAME . '/IyzipayBootstrap.php');
+                        IyzipayBootstrap::init();
+                        $options = new \Iyzipay\Options();
+                        $options->setApiKey(IYZIPAY_API_KEY);
+                        $options->setSecretKey(IYZIPAY_SECRET_KEY);
+                        $options->setBaseUrl('https://sandbox-api.iyzipay.com');
 
+                        $request = new \Iyzipay\Request\RetrieveCheckoutFormRequest();
+                        $request->setLocale(\Iyzipay\Model\Locale::TR);
+                        $request->setConversationId($conversation_id['data']);
+                        $request->setToken($_POST['token']);
+
+                        $checkoutForm = \Iyzipay\Model\CheckoutForm::retrieve($request, $options);
+
+                        // print_r($checkoutForm);
+
+                        if ($checkoutForm->getStatus() == 'success' && $checkoutForm->getPaymentStatus() == 'SUCCESS') {
+                            if ($checkoutForm->getConversationId() == $conversation_id['data']) {
+                                $checkoutForm->getToken();
+                                $checkoutForm->getCallbackUrl();
+                                $checkoutForm->getPaymentId();
+                                $checkoutForm->getPrice();
+                                $checkoutForm->getPaidPrice();
+                                $checkoutForm->getCurrency();
+                                $checkoutForm->getInstallment();
+                                $checkoutForm->getCardAssociation();
+                                $checkoutForm->getCardFamily();
+                                $checkoutForm->getCardType();
+                                if ($checkoutForm->getFraudStatus() == 1) {
+                                    echo 'Kargoya ver';
+                                } elseif ($checkoutForm->getFraudStatus() == 1) {
+                                    echo 'Iyzicodan haber bekle';
+                                } else {
+                                    echo 'Ödeme işlemi reddedildi';
+                                }
+                                $checkoutForm->getIyziCommissionFee();
+                                $checkoutForm->getIyziCommissionRateAmount();
+                                $checkoutForm->getMerchantCommissionRate();
+                                $checkoutForm->getMerchantCommissionRateAmount();
+                                foreach ($checkoutForm->getPaymentItems() as $key => $payment_item) {
+                                    $payment_item->getItemId();
+                                    $payment_item->getPaymentTransactionId();
+                                    $payment_item->getTransactionStatus();
+                                    $payment_item->getPrice();
+                                    $payment_item->getPaidPrice();
+                                    $payment_item->getBlockageRate();
+                                    $payment_item->getBlockageRateAmountMerchant();
+                                    $payment_item->getBlockageResolvedDate();
+                                    $payment_item->getIyziCommissionFee();
+                                    $payment_item->getIyziCommissionRateAmount();
+                                    $payment_item->getMerchantCommissionRate();
+                                    $payment_item->getMerchantCommissionRateAmount();
+                                    $payment_item->getSubMerchantPayoutAmount();
+                                    $payment_item->getConvertedPayout()->getPaidPrice();
+                                    $payment_item->getConvertedPayout()->getIyziCommissionFee();
+                                    $payment_item->getConvertedPayout()->getIyziCommissionRateAmount();
+                                    $payment_item->getConvertedPayout()->getBlockageRateAmountMerchant();
+                                    $payment_item->getConvertedPayout()->getSubMerchantPayoutAmount();
+                                    $payment_item->getConvertedPayout()->getIyziConversionRate();
+                                    $payment_item->getConvertedPayout()->getIyziConversionRateAmount();
+                                    $payment_item->getConvertedPayout()->getCurrency();
+                                }
+                                $this->input_control->Redirect(URL_ORDER_COMPLETE);
+                            } else {
+                                echo $checkoutForm->getConversationId();
+                                echo $conversation_id['data'];
+                            }
+                        } else {
+                            echo $checkoutForm->getStatus();
+                            echo $checkoutForm->getPaymentStatus();
+                            echo $checkoutForm->getErrorCode();
+                            echo $checkoutForm->getErrorMessage();
+                            echo $checkoutForm->getErrorGroup();
+                        }
+                    }
+                }
+                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                $this->input_control->Redirect(URL_CART);
+            }
+            // parent::KillAuthentication('HomeController OrderComplete');
+            $this->input_control->Redirect();
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function OrderComplete | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
     }
 }

@@ -72,9 +72,11 @@
                                     <span class="text"><?php echo $web_data['cart_data_total_price']; ?> ₺</span>
                                 </div>
                             </div>
-                            <form action="">
-                                <input class="btn-submit-cart" type="submit" name="btn_submit_cart" value="Alışverişi Tamamla">
-                            </form>
+                            <?php if (!empty($web_data['authenticated_user'])) : ?>
+                                <a class="btn-submit-cart" href="<?php echo URL . URL_ORDER_CREDIT; ?>">Alışverişi Tamamla</a>
+                            <?php else : ?>
+                                <a class="btn-submit-cart" href="<?php echo URL . URL_LOGIN . '?yonlendir=' . URL_ORDER_CREDIT; ?>">Alışverişi Tamamla</a>
+                            <?php endif; ?>
                         <?php else : ?>
                             <div class="cart-out-of-service">
                                 <span class="text text-1">Alışveriş Hizmeti Devre Dışı</span>

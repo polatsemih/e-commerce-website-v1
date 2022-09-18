@@ -86,6 +86,10 @@ class ActionController extends Controller
                                                             $cookie_authentication_token1 = hash_hmac('SHA512', $extracted_cookie_authentication_token1, $cookie_authentication_salt['data'], false);
                                                             if (!empty($cookie_authentication_token1) && $this->ActionModel->CreateCookieAuthentication(array('user_id' => $two_fa_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'cookie_authentication_token1' => $cookie_authentication_token1, 'cookie_authentication_token2' => $extracted_cookie_authentication_token2, 'cookie_authentication_salt' => $cookie_authentication_salt['data'], 'date_cookie_authentication_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_COOKIE_AUTHENTICATION))))['result'] && $this->UserModel->UpdateUser(array('date_last_login' => date('Y-m-d H:i:s'), 'id' => $two_fa_user_from_database['data']['id']))['result'] && $this->ActionModel->CreateLogLogin(array('user_id' => $two_fa_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'login_success' => 1))['result'] && $this->cookie_control->SetCookie(COOKIE_AUTHENTICATION_NAME, $cookie_authentication_token, time() + (EXPIRY_COOKIE_AUTHENTICATION), COOKIE_PATH, COOKIE_DOMAIN, COOKIE_SECURE, COOKIE_HTTP_ONLY, COOKIE_SAMESITE)) {
                                                                 if (!empty($_SESSION[SESSION_REDIRECT_LOCATION_NAME])) {
+                                                                    if ($_SESSION[SESSION_REDIRECT_LOCATION_NAME] == URL_ORDER_CREDIT) {
+                                                                        $this->session_control->KillSession(SESSION_REDIRECT_LOCATION_NAME);
+                                                                        $this->input_control->Redirect(URL_CART);
+                                                                    }
                                                                     $posted_redirect = explode('&percnt;2F', $_SESSION[SESSION_REDIRECT_LOCATION_NAME]);
                                                                     $this->session_control->KillSession(SESSION_REDIRECT_LOCATION_NAME);
                                                                     if (!empty($posted_redirect) && count($posted_redirect) == 2 && !empty($posted_redirect[0]) && !empty($posted_redirect[1]) && in_array($posted_redirect[0], REDIRECT_PERMISSION)) {
@@ -107,6 +111,10 @@ class ActionController extends Controller
                                                             $_SESSION[SESSION_REFRESH_NAME] = time() + (60 * 15);
                                                             $_SESSION[SESSION_AUTHENTICATION_NAME] = $session_authentication_token['data'];
                                                             if (!empty($_SESSION[SESSION_REDIRECT_LOCATION_NAME])) {
+                                                                if ($_SESSION[SESSION_REDIRECT_LOCATION_NAME] == URL_ORDER_CREDIT) {
+                                                                    $this->session_control->KillSession(SESSION_REDIRECT_LOCATION_NAME);
+                                                                    $this->input_control->Redirect(URL_CART);
+                                                                }
                                                                 $posted_redirect = explode('&percnt;2F', $_SESSION[SESSION_REDIRECT_LOCATION_NAME]);
                                                                 $this->session_control->KillSession(SESSION_REDIRECT_LOCATION_NAME);
                                                                 if (!empty($posted_redirect) && count($posted_redirect) == 2 && !empty($posted_redirect[0]) && !empty($posted_redirect[1]) && in_array($posted_redirect[0], REDIRECT_PERMISSION)) {
@@ -256,6 +264,10 @@ class ActionController extends Controller
                                                                 $cookie_authentication_token1 = hash_hmac('SHA512', $extracted_cookie_authentication_token1, $cookie_authentication_salt['data'], false);
                                                                 if (!empty($cookie_authentication_token1) && $this->ActionModel->CreateCookieAuthentication(array('user_id' => $login_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'cookie_authentication_token1' => $cookie_authentication_token1, 'cookie_authentication_token2' => $extracted_cookie_authentication_token2, 'cookie_authentication_salt' => $cookie_authentication_salt['data'], 'date_cookie_authentication_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_COOKIE_AUTHENTICATION))))['result'] && $this->UserModel->UpdateUser(array('date_last_login' => date('Y-m-d H:i:s'), 'id' => $login_user_from_database['data']['id']))['result'] && $this->ActionModel->CreateLogLogin(array('user_id' => $login_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'login_success' => 1))['result'] && $this->cookie_control->SetCookie(COOKIE_AUTHENTICATION_NAME, $cookie_authentication_token, time() + (EXPIRY_COOKIE_AUTHENTICATION), COOKIE_PATH, COOKIE_DOMAIN, COOKIE_SECURE, COOKIE_HTTP_ONLY, COOKIE_SAMESITE)) {
                                                                     if (!empty($_SESSION[SESSION_REDIRECT_LOCATION_NAME])) {
+                                                                        if ($_SESSION[SESSION_REDIRECT_LOCATION_NAME] == URL_ORDER_CREDIT) {
+                                                                            $this->session_control->KillSession(SESSION_REDIRECT_LOCATION_NAME);
+                                                                            $this->input_control->Redirect(URL_CART);
+                                                                        }
                                                                         $posted_redirect = explode('&percnt;2F', $_SESSION[SESSION_REDIRECT_LOCATION_NAME]);
                                                                         $this->session_control->KillSession(SESSION_REDIRECT_LOCATION_NAME);
                                                                         if (!empty($posted_redirect) && count($posted_redirect) == 2 && !empty($posted_redirect[0]) && !empty($posted_redirect[1]) && in_array($posted_redirect[0], REDIRECT_PERMISSION)) {
@@ -277,6 +289,10 @@ class ActionController extends Controller
                                                                 $_SESSION[SESSION_REFRESH_NAME] = time() + (60 * 15);
                                                                 $_SESSION[SESSION_AUTHENTICATION_NAME] = $session_authentication_token['data'];
                                                                 if (!empty($_SESSION[SESSION_REDIRECT_LOCATION_NAME])) {
+                                                                    if ($_SESSION[SESSION_REDIRECT_LOCATION_NAME] == URL_ORDER_CREDIT) {
+                                                                        $this->session_control->KillSession(SESSION_REDIRECT_LOCATION_NAME);
+                                                                        $this->input_control->Redirect(URL_CART);
+                                                                    }
                                                                     $posted_redirect = explode('&percnt;2F', $_SESSION[SESSION_REDIRECT_LOCATION_NAME]);
                                                                     $this->session_control->KillSession(SESSION_REDIRECT_LOCATION_NAME);
                                                                     if (!empty($posted_redirect) && count($posted_redirect) == 2 && !empty($posted_redirect[0]) && !empty($posted_redirect[1]) && in_array($posted_redirect[0], REDIRECT_PERMISSION)) {

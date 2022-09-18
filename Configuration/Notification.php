@@ -127,3 +127,4 @@ define('TR_NOTIFICATION_SUCCESS_DELETE_ADDRESS', 'Adres başarıyla silindi');
 define('TR_NOTIFICATION_ERROR_COMMENT_USER_EMPTY_NAME', 'Yorum eklemeden önce profilinizden isminizi eklemelisiniz');
 define('TR_NOTIFICATION_SUCCESS_PROFILE_2FA_DEACTIVE', '2 aşamalı doğrulama devre dışı bırakıldı');
 define('TR_NOTIFICATION_SUCCESS_PROFILE_2FA_ACTIVE', '2 aşamalı doğrulama aktif edildi');
+define('TR_NOTIFICATION_ERROR_ORDER_USER_BLOCKED', BRAND . ' hesabınız bloklandığı için alışveriş yapamazsınız.');
