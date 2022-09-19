@@ -17,14 +17,16 @@ define('URL_AGREEMENT_PRIVACY', 'gizlilik-ve-guvenlik-politikasi');
 define('URL_AGREEMENT_RETURN_POLICY', 'iptal-ve-iade-kosullari');
 define('URL_LOGOUT', 'cikis');
 define('URL_PROFILE', 'profil');
-define('URL_PROFILE_INFORMATIONS', 'bilgilerim');
+define('URL_PROFILE_INFORMATIONS', 'hesabim');
+define('URL_PROFILE_IDENTITY_NUMBER', 'kimlik-numaram');
 define('URL_PROFILE_ADDRESS', 'adresim');
 define('URL_PROFILE_PASSWORD', 'sifrem');
 define('URL_PROFILE_EMAIL', 'emailim');
 define('URL_PROFILE_PHONE', 'telefonum');
 define('URL_PROFILE_PHOTO', 'profil-fotom');
 define('URL_PROFILE_ORDERS', 'siparislerim');
-define('URL_PROFILE_UPDATE', 'bilgilerimi-guncelle');
+define('URL_PROFILE_UPDATE', 'hesabimi-guncelle');
+define('URL_IDENTITY_NUMBER_UPDATE', 'kimlik-numarami-guncelle');
 define('URL_PROFILE_2FA', 'iki-asamali-dogrulama-aktif');
 define('URL_ADDRESS_CREATE', 'adres-ekle');
 define('URL_ADDRESS_UPDATE', 'adres-guncelle');
@@ -35,6 +37,7 @@ define('URL_EMAIL_UPDATE_CONFIRM', 'yeni-email-dogrulama');
 define('URL_PHONE_UPDATE', 'telefon-numarami-guncelle');
 define('URL_PROFILE_PHOTO_UPDATE', 'resmimi-guncelle');
 define('URL_PROFILE_DELETE', 'hesabimi-sil');
+define('URL_ORDER_ADDRESS', 'adres-sec');
 define('URL_ORDER_CREDIT', 'siparis-ver');
 define('URL_ORDER_COMPLETE', 'siparis-sonuc');
 // ActionController
@@ -78,7 +81,8 @@ define('URL_MAPS', array(
     array('url_pattern' => 'sartlar-sozlesmeler-politikalar-ve-kosullar/?', 'controller' => 'HomeController', 'action' => 'Agreements'),
     array('url' => 'cikis', 'controller' => 'HomeController', 'action' => 'LogOut'),
     array('url_pattern' => 'profil/?', 'controller' => 'HomeController', 'action' => 'Profile'),
-    array('url' => 'bilgilerimi-guncelle', 'controller' => 'HomeController', 'action' => 'ProfileInformationsUpdate'),
+    array('url' => 'hesabimi-guncelle', 'controller' => 'HomeController', 'action' => 'ProfileInformationsUpdate'),
+    array('url' => 'kimlik-numarami-guncelle', 'controller' => 'HomeController', 'action' => 'ProfileIdentityNumberUpdate'),
     array('url' => 'iki-asamali-dogrulama-aktif', 'controller' => 'HomeController', 'action' => 'ProfileTwoFa'),
     array('url' => 'adres-ekle', 'controller' => 'HomeController', 'action' => 'ProfileCreateAddress'),
     array('url' => 'adres-guncelle', 'controller' => 'HomeController', 'action' => 'ProfileUpdateAddress'),
@@ -89,6 +93,7 @@ define('URL_MAPS', array(
     array('url' => 'telefon-numarami-guncelle', 'controller' => 'HomeController', 'action' => 'ProfilePhoneUpdate'),
     array('url' => 'resmimi-guncelle', 'controller' => 'HomeController', 'action' => 'ProfilePhotoUpdate'),
     array('url' => 'hesabimi-sil', 'controller' => 'HomeController', 'action' => 'ProfileDelete'),
+    array('url' => 'adres-sec', 'controller' => 'HomeController', 'action' => 'OrderAddressPost'),
     array('url' => 'siparis-ver', 'controller' => 'HomeController', 'action' => 'OrderCredit'),
     array('url' => 'siparis-sonuc', 'controller' => 'HomeController', 'action' => 'OrderComplete'),
     // ActionController

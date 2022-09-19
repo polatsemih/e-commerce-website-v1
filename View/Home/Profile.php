@@ -14,7 +14,8 @@
         <section class="profile-section container">
             <div class="row">
                 <div class="nav-menu">
-                    <a class="link<?php echo $web_data['profile_type'] == URL_PROFILE_INFORMATIONS ? ' active' : ''; ?>" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_INFORMATIONS; ?>">Bilgilerim</a>
+                    <a class="link<?php echo $web_data['profile_type'] == URL_PROFILE_INFORMATIONS ? ' active' : ''; ?>" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_INFORMATIONS; ?>">Hesabım</a>
+                    <a class="link<?php echo $web_data['profile_type'] == URL_PROFILE_IDENTITY_NUMBER ? ' active' : ''; ?>" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_IDENTITY_NUMBER; ?>">Kimlik Numaram</a>
                     <a class="link<?php echo $web_data['profile_type'] == URL_PROFILE_ADDRESS ? ' active' : ''; ?>" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_ADDRESS; ?>">Adreslerim</a>
                     <a class="link<?php echo $web_data['profile_type'] == URL_PROFILE_PASSWORD ? ' active' : ''; ?>" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_PASSWORD; ?>">Şifremi Değiştir</a>
                     <a class="link<?php echo $web_data['profile_type'] == URL_PROFILE_EMAIL ? ' active' : ''; ?>" href="<?php echo URL . URL_PROFILE . '/' . URL_PROFILE_EMAIL; ?>">Emailimi Değiştir</a>
@@ -26,7 +27,7 @@
                     <?php if ($web_data['profile_type'] == URL_PROFILE_INFORMATIONS) : ?>
                         <div class="row-space">
                             <div class="left">
-                                <h1 class="title mb">Bilgilerim</h1>
+                                <h1 class="title mb">Hesabım</h1>
                             </div>
                             <?php if ($web_data['authenticated_user']['user_delete_able'] == 1) : ?>
                                 <div class="right">
@@ -78,6 +79,24 @@
                                 </form>
                             </div>
                         </div>
+                    <?php elseif ($web_data['profile_type'] == URL_PROFILE_IDENTITY_NUMBER) : ?>
+                        <h1 class="title mb">T.C. Kimlik Numarası</h1>
+                        <form id="form-update-identity" action="<?php echo URL . URL_IDENTITY_NUMBER_UPDATE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                            <?php if (!empty($web_data['form_token'])) : ?>
+                                <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
+                            <?php endif; ?>
+                            <div class="form-update-wrapper">
+                                <div class="form-row">
+                                    <span class="label">Kimlik Numarası</span>
+                                    <input class="input" id="user-identity" type="text" name="user_identity_number" maxlength="11" value="<?php echo $web_data['authenticated_user']['identity_number']; ?>" placeholder="Kimlik Numaranızı Girin" autofocus>
+                                </div>
+                            </div>
+                            <div class="row-space">
+                                <div class="right">
+                                    <input class="btn-warning" id="btn-identity-update" type="submit" value="Kimlik Numaramı Değiştir" title="Kimlik Numaramı Değiştir">
+                                </div>
+                            </div>
+                        </form>
                     <?php elseif ($web_data['profile_type'] == URL_PROFILE_ADDRESS) : ?>
                         <div class="row-space">
                             <div class="left">
@@ -593,15 +612,9 @@
                     if (firstName.val() == '') {
                         firstName.focus();
                         setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_EMPTY_USER_NAME; ?></span></div>');
-                    } else if ($.trim(firstName.val()).indexOf(' ') >= 0) {
-                        firstName.focus();
-                        setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_NOT_VALID_USER_NAME; ?></span></div>');
                     } else if (lastName.val() == '') {
                         lastName.focus();
                         setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_EMPTY_USER_LAST_NAME; ?></span></div>');
-                    } else if ($.trim(lastName.val()).indexOf(' ') >= 0) {
-                        lastName.focus();
-                        setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_NOT_VALID_USER_LAST_NAME; ?></span></div>');
                     } else {
                         if ($('.loader-wrapper').hasClass('hidden')) {
                             $('.loader-wrapper').removeClass('hidden');
@@ -622,6 +635,30 @@
                     $('#form-two-fa').submit();
                 });
             <?php endif; ?>
+            <?php if ($web_data['profile_type'] == URL_PROFILE_IDENTITY_NUMBER) : ?>
+                const userIdentity = $('#user-identity');
+                $('#btn-identity-update').click(function(e) {
+                    e.preventDefault();
+                    if (userIdentity.val() == '') {
+                        userIdentity.focus();
+                        setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_EMPTY_IDENTITY_NUMBER; ?></span></div>');
+                    } else if ($.trim(userIdentity.val()).indexOf(' ') >= 0) {
+                        userIdentity.focus();
+                        setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_NOT_VALID_IDENTITY_NUMBER; ?></span></div>');
+                    } else if ($.trim(userIdentity.val()).length != <?php echo IDENTITY_NUMBER_LIMIT; ?>) {
+                        userIdentity.focus();
+                        setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_NOT_VALID_IDENTITY_NUMBER; ?></span></div>');
+                    } else {
+                        if ($('.loader-wrapper').hasClass('hidden')) {
+                            $('.loader-wrapper').removeClass('hidden');
+                        }
+                        if (!$('body').hasClass('noscroll')) {
+                            $('body').addClass('noscroll');
+                        }
+                        $('#form-update-identity').submit();
+                    }
+                });
+            <?php endif; ?>
             <?php if ($web_data['profile_type'] == URL_PROFILE_PASSWORD) : ?>
                 const inputOldPassword = $('#input-oldpassword');
                 const oldPasswordMessage = $('#oldpassword-message');
@@ -640,7 +677,7 @@
                     } else if ($.trim(inputPassword.val()).indexOf(' ') >= 0) {
                         inputPassword.focus();
                         setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_NO_WHITE_SPACE_PASSWORD; ?></span></div>');
-                    } else if ($.trim(inputPassword.val()).length <= <?php echo PASSWORD_MIN_LIMIT; ?>) {
+                    } else if ($.trim(inputPassword.val()).length < <?php echo PASSWORD_MIN_LIMIT; ?>) {
                         inputPassword.focus();
                         setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_MIN_LENGTH_PASSWORD; ?></span></div>');
                     } else if (!/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])/.test(inputPassword.val())) {
@@ -674,7 +711,7 @@
                         passwordMessage.text('<?php echo TR_NOTIFICATION_ERROR_EMPTY_PASSWORD; ?>');
                     } else if ($.trim(inputPassword.val()).indexOf(' ') >= 0) {
                         passwordMessage.text('<?php echo TR_NOTIFICATION_ERROR_NO_WHITE_SPACE_PASSWORD; ?>');
-                    } else if ($.trim(inputPassword.val()).length <= <?php echo PASSWORD_MIN_LIMIT; ?>) {
+                    } else if ($.trim(inputPassword.val()).length < <?php echo PASSWORD_MIN_LIMIT; ?>) {
                         passwordMessage.text('<?php echo TR_NOTIFICATION_ERROR_MIN_LENGTH_PASSWORD; ?>');
                     } else if (!/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])/.test(inputPassword.val())) {
                         passwordMessage.text('<?php echo TR_NOTIFICATION_ERROR_PATTERN_PASSWORD; ?>');
@@ -727,7 +764,7 @@
                     } else if ($.trim(userPhone.val()).indexOf(' ') >= 0) {
                         userPhone.focus();
                         setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_NOT_VALID_PHONE; ?></span></div>');
-                    } else if ($.trim(userPhone.val()).length < <?php echo PHONE_LIMIT; ?>) {
+                    } else if ($.trim(userPhone.val()).length != <?php echo PHONE_LIMIT; ?>) {
                         userPhone.focus();
                         setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_NOT_VALID_PHONE; ?></span></div>');
                     } else {

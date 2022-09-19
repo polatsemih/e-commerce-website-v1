@@ -18,6 +18,10 @@ class FilterModel extends Model
     {
         return $this->database->Get(TABLE_FILTER_CATEGORY, 'id,category_name,category_url', '', '', 'PLURAL');
     }
+    function GetCategoryById(string $category_id)
+    {
+        return $this->database->Get(TABLE_FILTER_CATEGORY, 'category_name', 'WHERE id=?', $category_id, 'SINGULAR');
+    }
     function GetColors()
     {
         return $this->database->Get(TABLE_FILTER_COLOR, 'id,color_name,color_url,color_hex', '', '', 'PLURAL');

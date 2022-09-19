@@ -45,12 +45,14 @@ class Controller
                 } elseif (!empty($_SESSION[SESSION_AUTHENTICATION_NAME])) {
                     $session_authentication_error = true;
                     $session_authentication_from_database = $this->ActionModel->GetSessionAuthentication(array($_SERVER['REMOTE_ADDR'], $_SESSION[SESSION_AUTHENTICATION_NAME]));
-                    if ($session_authentication_from_database['result'] && $session_authentication_from_database['data']['date_session_authentication_expiry'] > date('Y-m-d H:i:s') && $session_authentication_from_database['data']['is_session_authentication_logout'] == 0) {
-                        $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id', $session_authentication_from_database['data']['user_id']);
-                        if ($authenticated_user_from_database['result']) {
-                            $session_authentication_error = false;
-                            $this->web_data['authenticated_user'] = $authenticated_user_from_database['data']['id'];
-                            $this->web_data['session_authentication_id'] = $session_authentication_from_database['data']['id'];
+                    if ($session_authentication_from_database['result']) {
+                        if ($session_authentication_from_database['data']['date_session_authentication_expiry'] > date('Y-m-d H:i:s') && $session_authentication_from_database['data']['is_session_authentication_logout'] == 0) {
+                            $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id', $session_authentication_from_database['data']['user_id']);
+                            if ($authenticated_user_from_database['result']) {
+                                $session_authentication_error = false;
+                                $this->web_data['authenticated_user'] = $authenticated_user_from_database['data']['id'];
+                                $this->web_data['session_authentication_id'] = $session_authentication_from_database['data']['id'];
+                            }
                         }
                         if ($session_authentication_error && $this->ActionModel->UpdateSessionAuthentication(array('is_session_authentication_killed' => 1, 'date_session_authentication_killed' => date('Y-m-d H:i:s'), 'session_authentication_killed_function' => 'Controller __construct', 'id' => $session_authentication_from_database['data']['id']))['result']) {
                             $this->session_control->KillSession(SESSION_AUTHENTICATION_NAME);
@@ -70,14 +72,16 @@ class Controller
                         $extracted_cookie_authentication_token2 = substr($checked_cookie_authentication, 0, 200);
                         if (!empty($extracted_cookie_authentication_token1) && !empty($extracted_cookie_authentication_token2)) {
                             $cookie_authentication_from_database = $this->ActionModel->GetCookieAuthentication(array($_SERVER['REMOTE_ADDR'], $extracted_cookie_authentication_token2));
-                            if ($cookie_authentication_from_database['result'] && $cookie_authentication_from_database['data']['date_cookie_authentication_expiry'] > date('Y-m-d H:i:s') && $cookie_authentication_from_database['data']['is_cookie_authentication_logout'] == 0) {
-                                $cookie_authentication_token1 = hash_hmac('SHA512', $extracted_cookie_authentication_token1, $cookie_authentication_from_database['data']['cookie_authentication_salt'], false);
-                                if (hash_equals($cookie_authentication_from_database['data']['cookie_authentication_token1'], $cookie_authentication_token1)) {
-                                    $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id', $cookie_authentication_from_database['data']['user_id']);
-                                    if ($authenticated_user_from_database['result']) {
-                                        $cookie_authentication_error = false;
-                                        $this->web_data['authenticated_user'] = $authenticated_user_from_database['data']['id'];
-                                        $this->web_data['cookie_authentication_id'] = $cookie_authentication_from_database['data']['id'];
+                            if ($cookie_authentication_from_database['result']) {
+                                if ($cookie_authentication_from_database['data']['date_cookie_authentication_expiry'] > date('Y-m-d H:i:s') && $cookie_authentication_from_database['data']['is_cookie_authentication_logout'] == 0) {
+                                    $cookie_authentication_token1 = hash_hmac('SHA512', $extracted_cookie_authentication_token1, $cookie_authentication_from_database['data']['cookie_authentication_salt'], false);
+                                    if (hash_equals($cookie_authentication_from_database['data']['cookie_authentication_token1'], $cookie_authentication_token1)) {
+                                        $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id', $cookie_authentication_from_database['data']['user_id']);
+                                        if ($authenticated_user_from_database['result']) {
+                                            $cookie_authentication_error = false;
+                                            $this->web_data['authenticated_user'] = $authenticated_user_from_database['data']['id'];
+                                            $this->web_data['cookie_authentication_id'] = $cookie_authentication_from_database['data']['id'];
+                                        }
                                     }
                                 }
                                 if ($cookie_authentication_error && $this->ActionModel->UpdateCookieAuthentication(array('is_cookie_authentication_killed' => 1, 'date_cookie_authentication_killed' => date('Y-m-d H:i:s'), 'cookie_authentication_killed_function' => 'Controller __construct', 'id' => $cookie_authentication_from_database['data']['id']))['result']) {
@@ -104,20 +108,26 @@ class Controller
                         $cart_items = json_decode($decrypted_cookie_cart['data'], true);
                         if (json_last_error() === JSON_ERROR_NONE && !empty($cart_items) && is_array($cart_items) && count($cart_items) > 0) {
                             $cart_items_start_length = count($cart_items);
+                            $this->web_data['order_cart_data'] = array();
                             $this->web_data['cart_data'] = array();
+                            $cart_price = 0;
                             $cart_total_price = 0;
                             foreach ($cart_items as $key => $value) {
                                 $cookie_item_not_matched = true;
                                 if (!empty($cart_items[$key]['item_cart_id']) && !empty($cart_items[$key]['size_cart_id']) && !empty($cart_items[$key]['item_quantity'])) {
                                     $size_in_cart = $this->FilterModel->GetSizeBySizeCartId('size_cart_id,size_name,size_url', $cart_items[$key]['size_cart_id']);
                                     if ($size_in_cart['result']) {
-                                        $item_in_cart = $this->ItemModel->GetItemByItemCartId('item_cart_id,item_name,item_url,item_price,item_discount_price,item_images_path,item_images,' . $size_in_cart['data']['size_url'], $cart_items[$key]['item_cart_id']);
+                                        $item_in_cart = $this->ItemModel->GetItemByItemCartId('id,item_cart_id,item_name,item_url,item_price,item_discount_price,item_images_path,item_images,category,' . $size_in_cart['data']['size_url'], $cart_items[$key]['item_cart_id']);
                                         if ($item_in_cart['result']) {
+                                            $cart_price += $item_in_cart['data']['item_price'] * $cart_items[$key]['item_quantity'];
                                             $cart_total_price += $item_in_cart['data']['item_discount_price'] * $cart_items[$key]['item_quantity'];
                                             $formatted_item = $this->input_control->GetItemMainImageAndFormatedPrice($item_in_cart['data']);
                                             if ($formatted_item['result']) {
                                                 $cookie_item_not_matched = false;
                                                 $this->web_data['cart_data'][] = array('item' => $formatted_item['data'], 'size' => $size_in_cart['data'], 'quantity' => $cart_items[$key]['item_quantity']);
+                                                $item_in_cart['data']['item_price'] = $item_in_cart['data']['item_price'] * $cart_items[$key]['item_quantity'];
+                                                $item_in_cart['data']['item_discount_price'] = $item_in_cart['data']['item_discount_price'] * $cart_items[$key]['item_quantity'];
+                                                $this->web_data['order_cart_data'][] = $item_in_cart['data'];
                                             }
                                         }
                                     }
@@ -127,8 +137,12 @@ class Controller
                                 }
                             }
                             if (!empty($this->web_data['cart_data'])) {
+                                $this->web_data['order_cart_data_price'] = $cart_price;
+                                $this->web_data['order_cart_data_total_price'] = $cart_total_price;
+                                $formatted_cart_price = $this->input_control->FormatPrice($cart_price);
                                 $formatted_cart_total_price = $this->input_control->FormatPrice($cart_total_price);
-                                if ($formatted_cart_total_price['result']) {
+                                if ($formatted_cart_total_price['result'] && $formatted_cart_price['result']) {
+                                    $this->web_data['cart_data_price'] = $formatted_cart_price['data'];
                                     $this->web_data['cart_data_total_price'] = $formatted_cart_total_price['data'];
                                 }
                             }

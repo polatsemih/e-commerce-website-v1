@@ -368,7 +368,7 @@
                 } else if ($.trim(inputPassword.val()).indexOf(' ') >= 0) {
                     inputPassword.focus();
                     setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_NO_WHITE_SPACE_PASSWORD; ?></span></div>');
-                } else if ($.trim(inputPassword.val()).length <= <?php echo PASSWORD_MIN_LIMIT; ?>) {
+                } else if ($.trim(inputPassword.val()).length < <?php echo PASSWORD_MIN_LIMIT; ?>) {
                     inputPassword.focus();
                     setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_MIN_LENGTH_PASSWORD; ?></span></div>');
                 } else if (!/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])/.test(inputPassword.val())) {
@@ -416,7 +416,7 @@
                     passwordMessage.text('<?php echo TR_NOTIFICATION_ERROR_EMPTY_PASSWORD; ?>');
                 } else if ($.trim(inputPassword.val()).indexOf(' ') >= 0) {
                     passwordMessage.text('<?php echo TR_NOTIFICATION_ERROR_NO_WHITE_SPACE_PASSWORD; ?>');
-                } else if ($.trim(inputPassword.val()).length <= <?php echo PASSWORD_MIN_LIMIT; ?>) {
+                } else if ($.trim(inputPassword.val()).length < <?php echo PASSWORD_MIN_LIMIT; ?>) {
                     passwordMessage.text('<?php echo TR_NOTIFICATION_ERROR_MIN_LENGTH_PASSWORD; ?>');
                 } else if (!/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])/.test(inputPassword.val())) {
                     passwordMessage.text('<?php echo TR_NOTIFICATION_ERROR_PATTERN_PASSWORD; ?>');

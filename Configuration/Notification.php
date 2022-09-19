@@ -36,6 +36,7 @@ define('TR_NOTIFICATION_SUCCESS_EMPTY_CART', 'Sepet başarıyla boşaltıldı');
 define('TR_NOTIFICATION_ERROR_UPDATE_CART', 'Sepet güncellenirken bir hata oldu');
 // Profile
 define('URL_PROFILE_INFO_TITLE', 'Profil');
+define('URL_PROFILE_IDENTITY_TITLE', 'Kimlik - Profil');
 define('URL_PROFILE_ADDRESS_TITLE', 'Adres - Profil');
 define('URL_PROFILE_PWD_TITLE', 'Şifre - Profil');
 define('URL_PROFILE_EMAIL_TITLE', 'Email - Profil');
@@ -82,8 +83,6 @@ define('TR_NOTIFICATION_SUCCESS_PROFILE_PASSWORD_UPDATE', 'Şifreniz başarıyla
 define('TR_NOTIFICATION_ERROR_PROFILE_PASSWORD_UPDATE', 'Şifreniz değiştirilirken bir hata oldu. Lütfen daha sonra tekrar deneyin.');
 define('TR_NOTIFICATION_ERROR_EMPTY_USER_NAME', 'İsminizi girin');
 define('TR_NOTIFICATION_ERROR_EMPTY_USER_LAST_NAME', 'Soy isminizi girin');
-define('TR_NOTIFICATION_ERROR_NOT_VALID_USER_NAME', 'İsminiz boşluk karakteri içeremez');
-define('TR_NOTIFICATION_ERROR_NOT_VALID_USER_LAST_NAME', 'Soy isminiz boşluk karakteri içeremez');
 define('TR_NOTIFICATION_ERROR_MAX_LIMIT_USER_NAME', 'İsminiz karakter sınırını geçmemelidir');
 define('TR_NOTIFICATION_ERROR_MAX_LIMIT_USER_LAST_NAME', 'Soy isminiz karakter sınırını geçmemelidir');
 define('TR_NOTIFICATION_SUCCESS_PROFILE_USER_NAME_UPDATE', 'İsminiz başarıyla güncellendi');
@@ -128,3 +127,18 @@ define('TR_NOTIFICATION_ERROR_COMMENT_USER_EMPTY_NAME', 'Yorum eklemeden önce p
 define('TR_NOTIFICATION_SUCCESS_PROFILE_2FA_DEACTIVE', '2 aşamalı doğrulama devre dışı bırakıldı');
 define('TR_NOTIFICATION_SUCCESS_PROFILE_2FA_ACTIVE', '2 aşamalı doğrulama aktif edildi');
 define('TR_NOTIFICATION_ERROR_ORDER_USER_BLOCKED', BRAND . ' hesabınız bloklandığı için alışveriş yapamazsınız.');
+define('TR_NOTIFICATION_ERROR_EMPTY_IDENTITY_NUMBER', 'Kimlik numaranızı girin');
+define('TR_NOTIFICATION_ERROR_NOT_VALID_IDENTITY_NUMBER', 'Girdiğiniz kimlik numarası geçerli değil');
+define('TR_NOTIFICATION_ERROR_NEW_IDENTITY_NUMBER', 'Güncellemek istediğiniz kimlik numarasını girin');
+define('TR_NOTIFICATION_SUCCESS_PROFILE_IDENTITY_NUMBER_UPDATE', 'Kimlik numaranız başarıyla güncellendi');
+define('TR_NOTIFICATION_ERROR_EMPTY_CART_NAME', 'Kartınızın üzerindeki ismi girin');
+define('TR_NOTIFICATION_ERROR_NOT_VALID_CART_NAME', 'Kartınızın üzerindeki ismi eksiksiz girmelisiniz');
+define('TR_NOTIFICATION_ERROR_EMPTY_CART_NUMBER', 'Kartınızın numarasını girin');
+define('TR_NOTIFICATION_ERROR_NOT_VALID_CART_NUMBER', 'Kartınızın numarasını yanlış girdiniz');
+define('TR_NOTIFICATION_ERROR_EMPTY_CART_EXPIRY_MONTH', 'Kartınızın son kullanma tarihinin ayını girin');
+define('TR_NOTIFICATION_ERROR_NOT_VALID_CART_EXPIRY_MONTH', 'Kartınızın son kullanma tarihinin ayını yanlış girdiniz');
+define('TR_NOTIFICATION_ERROR_EMPTY_CART_EXPIRY_YEAR', 'Kartınızın son kullanma tarihinin yılını girin');
+define('TR_NOTIFICATION_ERROR_NOT_VALID_CART_EXPIRY_YEAR', 'Kartınızın son kullanma tarihinin yılını yanlış girdiniz');
+define('TR_NOTIFICATION_ERROR_EMPTY_CART_CVC', 'Kartınızın güvenlik kodunu girin');
+define('TR_NOTIFICATION_ERROR_NOT_VALID_CART_CVC', 'Kartınızın güvenlik kodunu yanlış girdiniz');
+define('TR_NOTIFICATION_ERROR_EMPTY_ORDER_TERMS', 'Siparişi onaylamadan önce, sözleşmeyi okumalı ve kabul etmelisiniz');

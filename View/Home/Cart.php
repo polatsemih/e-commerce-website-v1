@@ -64,6 +64,14 @@
                                     <span class="text">Seçilen Ürün Adedi: <?php echo count($web_data['cart_data']); ?></span>
                                 </div>
                                 <div class="price-infos">
+                                    <span class="text">Ücret</span>
+                                    <span class="text old-price"><?php echo $web_data['cart_data_price']; ?> ₺</span>
+                                </div>
+                                <div class="price-infos">
+                                    <span class="text">İndirimli Ücret</span>
+                                    <span class="text"><?php echo $web_data['cart_data_total_price']; ?> ₺</span>
+                                </div>
+                                <div class="price-infos">
                                     <span class="text">Kargo Ücreti</span>
                                     <span class="text">0 ₺</span>
                                 </div>
