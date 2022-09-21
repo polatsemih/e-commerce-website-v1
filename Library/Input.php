@@ -38,6 +38,13 @@ class Input
         }
         return null;
     }
+    function IsNumeric($input)
+    {
+        if (is_numeric($input)) {
+            return $input;
+        }
+        return null;
+    }
     function IsIntegerAndPositive($input)
     {
         if (is_numeric($input)) {
@@ -107,6 +114,13 @@ class Input
         }
         return null;
     }
+    function HasWhiteSpace($input)
+    {
+        if (str_contains($input, ' ')) {
+            return $input;
+        }
+        return null;
+    }
     function PreventXSSForId($input)
     {
         return htmlentities($input, ENT_QUOTES, 'UTF-8');
@@ -114,6 +128,9 @@ class Input
     function PreventXSS($input)
     {
         return htmlentities($input, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
+    function SlashAndXSS($input) {
+        return htmlentities(stripslashes($input), ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
     function DecodePreventXSS($input)
     {
@@ -164,6 +181,13 @@ class Input
                         return $error;
                     }
                 }
+                if (!empty($posted_input['has_white_space'])) {
+                    $input = $this->HasWhiteSpace($input);
+                    if (is_null($input)) {
+                        $error['error_message'] = $posted_input['error_message_has_white_space'];
+                        return $error;
+                    }
+                }
                 if (!empty($posted_input['is_email'])) {
                     $input = $this->IsEmail($input);
                     if (is_null($input)) {
@@ -201,6 +225,13 @@ class Input
                 if (!empty($posted_input['length_limit'])) {
                     if (strlen($input) > $posted_input['length_limit']) {
                         $error['error_message'] = $posted_input['error_message_length_limit'];
+                        return $error;
+                    }
+                }
+                if (!empty($posted_input['is_numeric'])) {
+                    $input = $this->IsNumeric($input);
+                    if (is_null($input)) {
+                        $error['error_message'] = $posted_input['error_message_is_numeric'];
                         return $error;
                     }
                 }

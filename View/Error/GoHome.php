@@ -38,14 +38,6 @@
             margin-bottom: 30px;
         }
 
-        span {
-            font-size: 20px;
-            line-height: 1.4;
-            color: #ca0101;
-            margin-bottom: 5px;
-            text-align: center;
-        }
-
         a {
             font-size: 20px;
             color: #ffffff;
@@ -72,9 +64,7 @@
     <main>
         <div>
             <h1>Blanck Basic</h1>
-            <span>Beklenmedik bir sorundan dolayı işleminizi gerçekleştiremiyoruz.</span>
-            <span>Lütfen daha sonra tekrar deneyin.</span>
-            <a href="https://blanckbasic.com">Ana Sayfaya Geri Dön</a>
+            <a href="https://blanckbasic.com">Ana Sayfaya Dön</a>
         </div>
     </main>
 </body>

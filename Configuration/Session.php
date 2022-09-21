@@ -3,7 +3,7 @@ define('SESSION_NAME', 'BB_SESS');
 define('SESSION_LIFETIME', 0);
 define('SESSION_PATH', '/');
 define('SESSION_DOMAIN', '.blanckbasic.com');
-define('SESSION_SECURE', false); // change => true
+define('SESSION_SECURE', true);
 define('SESSION_HTTP_ONLY', true);
 define('SESSION_SAMESITE', 'Strict');
 define('SESSION_OBSOLETE_NAME', 'BB_SESS_OBS');

@@ -5,6 +5,10 @@ class ErrorController extends Controller
     {
         parent::__construct();
     }
+    function GoHome()
+    {
+        parent::GetView('Error/GoHome');
+    }
     function Exception()
     {
         parent::GetView('Error/Exception');

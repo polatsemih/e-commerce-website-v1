@@ -9,6 +9,7 @@ require_once 'Configuration/Limit.php';
 require_once 'Configuration/Notification.php';
 require_once 'Configuration/Expiry.php';
 require_once 'Library/Controller.php';
+require_once 'Library/ControllerOrder.php';
 require_once 'Library/Cookie.php';
 require_once 'Library/Database.php';
 require_once 'Library/Input.php';

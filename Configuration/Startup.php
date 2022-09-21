@@ -1,5 +1,6 @@
 <?php
 // ErrorController
+define('URL_GO_HOME', 'anasayfaya-don');
 define('URL_EXCEPTION', 'sorun');
 define('URL_SHUTDOWN', 'hata');
 // HomeController
@@ -67,6 +68,7 @@ define('URL_ADMIN_INDEX', 'yonetici');
 
 define('URL_MAPS', array(
     // ErrorController
+    array('url' => 'anasayfaya-don', 'controller' => 'ErrorController', 'action' => 'GoHome'),
     array('url' => 'sorun', 'controller' => 'ErrorController', 'action' => 'Exception'),
     array('url' => 'hata', 'controller' => 'ErrorController', 'action' => 'ShutDown'),
     // HomeController
@@ -95,7 +97,7 @@ define('URL_MAPS', array(
     array('url' => 'hesabimi-sil', 'controller' => 'HomeController', 'action' => 'ProfileDelete'),
     array('url' => 'adres-sec', 'controller' => 'HomeController', 'action' => 'OrderAddressPost'),
     array('url' => 'siparis-ver', 'controller' => 'HomeController', 'action' => 'OrderCredit'),
-    array('url' => 'siparis-sonuc', 'controller' => 'HomeController', 'action' => 'OrderComplete'),
+    array('url' => 'siparis-sonuc', 'controller' => 'OrderController', 'action' => 'OrderComplete'),
     // ActionController
     array('url' => 'giris', 'controller' => 'ActionController', 'action' => 'Login'),
     array('url' => 'iki-asamali-dogrulama', 'controller' => 'ActionController', 'action' => 'TwoFA'),

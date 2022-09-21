@@ -17,6 +17,12 @@ class Controller
                 $this->GetModel('ItemModel');
                 $this->GetModel('LogModel');
                 $this->GetModel('UserModel');
+                $check_cookie_cart = true;
+                if (!empty($_COOKIE[COOKIE_AUTHENTICATION_CROSS_SITE_NAME]) && !empty($_COOKIE[COOKIE_CART_NAME])) {
+                    $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_CROSS_SITE_NAME);
+                    $this->cookie_control->EmptyCookie(COOKIE_CART_NAME);
+                    $check_cookie_cart = false;
+                }
                 if (!empty($_SESSION[SESSION_OBSOLETE_NAME]) && $_SESSION[SESSION_OBSOLETE_NAME] < time()) {
                     if ($this->session_control->KillAllSessions() && session_regenerate_id()) {
                         $_SESSION[SESSION_REFRESH_NAME] = time() + (60 * 15);
@@ -66,28 +72,31 @@ class Controller
                     }
                 } elseif (!empty($_COOKIE[COOKIE_AUTHENTICATION_NAME])) {
                     $cookie_authentication_error = true;
-                    $checked_cookie_authentication = $this->input_control->CheckGETInputWithLength($_COOKIE[COOKIE_AUTHENTICATION_NAME], 400);
-                    if (!empty($checked_cookie_authentication)) {
-                        $extracted_cookie_authentication_token1 = substr($checked_cookie_authentication, 200, 200);
-                        $extracted_cookie_authentication_token2 = substr($checked_cookie_authentication, 0, 200);
-                        if (!empty($extracted_cookie_authentication_token1) && !empty($extracted_cookie_authentication_token2)) {
-                            $cookie_authentication_from_database = $this->ActionModel->GetCookieAuthentication(array($_SERVER['REMOTE_ADDR'], $extracted_cookie_authentication_token2));
-                            if ($cookie_authentication_from_database['result']) {
-                                if ($cookie_authentication_from_database['data']['date_cookie_authentication_expiry'] > date('Y-m-d H:i:s') && $cookie_authentication_from_database['data']['is_cookie_authentication_logout'] == 0) {
-                                    $cookie_authentication_token1 = hash_hmac('SHA512', $extracted_cookie_authentication_token1, $cookie_authentication_from_database['data']['cookie_authentication_salt'], false);
-                                    if (hash_equals($cookie_authentication_from_database['data']['cookie_authentication_token1'], $cookie_authentication_token1)) {
-                                        $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id', $cookie_authentication_from_database['data']['user_id']);
-                                        if ($authenticated_user_from_database['result']) {
-                                            $cookie_authentication_error = false;
-                                            $this->web_data['authenticated_user'] = $authenticated_user_from_database['data']['id'];
-                                            $this->web_data['cookie_authentication_id'] = $cookie_authentication_from_database['data']['id'];
+                    $cookie_auth = $this->cookie_control->GetCookie(COOKIE_AUTHENTICATION_NAME);
+                    if ($cookie_auth['result']) {
+                        $checked_cookie_authentication = $this->input_control->CheckGETInputWithLength($cookie_auth['data'], 400);
+                        if (!empty($checked_cookie_authentication)) {
+                            $extracted_cookie_authentication_token1 = substr($checked_cookie_authentication, 200, 200);
+                            $extracted_cookie_authentication_token2 = substr($checked_cookie_authentication, 0, 200);
+                            if (!empty($extracted_cookie_authentication_token1) && !empty($extracted_cookie_authentication_token2)) {
+                                $cookie_authentication_from_database = $this->ActionModel->GetCookieAuthentication(array($_SERVER['REMOTE_ADDR'], $extracted_cookie_authentication_token2));
+                                if ($cookie_authentication_from_database['result']) {
+                                    if ($cookie_authentication_from_database['data']['date_cookie_authentication_expiry'] > date('Y-m-d H:i:s') && $cookie_authentication_from_database['data']['is_cookie_authentication_logout'] == 0) {
+                                        $cookie_authentication_token1 = hash_hmac('SHA512', $extracted_cookie_authentication_token1, $cookie_authentication_from_database['data']['cookie_authentication_salt'], false);
+                                        if (hash_equals($cookie_authentication_from_database['data']['cookie_authentication_token1'], $cookie_authentication_token1)) {
+                                            $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id', $cookie_authentication_from_database['data']['user_id']);
+                                            if ($authenticated_user_from_database['result']) {
+                                                $cookie_authentication_error = false;
+                                                $this->web_data['authenticated_user'] = $authenticated_user_from_database['data']['id'];
+                                                $this->web_data['cookie_authentication_id'] = $cookie_authentication_from_database['data']['id'];
+                                            }
                                         }
                                     }
-                                }
-                                if ($cookie_authentication_error && $this->ActionModel->UpdateCookieAuthentication(array('is_cookie_authentication_killed' => 1, 'date_cookie_authentication_killed' => date('Y-m-d H:i:s'), 'cookie_authentication_killed_function' => 'Controller __construct', 'id' => $cookie_authentication_from_database['data']['id']))['result']) {
-                                    $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME);
-                                    $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_SUCCESS_AUTHENTICATION_KILLED);
-                                    $this->input_control->Redirect(URL_LOGIN);
+                                    if ($cookie_authentication_error && $this->ActionModel->UpdateCookieAuthentication(array('is_cookie_authentication_killed' => 1, 'date_cookie_authentication_killed' => date('Y-m-d H:i:s'), 'cookie_authentication_killed_function' => 'Controller __construct', 'id' => $cookie_authentication_from_database['data']['id']))['result']) {
+                                        $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME);
+                                        $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_SUCCESS_AUTHENTICATION_KILLED);
+                                        $this->input_control->Redirect(URL_LOGIN);
+                                    }
                                 }
                             }
                         }
@@ -101,70 +110,74 @@ class Controller
                 if ($popular_search_items['result']) {
                     $this->web_data['popular_search_items'] = $popular_search_items['data'];
                 }
-                $cookie_cart = $this->cookie_control->GetCookie(COOKIE_CART_NAME);
-                if ($cookie_cart['result']) {
-                    $decrypted_cookie_cart = $this->input_control->DecrypteData($cookie_cart['data'], COOKIE_CART_PEPPER);
-                    if ($decrypted_cookie_cart['result']) {
-                        $cart_items = json_decode($decrypted_cookie_cart['data'], true);
-                        if (json_last_error() === JSON_ERROR_NONE && !empty($cart_items) && is_array($cart_items) && count($cart_items) > 0) {
-                            $cart_items_start_length = count($cart_items);
-                            $this->web_data['order_cart_data'] = array();
-                            $this->web_data['cart_data'] = array();
-                            $cart_price = 0;
-                            $cart_total_price = 0;
-                            foreach ($cart_items as $key => $value) {
-                                $cookie_item_not_matched = true;
-                                if (!empty($cart_items[$key]['item_cart_id']) && !empty($cart_items[$key]['size_cart_id']) && !empty($cart_items[$key]['item_quantity'])) {
-                                    $size_in_cart = $this->FilterModel->GetSizeBySizeCartId('size_cart_id,size_name,size_url', $cart_items[$key]['size_cart_id']);
-                                    if ($size_in_cart['result']) {
-                                        $item_in_cart = $this->ItemModel->GetItemByItemCartId('id,item_cart_id,item_name,item_url,item_price,item_discount_price,item_images_path,item_images,category,' . $size_in_cart['data']['size_url'], $cart_items[$key]['item_cart_id']);
-                                        if ($item_in_cart['result']) {
-                                            $cart_price += $item_in_cart['data']['item_price'] * $cart_items[$key]['item_quantity'];
-                                            $cart_total_price += $item_in_cart['data']['item_discount_price'] * $cart_items[$key]['item_quantity'];
-                                            $formatted_item = $this->input_control->GetItemMainImageAndFormatedPrice($item_in_cart['data']);
-                                            if ($formatted_item['result']) {
-                                                $cookie_item_not_matched = false;
-                                                $this->web_data['cart_data'][] = array('item' => $formatted_item['data'], 'size' => $size_in_cart['data'], 'quantity' => $cart_items[$key]['item_quantity']);
-                                                $item_in_cart['data']['item_price'] = $item_in_cart['data']['item_price'] * $cart_items[$key]['item_quantity'];
-                                                $item_in_cart['data']['item_discount_price'] = $item_in_cart['data']['item_discount_price'] * $cart_items[$key]['item_quantity'];
-                                                $this->web_data['order_cart_data'][] = $item_in_cart['data'];
+                if ($check_cookie_cart) {
+                    $cookie_cart = $this->cookie_control->GetCookie(COOKIE_CART_NAME);
+                    if ($cookie_cart['result']) {
+                        $decrypted_cookie_cart = $this->input_control->DecrypteData($cookie_cart['data'], COOKIE_CART_PEPPER);
+                        if ($decrypted_cookie_cart['result']) {
+                            $cart_items = json_decode($decrypted_cookie_cart['data'], true);
+                            if (json_last_error() === JSON_ERROR_NONE && !empty($cart_items) && is_array($cart_items) && count($cart_items) > 0) {
+                                $cart_items_start_length = count($cart_items);
+                                $order_cart_data = array();
+                                $cart_data = array();
+                                $cart_price = 0;
+                                $cart_total_price = 0;
+                                foreach ($cart_items as $key => $value) {
+                                    $cookie_item_not_matched = true;
+                                    if (!empty($cart_items[$key]['item_cart_id']) && !empty($cart_items[$key]['size_cart_id']) && !empty($cart_items[$key]['item_quantity']) && is_numeric($cart_items[$key]['item_quantity']) && $cart_items[$key]['item_quantity'] > 0) {
+                                        $size_in_cart = $this->FilterModel->GetSizeBySizeCartId('size_cart_id,size_name,size_url', $cart_items[$key]['size_cart_id']);
+                                        if ($size_in_cart['result']) {
+                                            $item_in_cart = $this->ItemModel->GetItemByItemCartId('id,item_cart_id,item_name,item_url,item_price,item_discount_price,item_images_path,item_images,category,' . $size_in_cart['data']['size_url'], $cart_items[$key]['item_cart_id']);
+                                            if ($item_in_cart['result']) {
+                                                $cart_price += $item_in_cart['data']['item_price'] * $cart_items[$key]['item_quantity'];
+                                                $cart_total_price += $item_in_cart['data']['item_discount_price'] * $cart_items[$key]['item_quantity'];
+                                                $formatted_item = $this->input_control->GetItemMainImageAndFormatedPrice($item_in_cart['data']);
+                                                if ($formatted_item['result']) {
+                                                    $cookie_item_not_matched = false;
+                                                    $cart_data[] = array('item' => $formatted_item['data'], 'size' => $size_in_cart['data'], 'quantity' => $cart_items[$key]['item_quantity']);
+                                                    $item_in_cart['data']['item_price'] = $item_in_cart['data']['item_price'] * $cart_items[$key]['item_quantity'];
+                                                    $item_in_cart['data']['item_discount_price'] = $item_in_cart['data']['item_discount_price'] * $cart_items[$key]['item_quantity'];
+                                                    $order_cart_data[] = array('item' => $item_in_cart['data'], 'size' => $size_in_cart['data']['size_name'], 'quantity' => $cart_items[$key]['item_quantity']);
+                                                }
                                             }
                                         }
                                     }
+                                    if ($cookie_item_not_matched) {
+                                        unset($cart_items[$key]);
+                                    }
                                 }
-                                if ($cookie_item_not_matched) {
-                                    unset($cart_items[$key]);
+                                if (!empty($cart_data) && !empty($order_cart_data) && !empty($cart_price) && !empty($cart_total_price)) {
+                                    $this->web_data['cart_data'] = $cart_data;
+                                    $this->web_data['order_cart_data'] = $order_cart_data;
+                                    $this->web_data['order_cart_data_price'] = $cart_price;
+                                    $this->web_data['order_cart_data_total_price'] = $cart_total_price;
+                                    $formatted_cart_price = $this->input_control->FormatPrice($cart_price);
+                                    $formatted_cart_total_price = $this->input_control->FormatPrice($cart_total_price);
+                                    if ($formatted_cart_total_price['result'] && $formatted_cart_price['result']) {
+                                        $this->web_data['cart_data_price'] = $formatted_cart_price['data'];
+                                        $this->web_data['cart_data_total_price'] = $formatted_cart_total_price['data'];
+                                    }
                                 }
-                            }
-                            if (!empty($this->web_data['cart_data'])) {
-                                $this->web_data['order_cart_data_price'] = $cart_price;
-                                $this->web_data['order_cart_data_total_price'] = $cart_total_price;
-                                $formatted_cart_price = $this->input_control->FormatPrice($cart_price);
-                                $formatted_cart_total_price = $this->input_control->FormatPrice($cart_total_price);
-                                if ($formatted_cart_total_price['result'] && $formatted_cart_price['result']) {
-                                    $this->web_data['cart_data_price'] = $formatted_cart_price['data'];
-                                    $this->web_data['cart_data_total_price'] = $formatted_cart_total_price['data'];
-                                }
-                            }
-                            if (!empty($cart_items)) {
-                                $this->web_data['cookie_cart'] = $cart_items;
-                                if (count($cart_items) != $cart_items_start_length) {
-                                    $update_cookie_cart_error = true;
-                                    $encoded_cart_items = json_encode($cart_items);
-                                    if (!empty($encoded_cart_items)) {
-                                        $setted_cart_cookie = $this->input_control->EncrypteData($encoded_cart_items, COOKIE_CART_PEPPER);
-                                        if (strlen($setted_cart_cookie) <= 4000) {
-                                            if ($this->cookie_control->SetCookie(COOKIE_CART_NAME, $setted_cart_cookie, time() + (COOKIE_CART_EXPIRY), COOKIE_PATH, COOKIE_DOMAIN, COOKIE_SECURE, COOKIE_HTTP_ONLY, COOKIE_SAMESITE)) {
-                                                $update_cookie_cart_error = false;
+                                if (!empty($cart_items)) {
+                                    $this->web_data['cookie_cart'] = $cart_items;
+                                    if (count($cart_items) != $cart_items_start_length) {
+                                        $update_cookie_cart_error = true;
+                                        $encoded_cart_items = json_encode($cart_items);
+                                        if (!empty($encoded_cart_items)) {
+                                            $setted_cart_cookie = $this->input_control->EncrypteData($encoded_cart_items, COOKIE_CART_PEPPER);
+                                            if (strlen($setted_cart_cookie) <= 4000) {
+                                                if ($this->cookie_control->SetCookie(COOKIE_CART_NAME, $setted_cart_cookie, time() + (COOKIE_CART_EXPIRY), COOKIE_PATH, COOKIE_DOMAIN, COOKIE_SECURE, COOKIE_HTTP_ONLY, COOKIE_SAMESITE)) {
+                                                    $update_cookie_cart_error = false;
+                                                }
                                             }
                                         }
+                                        if ($update_cookie_cart_error) {
+                                            $this->cookie_control->EmptyCookie(COOKIE_CART_NAME);
+                                        }
                                     }
-                                    if ($update_cookie_cart_error) {
-                                        $this->cookie_control->EmptyCookie(COOKIE_CART_NAME);
-                                    }
+                                } else {
+                                    $this->cookie_control->EmptyCookie(COOKIE_CART_NAME);
                                 }
-                            } else {
-                                $this->cookie_control->EmptyCookie(COOKIE_CART_NAME);
                             }
                         }
                     }

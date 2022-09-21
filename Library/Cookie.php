@@ -11,9 +11,9 @@ class Cookie
         }
         return array('result' => false);
     }
-    function SetCookie(string $cookie_name, string $cookie, int $expires)
+    function SetCookie(string $cookie_name, string $cookie, int $expires, string $path, string $domain, bool $secure, bool $httponly, string $samesite)
     {
-        return setcookie($cookie_name, $cookie, array('expires' => $expires, 'path' => COOKIE_PATH, 'domain' => COOKIE_DOMAIN, 'secure' => COOKIE_SECURE, 'httponly' => COOKIE_HTTP_ONLY, 'samesite' => COOKIE_SAMESITE));
+        return setcookie($cookie_name, $cookie, array('expires' => $expires, 'path' => $path, 'domain' => $domain, 'secure' => $secure, 'httponly' => $httponly, 'samesite' => $samesite));
     }
     function EmptyCookie(string $cookie_name)
     {

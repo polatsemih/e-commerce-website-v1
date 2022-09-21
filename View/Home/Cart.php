@@ -58,7 +58,7 @@
                         </div>
                     </div>
                     <div class="col-cart-price">
-                        <?php if (!empty($web_data['cart_data_total_price']) && WEB_SHOPPING_PERMISSION) : ?>
+                        <?php if (WEB_SHOPPING_PERMISSION && !empty($web_data['cart_data_price']) && !empty($web_data['cart_data_total_price'])) : ?>
                             <div class="vertical">
                                 <div class="selected-item">
                                     <span class="text">Seçilen Ürün Adedi: <?php echo count($web_data['cart_data']); ?></span>

@@ -25,7 +25,7 @@
                     <a href="<?php echo BRAND_INSTAGRAM; ?>"><i class="fab fa-twitter social-link"></i></a>
                 </div>
                 <div class="footer-box">
-                    <svg viewBox="0 0 429 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <svg viewBox="0 0 429 32" version="1.1" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink">
                         <title>logo-band</title>
                         <defs>
                             <radialGradient cx="17.5632448%" cy="17.5027381%" fx="17.5632448%" fy="17.5027381%" r="134.355667%" gradientTransform="translate(0.175632,0.175027),scale(0.694444,1.000000),translate(-0.175632,-0.175027)" id="radialGradient-1">

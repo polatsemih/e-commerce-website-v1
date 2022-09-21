@@ -4,8 +4,8 @@ define('WEB_PREPARE_PHASE', false);
 define('WEB_MAINTENANCE_PHASE', false);
 define('WEB_SHOPPING_PERMISSION', true);
 define('BRAND', 'Blanck Basic');
-define('PURE_URL', 'http://blanckbasic.com'); // change => https://blanckbasic.com
-define('URL', 'http://blanckbasic.com/'); // change => https://blanckbasic.com/
+define('PURE_URL', 'https://blanckbasic.com');
+define('URL', 'https://blanckbasic.com/');
 define('META_TAG_AUTHOR', 'Semih Polat');
 
 

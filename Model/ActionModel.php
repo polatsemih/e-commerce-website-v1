@@ -125,4 +125,16 @@ class ActionModel extends Model
     {
         return $this->database->Update(TABLE_COOKIE_AUTHENTICATION, $inputs);
     }
+    function CreateCookieAuthenticationCrossSite(array $inputs)
+    {
+        return $this->database->Create(TABLE_COOKIE_AUTHENTICATION_CROSS_SITE, $inputs);
+    }
+    function GetCookieAuthenticationCrossSite(array $inputs)
+    {
+        return $this->database->Get(TABLE_COOKIE_AUTHENTICATION_CROSS_SITE, 'id,user_id,cookie_authentication_cross_site_token1,cookie_authentication_cross_site_salt,date_cookie_authentication_cross_site_expiry,is_cookie_authentication_cross_site_used', 'WHERE user_ip=? AND cookie_authentication_cross_site_token2=? ORDER BY date_cookie_authentication_cross_site_created DESC LIMIT 1', $inputs, 'SINGULAR');
+    }
+    function UpdateCookieAuthenticationCrossSite(array $inputs)
+    {
+        return $this->database->Update(TABLE_COOKIE_AUTHENTICATION_CROSS_SITE, $inputs);
+    }
 }

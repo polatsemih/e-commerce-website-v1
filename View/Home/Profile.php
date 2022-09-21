@@ -65,7 +65,7 @@
                                         <?php if (!empty($web_data['form_token'])) : ?>
                                             <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
                                         <?php endif; ?>
-                                        <input class="mfa-checkbox" id="mfa-id" type="checkbox" name="mfa"<?php echo $web_data['authenticated_user']['two_fa_enable'] == 0 ? '' : ' checked'; ?>>
+                                        <input class="mfa-checkbox" id="mfa-id" type="checkbox" name="mfa" <?php echo $web_data['authenticated_user']['two_fa_enable'] == 0 ? '' : ' checked'; ?>>
                                         <div class="mfa-bg">
                                             <?php if ($web_data['authenticated_user']['two_fa_enable'] == 0) : ?>
                                                 <span class="mfa-inner-text">Kapalı</span>
@@ -370,6 +370,100 @@
                         </form>
                     <?php elseif ($web_data['profile_type'] == URL_PROFILE_ORDERS) : ?>
                         <h1 class="title">Siparişlerim</h1>
+                        <?php if (!empty($web_data['orders'])) : ?>
+                            <div class="order-wrapper">
+                                <div class="order-container">
+                                    <span class="box-header box-m">Alıcının İsmi</span>
+                                    <span class="box-header box-l">Alıcının Adresi</span>
+                                    <span class="box-header box-s">Ödenen Ücret</span>
+                                    <span class="box-header box-s" title="Sipariş Durumu">Durum</span>
+                                    <span class="box-header">Detaylar</span>
+                                </div>
+                                <?php $i = 0; ?>
+                                <?php foreach ($web_data['orders'] as $key => $order) : ?>
+                                    <?php $i++; ?>
+                                    <div class="order-container">
+                                        <span class="box box-m"><?php echo $order['order_informations']['shipping_contact_name']; ?></span>
+                                        <span class="box box-l"><?php echo $order['order_informations']['shipping_address'] . ' ' . $order['order_informations']['shipping_city'] . '/' . $order['order_informations']['shipping_country'] . ' ZIP: ' . $order['order_informations']['shipping_zip_code']; ?></span>
+                                        <span class="box box-s"><?php echo $order['order_informations']['paid_price']; ?> ₺</span>
+                                        <?php if ($order['order_informations']['status'] == 0) : ?>
+                                            <span class="box box-s">İptal Edildi</span>
+                                        <?php elseif ($order['order_informations']['status'] == 1) : ?>
+                                            <span class="box box-s">Onay Bekliyor...</span>
+                                        <?php elseif ($order['order_informations']['status'] == 2) : ?>
+                                            <span class="box box-s">Onaylandı. Kargoya Verilecek...</span>
+                                        <?php elseif ($order['order_informations']['status'] == 3) : ?>
+                                            <span class="box box-s">Kargoda</span>
+                                        <?php elseif ($order['order_informations']['status'] == 4) : ?>
+                                            <span class="box box-s">Teslim Edildi</span>
+                                        <?php endif; ?>
+                                        <span class="box-details extend-order-details-<?php echo $i; ?>"><i class="fas fa-chevron-right"></i></span>
+                                    </div>
+                                    <div id="popup-wrapper" class="order-details-popup-wrapper-<?php echo $i; ?> disable">
+                                        <div class="popup-order-container">
+                                            <div id="order-details-popup-wrapper-exit-<?php echo $i; ?>" class="popup-exit">
+                                                <div class="exit">
+                                                    <i class="fas fa-times"></i>
+                                                </div>
+                                            </div>
+                                            <div class="order-title-row">
+                                                <div class="left">
+                                                    <h4 class="title">Sipariş Detayları</h4>
+                                                </div>
+                                                <div class="right">
+                                                    <span class="order-date" title="Sipariş Verilme Tarihi"><?php echo $order['order_informations']['order_created']; ?></span>
+                                                </div>
+                                            </div>
+                                            <div class="order-basket-wrapper">
+                                                <div class="order-container">
+                                                    <span class="box-header box-l">İsim</span>
+                                                    <span class="box-header box-xs">Kategori</span>
+                                                    <span class="box-header box-s">Beden</span>
+                                                    <span class="box-header box-xs">Adet</span>
+                                                    <span class="box-header box-xs" title="Adet Sayısı Dahil Edilmiş Ürünün Toplam Ücreti">Ücret</span>
+                                                </div>
+                                                <?php foreach ($order['order_basket'] as $order_basket) : ?>
+                                                    <div class="order-container">
+                                                        <span class="box box-l"><?php echo $order_basket['item_name']; ?></span>
+                                                        <span class="box box-xs"><?php echo $order_basket['item_category']; ?></span>
+                                                        <span class="box box-s"><?php echo $order_basket['item_size_name']; ?></span>
+                                                        <span class="box box-xs">x<?php echo $order_basket['item_quantity']; ?></span>
+                                                        <span class="box box-xs"><?php echo $order_basket['item_discount_price']; ?>₺</span>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                                <div class="order-container mt">
+                                                    <span class="box-header box-m">Alıcının İsmi</span>
+                                                    <span class="box-header box-l">Alıcının Adresi</span>
+                                                    <span class="box-header box-xs-2">Ödenen Toplam Ücret</span>
+                                                    <span class="box-header box-xs-2" title="Sipariş Durumu">Durum</span>
+                                                </div>
+                                                <div class="order-container">
+                                                    <span class="box box-m"><?php echo $order['order_informations']['shipping_contact_name']; ?></span>
+                                                    <span class="box box-l"><?php echo $order['order_informations']['shipping_address'] . ' ' . $order['order_informations']['shipping_city'] . '/' . $order['order_informations']['shipping_country'] . ' ZIP: ' . $order['order_informations']['shipping_zip_code']; ?></span>
+                                                    <span class="box box-xs-2"><?php echo $order['order_informations']['paid_price']; ?> ₺</span>
+                                                    <?php if ($order['order_informations']['status'] == 0) : ?>
+                                                        <span class="box box-xs-2">İptal Edildi</span>
+                                                    <?php elseif ($order['order_informations']['status'] == 1) : ?>
+                                                        <span class="box box-xs-2">Onay Bekliyor...</span>
+                                                    <?php elseif ($order['order_informations']['status'] == 2) : ?>
+                                                        <span class="box box-xs-2">Onaylandı. Kargoya Verilecek...</span>
+                                                    <?php elseif ($order['order_informations']['status'] == 3) : ?>
+                                                        <span class="box box-xs-2">Kargoda</span>
+                                                    <?php elseif ($order['order_informations']['status'] == 4) : ?>
+                                                        <span class="box box-xs-2">Teslim Edildi</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div class="basket-bot">
+                                                        iade iptal
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else : ?>
+                            <span class="not-found-order">Verilmiş siparişiniz yok</span>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>
@@ -502,6 +596,32 @@
                     }
                 }
             };
+        </script>
+    <?php endif; ?>
+    <?php if ($web_data['profile_type'] == URL_PROFILE_ORDERS && !empty($i)) : ?>
+        <script>
+            var j = <?php echo $i; ?>;
+            for (let index = 1; index < j + 1; index++) {
+                const orderDetailsPopup = document.querySelector('.order-details-popup-wrapper-' + index);
+                document.querySelector('.extend-order-details-' + index).addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (orderDetailsPopup.classList.contains('disable')) {
+                        orderDetailsPopup.classList.remove('disable');
+                    }
+                    if (!bodyElement.classList.contains('noscroll')) {
+                        bodyElement.classList.add('noscroll');
+                    }
+                });
+                document.getElementById('order-details-popup-wrapper-exit-' + index).addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (!orderDetailsPopup.classList.contains('disable')) {
+                        orderDetailsPopup.classList.add('disable');
+                    }
+                    if (bodyElement.classList.contains('noscroll')) {
+                        bodyElement.classList.remove('noscroll');
+                    }
+                });
+            }
         </script>
     <?php endif; ?>
     <script>
