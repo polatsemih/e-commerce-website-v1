@@ -4153,8 +4153,12 @@ a {
     justify-content: space-between;
 }
 
-.profile-section .order-wrapper .order-container.mt {
-    margin-top: 3rem;
+.profile-section .order-wrapper .hr-line {
+    width: 100%;
+    height: 1px;
+    background-color: var(--color-secondary-theme);
+    margin-top: 2rem;
+    margin-bottom: 2rem;
 }
 
 .profile-section .order-wrapper .order-container .box-header {
@@ -4173,8 +4177,8 @@ a {
     padding-left: 0.5rem;
     border-width: 1px;
     border-style: solid;
-    border-color: #e7e7e7;
-    font-size: 1.3rem;
+    border-color: #dcdcdc;
+    font-size: 0.5rem;
     line-height: 1.4;
 }
 
@@ -4202,7 +4206,7 @@ a {
 }
 
 .profile-section .order-wrapper .order-container .box-l-2 {
-    width: 40%;
+    width: 50%;
 }
 
 .profile-section .order-wrapper .order-container .box-details {
@@ -4212,6 +4216,9 @@ a {
     display: flex;
     justify-content: center;
     align-items: center;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: #dcdcdc;
 }
 
 .profile-section .order-wrapper .order-container .box-details .fa-chevron-right {
@@ -4246,7 +4253,14 @@ a {
     padding-left: 1rem;
     margin-bottom: 2rem;
     margin-top: 2rem;
+    display: flex;
+    align-items: center;
 }
+
+.profile-section .order-wrapper .basket-bot .right {
+    margin-left: auto;
+}
+
 
 /* Order Settings */
 .order-section {
@@ -4535,6 +4549,7 @@ a {
 .order-section .credit-wrapper {
     box-shadow: var(--box-shadow-primary);
     padding: 1rem;
+    margin-bottom: 1rem;
 }
 
 .order-section .row-order {
@@ -4762,6 +4777,130 @@ a {
     padding-bottom: 2rem;
 }
 
+.order-section .installment-header {
+    display: flex;
+    align-items: center;
+}
+
+.order-section .installment-header .cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    color: var(--color-secondary-theme);
+    width: 25%;
+    padding: 1rem;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #dcdcdc;
+}
+
+.order-section .installment-info-text {
+    display: block;
+    font-size: 1.2rem;
+    color: var(--color-primary-dark);
+    margin-top: 1rem;
+}
+
+.order-section .installment-container {
+    display: flex;
+    margin-bottom: 2rem;
+}
+
+.order-section .installment-text {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 25%;
+    font-size: 1.2rem;
+    color: var(--color-primary-dark);
+    padding: 1rem;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #dcdcdc;
+}
+
+.order-section .installment-text-danger {
+    color: var(--danger);
+    font-size: 1.2rem;
+}
+
+.order-section #popup-wrapper-order {
+    z-index: 9997;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000000b3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.order-section #popup-wrapper-order.disable {
+    display: none !important;
+}
+
+.order-section #popup-wrapper-order .popup-container {
+    position: relative;
+    background-color: var(--color-primary-light);
+    box-shadow: var(--box-shadow-primary);
+    width: 95%;
+    height: 70%;
+    border-radius: 1rem;
+    overflow-y: auto;
+}
+
+.order-section #popup-wrapper-order .popup-exit {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 3rem;
+    height: 3rem;
+    cursor: pointer;
+}
+
+.order-section #popup-wrapper-order .popup-exit .exit {
+    position: fixed;
+    width: 3rem;
+    height: 3rem;
+    border-bottom-left-radius: 1.5rem;
+    background-color: #000000cc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.order-section #popup-wrapper-order .popup-exit .fa-times {
+    color: var(--color-primary-light);
+    font-size: 1.4rem;
+}
+
+.order-section #popup-wrapper-order .title {
+    font-size: 1.6rem;
+    line-height: 1.4;
+    color: var(--color-primary-dark);
+    padding-top: 3rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin-bottom: 2rem;
+}
+
+.order-section #popup-wrapper-order .text {
+    color: var(--color-primary-dark);
+    font-size: 1.2rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    text-align: justify;
+}
+
+#btn-order-term {
+    cursor: pointer;
+}
+
 /* Order Complete Settings */
 .order-complete-section {
     padding-top: 5rem;
@@ -4775,7 +4914,7 @@ a {
     margin-bottom: 2rem;
 }
 
-.order-complete-section .notfound-container {
+.order-complete-section .order-complete-container {
     height: 40vh;
     display: flex;
     flex-direction: column;
@@ -4784,13 +4923,19 @@ a {
     box-shadow: var(--box-shadow-primary);
 }
 
-.order-complete-section .notfound-container .text {
+.order-complete-section .title-2 {
     font-size: 1.6rem;
     color: var(--success);
     margin-bottom: 2rem;
 }
 
-.order-complete-section .notfound-container .link {
+.order-complete-section .text {
+    font-size: 1.4rem;
+    color: var(--color-primary-dark);
+    margin-bottom: 2rem;
+}
+
+.order-complete-container .link {
     display: block;
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
@@ -4815,7 +4960,7 @@ a {
     transition-timing-function: ease;
 }
 
-.order-complete-section .notfound-container .link:hover {
+.order-complete-container .link:hover {
     cursor: pointer;
     background-color: var(--hover-success);
 }
@@ -5858,7 +6003,7 @@ a {
     .order-section .form-row .label {
         width: 25%;
     }
-    
+
     .order-section .form-row .input {
         width: 75%;
     }
@@ -5871,7 +6016,7 @@ a {
         width: 51%;
         font-size: 1.2rem;
     }
-    
+
     .order-section .col-1 .row-credit .credit-col .input {
         width: 49%;
         font-size: 1.2rem;
@@ -5887,6 +6032,11 @@ a {
         width: 15%;
     }
 
+    .profile-section .order-wrapper .order-container .box,
+    .profile-section .order-wrapper .order-container .box-header {
+        font-size: 1.3rem;
+    }
+
     /* Action Settings */
     .action-section .action-container,
     .captcha-popup .captcha-container,
@@ -5895,6 +6045,7 @@ a {
     }
 
     .action-section #popup-wrapper .popup-container,
+    .order-section #popup-wrapper-order .popup-container,
     .profile-section #popup-wrapper .popup-container,
     .profile-section #popup-wrapper .popup-order-container,
     .order-section #popup-wrapper .popup-container {
@@ -6154,6 +6305,7 @@ a {
     }
 
     .action-section #popup-wrapper .popup-container,
+    .order-section #popup-wrapper-order .popup-container,
     .profile-section #popup-wrapper .popup-container,
     .order-section #popup-wrapper .popup-container {
         width: 45%;

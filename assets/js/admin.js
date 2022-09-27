@@ -1,20 +1,21 @@
-const body = document.querySelector('body');
-const loader = document.querySelector('.loader');
-window.addEventListener('load', () => {
-    loader.classList.add('loading');
-});
-const notification = document.querySelector('.notification');
+const bodyElement = document.querySelector('body');
+const loaderWrapper = document.querySelector('.loader-wrapper');
+const notificationWrapper = document.querySelector('.notification-wrapper');
 window.onload = function () {
-    body.style.overflowY = 'visible';
+    if (bodyElement.classList.contains('noscroll')) {
+        bodyElement.classList.remove('noscroll');
+    }
+    if (!loaderWrapper.classList.contains('hidden')) {
+        loaderWrapper.classList.add('hidden');
+    }
     setTimeout(() => {
-        loader.classList.add('disable');
-    }, 100);
-    setTimeout(() => {
-        notification.classList.add('hidden');
+        if (!notificationWrapper.classList.contains('hidden')) {
+            notificationWrapper.classList.add('hidden');
+        }
         setTimeout(() => {
-            notification.classList.add('removed');
+            notificationWrapper.remove();
         }, 1500);
-    }, 5000);
+    }, 10000);
 };
 // NAVBAR SETTINGS
 const navbar = document.querySelector('.navbar');
