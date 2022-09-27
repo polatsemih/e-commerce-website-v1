@@ -1,5 +1,5 @@
 <?php
-class AdminController extends Controller
+class AdminController extends ControllerAdmin
 {
     function __construct()
     {
@@ -41,64 +41,357 @@ class AdminController extends Controller
             $this->input_control->Redirect();
         }
     }
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // function MenuPreference()
-    // {
-    //     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    //         if (isset($_SESSION[COOKIE_ADMIN_MENU_NAME])) {
-    //             $menu_preference = $_SESSION[COOKIE_ADMIN_MENU_NAME];
-    //             if ($menu_preference === 'true') {
-    //                 $_SESSION[COOKIE_ADMIN_MENU_NAME] = 'false';
-    //             } elseif ($menu_preference === 'false') {
-    //                 $_SESSION[COOKIE_ADMIN_MENU_NAME] = 'true';
-    //             } else {
-    //                 $this->session_control->KillSession();
-    //                 exit(0);
-    //             }
-    //         } else {
-    //             $this->session_control->KillSession();
-    //             exit(0);
-    //         }
-    //     } else {
-    //         $this->session_control->KillSession();
-    //         exit(0);
-    //     }
-    // }
-
     function Index()
     {
-        echo 'Yonetici Sayfası';
-        exit(0);
-        // parent::GetView('Admin/Index', $this->web_data);
+        parent::GetView('Admin/Index', $this->web_data);
     }
+    function LogOut()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                if (!empty($this->web_data['session_authentication_id'])) {
+                    $this->ActionModel->UpdateSessionAuthentication(array('is_session_authentication_logout' => 1, 'date_session_authentication_logout' => date('Y-m-d H:i:s'), 'id' => $this->web_data['session_authentication_id']));
+                    $this->session_control->KillSession(SESSION_AUTHENTICATION_NAME);
+                    $_SESSION[SESSION_OBSOLETE_NAME] = time() + (60 * 5);
+                    if (session_regenerate_id()) {
+                        $this->session_control->KillSession(SESSION_OBSOLETE_NAME);
+                        $_SESSION[SESSION_REFRESH_NAME] = time() + (60 * 15);
+                        $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_LOG_OUT);
+                        $this->input_control->Redirect();
+                    } else {
+                        $this->input_control->Redirect(URL_EXCEPTION);
+                    }
+                }
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function LogOut | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function Menu()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            if ($this->web_data['admin_menu'] == 1) {
+                $_SESSION[SESSION_ADMIN_MENU_NAME] = false;
+            } else {
+                $_SESSION[SESSION_ADMIN_MENU_NAME] = true;
+            }
+        }
+    }
+    function Items()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl(array('cinsiyet', 'limit', 'ara', 'sayfa', 'anasayfada', 'satista', 'eklenme-tarihi', 'isim-azalan', 'isim-artan', 'fiyat-azalan', 'fiyat-artan', 'indirimli-fiyat-azalan', 'indirimli-fiyat-artan', 'adet-azalan', 'adet-artan'));
+                $items_count_from_database = $this->AdminModel->GetItemsCount();
+                if ($items_count_from_database['result']) {
+                    $this->web_data['item_total_count'] = $items_count_from_database['data']['COUNT(id)'];
+                }
+                $item_conditions = 'WHERE is_item_deleted=0';
+                $item_bind_params = array();
+                $url_for_selected_filters_gender = '';
+                $url_for_selected_filters_home = '';
+                $url_for_selected_filters_sale = '';
+                $url_for_selected_filters_date = '';
+                $url_for_selected_filters_search = '';
+                $url_for_selected_filters_name_desc = '';
+                $url_for_selected_filters_name_asc = '';
+                $url_for_selected_filters_price_desc = '';
+                $url_for_selected_filters_price_asc = '';
+                $url_for_selected_filters_discount_price_desc = '';
+                $url_for_selected_filters_discount_price_asc = '';
+                $url_for_selected_filters_quantity_desc = '';
+                $url_for_selected_filters_quantity_asc = '';
+                $url_for_selected_filters_limit = '';
+
+                if (!empty($_GET['cinsiyet'])) {
+                    $genders_from_database = $this->FilterModel->GetGenders('id,gender_url');
+                    if ($genders_from_database['result']) {
+                        $gender_from_get_form = $this->input_control->CheckGETInput($_GET['cinsiyet']);
+                        $gender_get_matched_error = true;
+                        foreach ($genders_from_database['data'] as $gender_from_database) {
+                            if (!empty($gender_from_get_form) && $gender_from_get_form == $gender_from_database['gender_url']) {
+                                $gender_get_matched_error = false;
+                                $this->web_data['selected_gender'] = $gender_from_database['gender_url'];
+                                $url_for_selected_filters_gender = 'cinsiyet=' . $gender_from_database['gender_url'] . '&';
+                                $item_conditions .= ' AND gender=?';
+                                $item_bind_params[] = $gender_from_database['id'];
+                            }
+                        }
+                        if ($gender_get_matched_error) {
+                            $this->input_control->CheckUrl(array('limit', 'ara', 'sayfa', 'anasayfada', 'satista', 'eklenme-tarihi', 'isim-azalan', 'isim-artan', 'fiyat-azalan', 'fiyat-artan', 'indirimli-fiyat-azalan', 'indirimli-fiyat-artan', 'adet-azalan', 'adet-artan'));
+                        }
+                    }
+                }
+                if (isset($_GET['anasayfada'])) {
+                    $home_from_get_form = $this->input_control->CheckPositiveGETInput($_GET['anasayfada']);
+                    if (isset($home_from_get_form) && ($home_from_get_form == 0 || $home_from_get_form == 1)) {
+                        $this->web_data['selected_home'] = $home_from_get_form;
+                        $url_for_selected_filters_home = 'anasayfada=' . $home_from_get_form . '&';
+                        $item_conditions .= ' AND is_item_home=?';
+                        $item_bind_params[] = $home_from_get_form;
+                    } else {
+                        $this->input_control->CheckUrl(array('cinsiyet', 'limit', 'ara', 'sayfa', 'satista', 'eklenme-tarihi', 'isim-azalan', 'isim-artan', 'fiyat-azalan', 'fiyat-artan', 'indirimli-fiyat-azalan', 'indirimli-fiyat-artan', 'adet-azalan', 'adet-artan'));
+                    }
+                }
+                if (isset($_GET['satista'])) {
+                    $sale_from_get_form = $this->input_control->CheckPositiveGETInput($_GET['satista']);
+                    if (isset($sale_from_get_form) && ($sale_from_get_form == 0 || $sale_from_get_form == 1)) {
+                        $this->web_data['selected_sale'] = $sale_from_get_form;
+                        $url_for_selected_filters_sale = 'satista=' . $sale_from_get_form . '&';
+                        $item_conditions .= ' AND is_item_for_sale=?';
+                        $item_bind_params[] = $sale_from_get_form;
+                    } else {
+                        $this->input_control->CheckUrl(array('cinsiyet', 'limit', 'ara', 'sayfa', 'anasayfada', 'eklenme-tarihi', 'isim-azalan', 'isim-artan', 'fiyat-azalan', 'fiyat-artan', 'indirimli-fiyat-azalan', 'indirimli-fiyat-artan', 'adet-azalan', 'adet-artan'));
+                    }
+                }
+                if (isset($_GET['ara'])) {
+                    $search_from_get_form = $this->input_control->CheckGETInputWithMaxLength($_GET['ara'], 250);
+                    if (isset($search_from_get_form)) {
+                        $this->web_data['selected_search'] = $search_from_get_form;
+                        $url_for_selected_filters_search = 'ara=' . $search_from_get_form . '&';
+                        $item_conditions .= ' AND (id LIKE ? OR item_name LIKE ? OR item_url LIKE ? OR item_price LIKE ? OR item_discount_price LIKE ? OR item_total_quantity LIKE ?)';
+                        $item_bind_params[] = '%' . $search_from_get_form . '%';
+                        $item_bind_params[] = '%' . $search_from_get_form . '%';
+                        $item_bind_params[] = '%' . $search_from_get_form . '%';
+                        $item_bind_params[] = '%' . $search_from_get_form . '%';
+                        $item_bind_params[] = '%' . $search_from_get_form . '%';
+                        $item_bind_params[] = '%' . $search_from_get_form . '%';
+                    } else {
+                        $this->input_control->CheckUrl(array('cinsiyet', 'limit', 'sayfa', 'anasayfada', 'satista', 'eklenme-tarihi', 'isim-azalan', 'isim-artan', 'fiyat-azalan', 'fiyat-artan', 'indirimli-fiyat-azalan', 'indirimli-fiyat-artan', 'adet-azalan', 'adet-artan'));
+                    }
+                }
+                $date_get_matched_error = true;
+                if (isset($_GET['eklenme-tarihi'])) {
+                    $date_from_get_form = $this->input_control->CheckPositiveGETInput($_GET['eklenme-tarihi']);
+                    if (isset($date_from_get_form) && $date_from_get_form == 1 && $date_get_matched_error) {
+                        $date_get_matched_error = false;
+                        $this->web_data['selected_date'] = $date_from_get_form;
+                        $url_for_selected_filters_date = 'eklenme-tarihi=' . $date_from_get_form . '&';
+                        $item_conditions .= ' ORDER BY date_item_created ASC';
+                    } else {
+                        $this->input_control->CheckUrl(array('cinsiyet', 'limit', 'ara', 'sayfa', 'anasayfada', 'satista', 'isim-azalan', 'isim-artan', 'fiyat-azalan', 'fiyat-artan', 'indirimli-fiyat-azalan', 'indirimli-fiyat-artan', 'adet-azalan', 'adet-artan'));
+                    }
+                }
+                if (isset($_GET['isim-azalan'])) {
+                    $date_from_get_form = $this->input_control->CheckPositiveGETInput($_GET['isim-azalan']);
+                    if (isset($date_from_get_form) && $date_from_get_form == 1 && $date_get_matched_error) {
+                        $date_get_matched_error = false;
+                        $this->web_data['selected_name_desc'] = $date_from_get_form;
+                        $url_for_selected_filters_name_desc = 'isim-azalan=' . $date_from_get_form . '&';
+                        $item_conditions .= ' ORDER BY item_name DESC';
+                    } else {
+                        $this->input_control->CheckUrl(array('cinsiyet', 'limit', 'ara', 'sayfa', 'anasayfada', 'satista', 'eklenme-tarihi'));
+                    }
+                }
+                if (isset($_GET['isim-artan'])) {
+                    $date_from_get_form = $this->input_control->CheckPositiveGETInput($_GET['isim-artan']);
+                    if (isset($date_from_get_form) && $date_from_get_form == 1 && $date_get_matched_error) {
+                        $date_get_matched_error = false;
+                        $this->web_data['selected_name_asc'] = $date_from_get_form;
+                        $url_for_selected_filters_name_asc = 'isim-artan=' . $date_from_get_form . '&';
+                        $item_conditions .= ' ORDER BY item_name ASC';
+                    } else {
+                        $this->input_control->CheckUrl(array('cinsiyet', 'limit', 'ara', 'sayfa', 'anasayfada', 'satista', 'eklenme-tarihi'));
+                    }
+                }
+                if (isset($_GET['fiyat-azalan'])) {
+                    $date_from_get_form = $this->input_control->CheckPositiveGETInput($_GET['fiyat-azalan']);
+                    if (isset($date_from_get_form) && $date_from_get_form == 1 && $date_get_matched_error) {
+                        $date_get_matched_error = false;
+                        $this->web_data['selected_price_desc'] = $date_from_get_form;
+                        $url_for_selected_filters_price_desc = 'fiyat-azalan=' . $date_from_get_form . '&';
+                        $item_conditions .= ' ORDER BY item_price DESC';
+                    } else {
+                        $this->input_control->CheckUrl(array('cinsiyet', 'limit', 'ara', 'sayfa', 'anasayfada', 'satista', 'eklenme-tarihi'));
+                    }
+                }
+                if (isset($_GET['fiyat-artan'])) {
+                    $date_from_get_form = $this->input_control->CheckPositiveGETInput($_GET['fiyat-artan']);
+                    if (isset($date_from_get_form) && $date_from_get_form == 1 && $date_get_matched_error) {
+                        $date_get_matched_error = false;
+                        $this->web_data['selected_price_asc'] = $date_from_get_form;
+                        $url_for_selected_filters_price_asc = 'fiyat-artan=' . $date_from_get_form . '&';
+                        $item_conditions .= ' ORDER BY item_price ASC';
+                    } else {
+                        $this->input_control->CheckUrl(array('cinsiyet', 'limit', 'ara', 'sayfa', 'anasayfada', 'satista', 'eklenme-tarihi'));
+                    }
+                }
+                if (isset($_GET['indirimli-fiyat-azalan'])) {
+                    $date_from_get_form = $this->input_control->CheckPositiveGETInput($_GET['indirimli-fiyat-azalan']);
+                    if (isset($date_from_get_form) && $date_from_get_form == 1 && $date_get_matched_error) {
+                        $date_get_matched_error = false;
+                        $this->web_data['selected_discount_price_desc'] = $date_from_get_form;
+                        $url_for_selected_filters_discount_price_desc = 'indirimli-fiyat-azalan=' . $date_from_get_form . '&';
+                        $item_conditions .= ' ORDER BY item_discount_price DESC';
+                    } else {
+                        $this->input_control->CheckUrl(array('cinsiyet', 'limit', 'ara', 'sayfa', 'anasayfada', 'satista', 'eklenme-tarihi'));
+                    }
+                }
+                if (isset($_GET['indirimli-fiyat-artan'])) {
+                    $date_from_get_form = $this->input_control->CheckPositiveGETInput($_GET['indirimli-fiyat-artan']);
+                    if (isset($date_from_get_form) && $date_from_get_form == 1 && $date_get_matched_error) {
+                        $date_get_matched_error = false;
+                        $this->web_data['selected_discount_price_asc'] = $date_from_get_form;
+                        $url_for_selected_filters_discount_price_asc = 'indirimli-fiyat-artan=' . $date_from_get_form . '&';
+                        $item_conditions .= ' ORDER BY item_discount_price ASC';
+                    } else {
+                        $this->input_control->CheckUrl(array('cinsiyet', 'limit', 'ara', 'sayfa', 'anasayfada', 'satista', 'eklenme-tarihi'));
+                    }
+                }
+                if (isset($_GET['adet-azalan'])) {
+                    $date_from_get_form = $this->input_control->CheckPositiveGETInput($_GET['adet-azalan']);
+                    if (isset($date_from_get_form) && $date_from_get_form == 1 && $date_get_matched_error) {
+                        $date_get_matched_error = false;
+                        $this->web_data['selected_quantity_desc'] = $date_from_get_form;
+                        $url_for_selected_filters_quantity_desc = 'adet-azalan=' . $date_from_get_form . '&';
+                        $item_conditions .= ' ORDER BY item_total_quantity DESC';
+                    } else {
+                        $this->input_control->CheckUrl(array('cinsiyet', 'limit', 'ara', 'sayfa', 'anasayfada', 'satista', 'eklenme-tarihi'));
+                    }
+                }
+                if (isset($_GET['adet-artan'])) {
+                    $date_from_get_form = $this->input_control->CheckPositiveGETInput($_GET['adet-artan']);
+                    if (isset($date_from_get_form) && $date_from_get_form == 1 && $date_get_matched_error) {
+                        $date_get_matched_error = false;
+                        $this->web_data['selected_quantity_asc'] = $date_from_get_form;
+                        $url_for_selected_filters_quantity_asc = 'adet-artan=' . $date_from_get_form . '&';
+                        $item_conditions .= ' ORDER BY item_total_quantity ASC';
+                    } else {
+                        $this->input_control->CheckUrl(array('cinsiyet', 'limit', 'ara', 'sayfa', 'anasayfada', 'satista', 'eklenme-tarihi'));
+                    }
+                }
+                if ($date_get_matched_error) {
+                    $item_conditions .= ' ORDER BY date_item_created DESC';
+                }
+                $item_conditions .= ' LIMIT ?';
+                $limit_not_used = true;
+                if (isset($_GET['limit'])) {
+                    $limit_from_get_form = $this->input_control->CheckPositiveNonZeroGETInput($_GET['limit']);
+                    if (!empty($limit_from_get_form)) {
+                        $limit_not_used = false;
+                        $this->web_data['selected_limit'] = $limit_from_get_form;
+                        $url_for_selected_filters_limit = 'limit=' . $limit_from_get_form . '&';
+                        $item_bind_params[] = $limit_from_get_form;
+                    }
+                }
+                if ($limit_not_used) {
+                    $this->web_data['selected_limit'] = 20;
+                    $item_bind_params[] = 20;
+                }
+                $this->web_data['url_gender'] = rtrim($url_for_selected_filters_home . $url_for_selected_filters_sale . $url_for_selected_filters_date . $url_for_selected_filters_search . $url_for_selected_filters_limit . $url_for_selected_filters_name_desc . $url_for_selected_filters_name_asc . $url_for_selected_filters_price_desc . $url_for_selected_filters_price_asc . $url_for_selected_filters_discount_price_desc . $url_for_selected_filters_discount_price_asc . $url_for_selected_filters_quantity_desc . $url_for_selected_filters_quantity_asc, '&');
+                $this->web_data['url_home'] = rtrim($url_for_selected_filters_gender . $url_for_selected_filters_sale . $url_for_selected_filters_date . $url_for_selected_filters_search . $url_for_selected_filters_limit . $url_for_selected_filters_name_desc . $url_for_selected_filters_name_asc . $url_for_selected_filters_price_desc . $url_for_selected_filters_price_asc . $url_for_selected_filters_discount_price_desc . $url_for_selected_filters_discount_price_asc . $url_for_selected_filters_quantity_desc . $url_for_selected_filters_quantity_asc, '&');
+                $this->web_data['url_sale'] = rtrim($url_for_selected_filters_home . $url_for_selected_filters_gender . $url_for_selected_filters_date . $url_for_selected_filters_search . $url_for_selected_filters_limit . $url_for_selected_filters_name_desc . $url_for_selected_filters_name_asc . $url_for_selected_filters_price_desc . $url_for_selected_filters_price_asc . $url_for_selected_filters_discount_price_desc . $url_for_selected_filters_discount_price_asc . $url_for_selected_filters_quantity_desc . $url_for_selected_filters_quantity_asc, '&');
+                $this->web_data['url_date'] = rtrim($url_for_selected_filters_home . $url_for_selected_filters_sale . $url_for_selected_filters_gender . $url_for_selected_filters_search . $url_for_selected_filters_limit . $url_for_selected_filters_name_desc . $url_for_selected_filters_name_asc . $url_for_selected_filters_price_desc . $url_for_selected_filters_price_asc . $url_for_selected_filters_discount_price_desc . $url_for_selected_filters_discount_price_asc . $url_for_selected_filters_quantity_desc . $url_for_selected_filters_quantity_asc, '&');
+                $this->web_data['url_search'] = rtrim($url_for_selected_filters_home . $url_for_selected_filters_sale . $url_for_selected_filters_date . $url_for_selected_filters_gender . $url_for_selected_filters_limit . $url_for_selected_filters_name_desc . $url_for_selected_filters_name_asc . $url_for_selected_filters_price_desc . $url_for_selected_filters_price_asc . $url_for_selected_filters_discount_price_desc . $url_for_selected_filters_discount_price_asc . $url_for_selected_filters_quantity_desc . $url_for_selected_filters_quantity_asc, '&');
+                $this->web_data['url_limit'] = rtrim($url_for_selected_filters_home . $url_for_selected_filters_sale . $url_for_selected_filters_date . $url_for_selected_filters_search . $url_for_selected_filters_gender . $url_for_selected_filters_name_desc . $url_for_selected_filters_name_asc . $url_for_selected_filters_price_desc . $url_for_selected_filters_price_asc . $url_for_selected_filters_discount_price_desc . $url_for_selected_filters_discount_price_asc . $url_for_selected_filters_quantity_desc . $url_for_selected_filters_quantity_asc, '&');
+                $this->web_data['url_sort'] = rtrim($url_for_selected_filters_home . $url_for_selected_filters_sale . $url_for_selected_filters_date . $url_for_selected_filters_search . $url_for_selected_filters_limit . $url_for_selected_filters_gender, '&');
+                $items_from_database = $this->AdminModel->GetItems($item_conditions, $item_bind_params);
+                if ($items_from_database['result']) {
+                    $formatted_items_from_database = $this->input_control->GetItemsMainImageAndFormatedPrice($items_from_database['data']);
+                    if ($formatted_items_from_database['result']) {
+                        $this->web_data['items'] = $formatted_items_from_database['data'];
+                        parent::GetView('Admin/Items', $this->web_data);
+                    }
+                } elseif ($items_from_database['empty']) {
+                    parent::GetView('Admin/Items', $this->web_data);
+                }
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function Items | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function ItemDetails(string $item_url)
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl();
+
+                echo $item_url;
+
+                parent::GetView('Admin/ItemDetails', $this->web_data);
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function ItemDetails | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function ItemCreate()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl();
+
+
+
+                parent::GetView('Admin/ItemCreate', $this->web_data);
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function ItemCreate | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function Orders()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function Orders | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+        parent::GetView('Admin/Orders', $this->web_data);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // function Items()
     // {

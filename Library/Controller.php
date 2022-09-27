@@ -137,7 +137,7 @@ class Controller
                                                     $cart_data[] = array('item' => $formatted_item['data'], 'size' => $size_in_cart['data'], 'quantity' => $cart_items[$key]['item_quantity']);
                                                     $item_in_cart['data']['item_price'] = $item_in_cart['data']['item_price'] * $cart_items[$key]['item_quantity'];
                                                     $item_in_cart['data']['item_discount_price'] = $item_in_cart['data']['item_discount_price'] * $cart_items[$key]['item_quantity'];
-                                                    $order_cart_data[] = array('item' => $item_in_cart['data'], 'size' => $size_in_cart['data']['size_name'], 'quantity' => $cart_items[$key]['item_quantity']);
+                                                    $order_cart_data[] = array('item' => $item_in_cart['data'], 'size_name' => $size_in_cart['data']['size_name'], 'size_url' => $size_in_cart['data']['size_url'], 'quantity' => $cart_items[$key]['item_quantity']);
                                                 }
                                             }
                                         }

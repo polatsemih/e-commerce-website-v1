@@ -81,9 +81,9 @@
                                 </div>
                             </div>
                             <?php if (!empty($web_data['authenticated_user'])) : ?>
-                                <a class="btn-submit-cart" href="<?php echo URL . URL_ORDER_CREDIT; ?>">Alışverişi Tamamla</a>
+                                <a class="btn-submit-cart" href="<?php echo URL . URL_ORDER_INITIALIZE; ?>">Alışverişi Tamamla</a>
                             <?php else : ?>
-                                <a class="btn-submit-cart" href="<?php echo URL . URL_LOGIN . '?yonlendir=' . URL_ORDER_CREDIT; ?>">Alışverişi Tamamla</a>
+                                <a class="btn-submit-cart" href="<?php echo URL . URL_LOGIN . '?yonlendir=' . URL_ORDER_INITIALIZE; ?>">Alışverişi Tamamla</a>
                             <?php endif; ?>
                         <?php else : ?>
                             <div class="cart-out-of-service">

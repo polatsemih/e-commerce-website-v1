@@ -12,11 +12,11 @@ class FilterModel extends Model
     }
     function GetGenders(string $columns)
     {
-        return $this->database->Get(TABLE_FILTER_GENDER, $columns, '', '', 'PLURAL');
+        return $this->database->Get(TABLE_FILTER_GENDER, $columns, 'ORDER BY date_gender_created ASC', '', 'PLURAL');
     }
     function GetCategories()
     {
-        return $this->database->Get(TABLE_FILTER_CATEGORY, 'id,category_name,category_url', '', '', 'PLURAL');
+        return $this->database->Get(TABLE_FILTER_CATEGORY, 'id,category_name,category_url', 'ORDER BY date_category_created ASC', '', 'PLURAL');
     }
     function GetCategoryById(string $category_id)
     {
@@ -24,11 +24,11 @@ class FilterModel extends Model
     }
     function GetColors()
     {
-        return $this->database->Get(TABLE_FILTER_COLOR, 'id,color_name,color_url,color_hex', '', '', 'PLURAL');
+        return $this->database->Get(TABLE_FILTER_COLOR, 'id,color_name,color_url,color_hex', 'ORDER BY date_color_created ASC', '', 'PLURAL');
     }
     function GetSizes()
     {
-        return $this->database->Get(TABLE_FILTER_SIZE, 'id,size_cart_id,size_name,size_url', '', '', 'PLURAL');
+        return $this->database->Get(TABLE_FILTER_SIZE, 'id,size_cart_id,size_name,size_url', 'ORDER BY date_size_created ASC', '', 'PLURAL');
     }
     function GetMaxPrice()
     {

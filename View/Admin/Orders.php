@@ -2,7 +2,7 @@
 <html lang="tr">
 
 <head>
-    <title>Yönetici | <?php echo BRAND; ?></title>
+    <title>Siparişler - Yönetici | <?php echo BRAND; ?></title>
     <meta name="robots" content="none" />
     <?php require_once 'View/SharedAdmin/_admin_head.php'; ?>
 </head>
@@ -11,7 +11,7 @@
     <?php require_once 'View/SharedAdmin/_admin_body.php'; ?>
     <main>
         <section class="admin-section container">
-            
+
         </section>
     </main>
     <?php require_once 'View/SharedAdmin/_admin_footer.php'; ?>

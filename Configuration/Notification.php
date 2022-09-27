@@ -126,7 +126,7 @@ define('TR_NOTIFICATION_SUCCESS_DELETE_ADDRESS', 'Adres başarıyla silindi');
 define('TR_NOTIFICATION_ERROR_COMMENT_USER_EMPTY_NAME', 'Yorum eklemeden önce profilinizden isminizi eklemelisiniz');
 define('TR_NOTIFICATION_SUCCESS_PROFILE_2FA_DEACTIVE', '2 aşamalı doğrulama devre dışı bırakıldı');
 define('TR_NOTIFICATION_SUCCESS_PROFILE_2FA_ACTIVE', '2 aşamalı doğrulama aktif edildi');
-define('TR_NOTIFICATION_ERROR_ORDER_USER_BLOCKED', BRAND . ' hesabınız bloklandığı için alışveriş yapamazsınız.');
+define('TR_NOTIFICATION_ERROR_ORDER_USER_BLOCKED', BRAND . ' hesabınız bloklandığı için işlem yapamazsınız.');
 define('TR_NOTIFICATION_ERROR_EMPTY_IDENTITY_NUMBER', 'Kimlik numaranızı girin');
 define('TR_NOTIFICATION_ERROR_NOT_VALID_IDENTITY_NUMBER', 'Girdiğiniz kimlik numarası geçerli değil');
 define('TR_NOTIFICATION_ERROR_NEW_IDENTITY_NUMBER', 'Güncellemek istediğiniz kimlik numarasını girin');
@@ -142,3 +142,4 @@ define('TR_NOTIFICATION_ERROR_NOT_VALID_CART_EXPIRY_YEAR', 'Kartınızın son ku
 define('TR_NOTIFICATION_ERROR_EMPTY_CART_CVC', 'Kartınızın güvenlik kodunu girin');
 define('TR_NOTIFICATION_ERROR_NOT_VALID_CART_CVC', 'Kartınızın güvenlik kodunu yanlış girdiniz');
 define('TR_NOTIFICATION_ERROR_EMPTY_ORDER_TERMS', 'Siparişi onaylamadan önce, sözleşmeyi okumalı ve kabul etmelisiniz');
+define('WEB_SHOPPING_PERMISSION_FALSE', 'Teknik bir hatadan dolayı geçici süreliğine alışveriş hizmeti devre dışıdır. Sorundan haberdarız ve sorunun üzerinden çalışıyoruz. Anlayışınız ve sabrınız için teşekkür ederiz.');

@@ -753,4 +753,109 @@ class AccountController extends Controller
             }
         }
     }
+    function OrderInstallment()
+    {
+        try {
+            $response = array();
+            $response['reset'] = true;
+            if (WEB_SHOPPING_PERMISSION) {
+                if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+                    $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                        'cart_number' => array('input' => isset($_POST['cart_number']) ? substr($_POST['cart_number'], 0, 6) : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'no_white_space' => true, 'error_message_no_white_space' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'length_control' => true, 'min_length' => 6, 'error_message_min_length' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'max_length' => 6, 'error_message_max_length' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT)
+                    ));
+                    if (empty($checked_inputs['error_message'])) {
+                        $conversation_id = $this->input_control->GenerateToken();
+                        if ($conversation_id['result'] && !empty($this->web_data['order_cart_data_total_price'])) {
+                            require_once(IYZIPAY_FOLDER_NAME . '/samples/config.php');
+                            $request = new \Iyzipay\Request\RetrieveInstallmentInfoRequest();
+                            $request->setLocale(\Iyzipay\Model\Locale::TR);
+                            $request->setConversationId($conversation_id['data']);
+                            $request->setBinNumber($checked_inputs['cart_number']);
+                            $request->setPrice($this->web_data['order_cart_data_total_price']);
+                            $installmentInfo = \Iyzipay\Model\InstallmentInfo::retrieve($request, Config::options());
+                            if ($installmentInfo->getStatus() == 'success') {
+                                if ($installmentInfo->getConversationId() == $conversation_id['data']) {
+                                    $response['installment'] = array();
+                                    $is_installment_not_one = false;
+                                    foreach ($installmentInfo->getInstallmentDetails() as $installment_details) {
+                                        $this->ItemModel->CreateOrderInstallment(array(
+                                            'conversation_id_request' => $conversation_id['data'],
+                                            'conversation_id_response' => $this->input_control->SlashAndXSSForId($installmentInfo->getConversationId()),
+                                            'bin_number' => $this->input_control->SlashAndXSSForId($installment_details->getBinNumber()),
+                                            'price' => $this->input_control->SlashAndXSSForId($installment_details->getPrice()),
+                                            'card_type' => $this->input_control->SlashAndXSSForId($installment_details->getCardType()),
+                                            'card_association' => $this->input_control->SlashAndXSSForId($installment_details->getCardAssociation()),
+                                            'card_family_name' => $this->input_control->SlashAndXSSForId($installment_details->getCardFamilyName()),
+                                            'force_3ds' => $this->input_control->SlashAndXSSForId($installment_details->getForce3ds()),
+                                            'bank_code' => $this->input_control->SlashAndXSSForId($installment_details->getBankCode()),
+                                            'bank_name' => $this->input_control->SlashAndXSSForId($installment_details->getBankName()),
+                                            'user_id' => $this->web_data['authenticated_user'],
+                                            'user_ip' => $_SERVER['REMOTE_ADDR']
+                                        ));
+                                        foreach ($installment_details->getInstallmentPrices() as $installment_prices) {
+                                            $this->ItemModel->CreateOrderInstallmentPrices(array(
+                                                'conversation_id_request' => $conversation_id['data'],
+                                                'conversation_id_response' => $this->input_control->SlashAndXSSForId($installmentInfo->getConversationId()),
+                                                'installment_price' => $this->input_control->SlashAndXSSForId($installment_prices->getInstallmentPrice()),
+                                                'installment_total_price' => $this->input_control->SlashAndXSSForId($installment_prices->getTotalPrice()),
+                                                'installment_number' => $this->input_control->SlashAndXSSForId($installment_prices->getInstallmentNumber()),
+                                            ));
+                                            if ($this->input_control->SlashAndXSSForId($installment_prices->getInstallmentNumber()) != 1) {
+                                                $is_installment_not_one = true;
+                                                $response['installment'][] = array(
+                                                    'installment_price' => $this->input_control->SlashAndXSSForId($installment_prices->getInstallmentPrice()),
+                                                    'installment_total_price' => $this->input_control->SlashAndXSSForId($installment_prices->getTotalPrice()),
+                                                    'installment_number' => $this->input_control->SlashAndXSSForId($installment_prices->getInstallmentNumber())
+                                                );
+                                            }
+                                        }
+                                    }
+                                    if ($is_installment_not_one && !empty($response['installment'])) {
+                                        $response['reset'] = false;
+                                    }
+                                } else {
+                                    $this->ItemModel->CreateOrderConversationError(array(
+                                        'conversation_id_request' => $conversation_id['data'],
+                                        'conversation_id_response' => $this->input_control->SlashAndXSSForId($installmentInfo->getConversationId()),
+                                        'system_time' => $this->input_control->SlashAndXSSForId($installmentInfo->getSystemTime()),
+                                        'user_id' => $this->web_data['authenticated_user'],
+                                        'user_ip' => $_SERVER['REMOTE_ADDR'],
+                                        'function_type' => 'Installment'
+                                    ));
+                                }
+                            } else {
+                                $this->ItemModel->CreateOrderStatusError(array(
+                                    'conversation_id_request' => $conversation_id['data'],
+                                    'conversation_id_response' => $this->input_control->SlashAndXSSForId($installmentInfo->getConversationId()),
+                                    'status' => $this->input_control->SlashAndXSSForId($installmentInfo->getStatus()),
+                                    'error_code' => $this->input_control->SlashAndXSSForId($installmentInfo->getErrorCode()),
+                                    'error_message' => $this->input_control->SlashAndXSSForId($installmentInfo->getErrorMessage()),
+                                    'error_group' => $this->input_control->SlashAndXSSForId($installmentInfo->getErrorGroup()),
+                                    'system_time' => $this->input_control->SlashAndXSSForId($installmentInfo->getSystemTime()),
+                                    'user_id' => $this->web_data['authenticated_user'],
+                                    'user_ip' => $_SERVER['REMOTE_ADDR'],
+                                    'function_type' => 'Installment'
+                                ));
+                            }
+                        }
+                    }
+                } else {
+                    parent::KillAuthentication('AccountController OrderInstallment');
+                }
+            }
+            $jsoned_response = json_encode($response);
+            if (!empty($jsoned_response)) {
+                echo $jsoned_response;
+                exit(0);
+            }
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function OrderInstallment | ' . $th))['result']) {
+                echo '{"exception":"exception"}';
+                exit(0);
+            } else {
+                echo '{"shutdown":"shutdown"}';
+                exit(0);
+            }
+        }
+    }
 }

@@ -57,44 +57,68 @@ class ItemModel extends Model
     {
         return $this->database->Get(TABLE_ITEM, 'id', 'WHERE is_item_for_sale=1 AND item_url=? AND is_item_deleted=0', $item_url, 'SINGULAR');
     }
-    function CreateOrder(array $inputs)
+    function CreateOrderInitializeInformations(array $inputs)
     {
-        return $this->database->Create(TABLE_ORDER, $inputs);
+        return $this->database->Create(TABLE_ORDER_INITIALIZE_INFORMATIONS, $inputs);
     }
-    function CreateOrder2(array $inputs)
+    function CreateOrderInitializeBasket(array $inputs)
     {
-        return $this->database->Create(TABLE_ORDER_2, $inputs);
+        return $this->database->Create(TABLE_ORDER_INITIALIZE_BASKET, $inputs);
     }
-    function CreateOrderBasket(array $inputs)
+    function CreateOrderStatusError(array $inputs)
     {
-        return $this->database->Create(TABLE_ORDER_BASKET, $inputs);
+        return $this->database->Create(TABLE_ORDER_STATUS_ERROR, $inputs);
     }
-    function CreateOrder1ConversationError(array $inputs)
+    function CreateOrderConversationError(array $inputs)
     {
-        return $this->database->Create(TABLE_ORDER_1_CONVERSATION_ERROR, $inputs);
+        return $this->database->Create(TABLE_ORDER_CONVERSATION_ERROR, $inputs);
     }
-    function CreateOrder1StatusError(array $inputs)
+    function GetOrderInitializeLastConversationId(array $inputs)
     {
-        return $this->database->Create(TABLE_ORDER_1_STATUS_ERROR, $inputs);
+        return $this->database->Get(TABLE_ORDER_INITIALIZE_INFORMATIONS, 'conversation_id', 'WHERE user_ip=? AND user_id=? ORDER BY date_order_initialize_created DESC LIMIT 1', $inputs, 'SINGULAR');
     }
-    function CreateOrder2ConversationError(array $inputs)
+    function CreateOrderVerify(array $inputs)
     {
-        return $this->database->Create(TABLE_ORDER_2_CONVERSATION_ERROR, $inputs);
+        return $this->database->Create(TABLE_ORDER_VERIFY, $inputs);
     }
-    function CreateOrder2StatusError(array $inputs)
+    function CreateOrderPayment(array $inputs)
     {
-        return $this->database->Create(TABLE_ORDER_2_STATUS_ERROR, $inputs);
+        return $this->database->Create(TABLE_ORDER_PAYMENT, $inputs);
     }
-    function GetOrder1LastConversationId(array $inputs)
+    function CreateOrderPaymentItemTransaction(array $inputs)
     {
-        return $this->database->Get(TABLE_ORDER, 'conversation_id', 'WHERE user_id=? AND user_ip=? ORDER BY order_created DESC LIMIT 1', $inputs, 'SINGULAR');
+        return $this->database->Create(TABLE_ORDER_PAYMENT_ITEM_TRANSACTION, $inputs);
+    }
+    function GetItemForOrderEmail(array $inputs)
+    {
+        return $this->database->Get(TABLE_ORDER_INITIALIZE_BASKET, 'item_name,item_size_name,item_size_url,item_quantity', 'WHERE order_initialize_information_id=? AND item_id=?', $inputs, 'SINGULAR');
+    }
+    function GetItemForOrder(string $item_size_url, string $item_id)
+    {
+        return $this->database->Get(TABLE_ITEM, 'item_total_quantity,' . $item_size_url, 'WHERE id=?', $item_id, 'SINGULAR');
+    }
+    function UpdateItem(array $inputs)
+    {
+        return $this->database->Update(TABLE_ITEM, $inputs);
     }
     function GetOrders(string $user_id)
     {
-        return $this->database->Get(TABLE_ORDER, 'paid_price,basket_id,shipping_contact_name,shipping_city,shipping_country,shipping_address,shipping_zip_code,status,order_created', 'WHERE user_id=? ORDER BY order_created DESC', $user_id, 'PLURAL');
+        return $this->database->Get(TABLE_ORDER_INITIALIZE_INFORMATIONS, 'id,paid_price,shipping_contact_name,shipping_city,shipping_country,shipping_address,shipping_zip_code,status,date_order_initialize_created', 'WHERE user_id=? ORDER BY date_order_initialize_created DESC', $user_id, 'PLURAL');
     }
-    function GetOrderBasket(string $basket_id)
+    function UpdateOrder(array $inputs)
     {
-        return $this->database->Get(TABLE_ORDER_BASKET, 'item_name,item_category,item_size_name,item_quantity,item_discount_price', 'WHERE basket_id=? ORDER BY date_order_basket_created DESC', $basket_id, 'PLURAL');
+        return $this->database->Update(TABLE_ORDER_INITIALIZE_INFORMATIONS, $inputs);
+    }
+    function GetOrderBasket(string $order_initialize_information_id)
+    {
+        return $this->database->Get(TABLE_ORDER_INITIALIZE_BASKET, 'item_name,item_category,item_size_name,item_quantity,item_discount_price', 'WHERE order_initialize_information_id=? ORDER BY date_order_initialize_basket_created DESC', $order_initialize_information_id, 'PLURAL');
+    }
+    function CreateOrderInstallment(array $inputs)
+    {
+        return $this->database->Create(TABLE_ORDER_INSTALLMENT, $inputs);
+    }
+    function CreateOrderInstallmentPrices(array $inputs)
+    {
+        return $this->database->Create(TABLE_ORDER_INSTALLMENT_PRICES, $inputs);
     }
 }

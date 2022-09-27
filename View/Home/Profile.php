@@ -374,9 +374,9 @@
                             <div class="order-wrapper">
                                 <div class="order-container">
                                     <span class="box-header box-m">Alıcının İsmi</span>
-                                    <span class="box-header box-l">Alıcının Adresi</span>
-                                    <span class="box-header box-s">Ödenen Ücret</span>
-                                    <span class="box-header box-s" title="Sipariş Durumu">Durum</span>
+                                    <span class="box-header box-l-2">Alıcının Adresi</span>
+                                    <span class="box-header box-xs">Ödenen Ücret</span>
+                                    <span class="box-header box-xs" title="Sipariş Durumu">Durum</span>
                                     <span class="box-header">Detaylar</span>
                                 </div>
                                 <?php $i = 0; ?>
@@ -384,18 +384,20 @@
                                     <?php $i++; ?>
                                     <div class="order-container">
                                         <span class="box box-m"><?php echo $order['order_informations']['shipping_contact_name']; ?></span>
-                                        <span class="box box-l"><?php echo $order['order_informations']['shipping_address'] . ' ' . $order['order_informations']['shipping_city'] . '/' . $order['order_informations']['shipping_country'] . ' ZIP: ' . $order['order_informations']['shipping_zip_code']; ?></span>
-                                        <span class="box box-s"><?php echo $order['order_informations']['paid_price']; ?> ₺</span>
+                                        <span class="box box-l-2"><?php echo $order['order_informations']['shipping_address'] . ' ' . $order['order_informations']['shipping_city'] . '/' . $order['order_informations']['shipping_country'] . ' ZIP: ' . $order['order_informations']['shipping_zip_code']; ?></span>
+                                        <span class="box box-xs"><?php echo $order['order_informations']['paid_price']; ?> ₺</span>
                                         <?php if ($order['order_informations']['status'] == 0) : ?>
-                                            <span class="box box-s">İptal Edildi</span>
+                                            <span class="box box-xs">İptal Edildi</span>
                                         <?php elseif ($order['order_informations']['status'] == 1) : ?>
-                                            <span class="box box-s">Onay Bekliyor...</span>
+                                            <span class="box box-xs">Onay Bekliyor...</span>
                                         <?php elseif ($order['order_informations']['status'] == 2) : ?>
-                                            <span class="box box-s">Onaylandı. Kargoya Verilecek...</span>
+                                            <span class="box box-xs">Onaylandı. Kargoya Verilecek...</span>
                                         <?php elseif ($order['order_informations']['status'] == 3) : ?>
-                                            <span class="box box-s">Kargoda</span>
+                                            <span class="box box-xs">Kargoda</span>
                                         <?php elseif ($order['order_informations']['status'] == 4) : ?>
-                                            <span class="box box-s">Teslim Edildi</span>
+                                            <span class="box box-xs">Teslim Edildi</span>
+                                        <?php elseif ($order['order_informations']['status'] == 5) : ?>
+                                            <span class="box box-xs">İade Edildi</span>
                                         <?php endif; ?>
                                         <span class="box-details extend-order-details-<?php echo $i; ?>"><i class="fas fa-chevron-right"></i></span>
                                     </div>
@@ -408,15 +410,15 @@
                                             </div>
                                             <div class="order-title-row">
                                                 <div class="left">
-                                                    <h4 class="title">Sipariş Detayları</h4>
+                                                    <h4 class="title">Sipariş Detayı</h4>
                                                 </div>
                                                 <div class="right">
-                                                    <span class="order-date" title="Sipariş Verilme Tarihi"><?php echo $order['order_informations']['order_created']; ?></span>
+                                                    <span class="order-date" title="Sipariş Verilme Tarihi"><?php echo $order['order_informations']['date_order_initialize_created']; ?></span>
                                                 </div>
                                             </div>
                                             <div class="order-basket-wrapper">
                                                 <div class="order-container">
-                                                    <span class="box-header box-l">İsim</span>
+                                                    <span class="box-header box-l">Ürün İsimi</span>
                                                     <span class="box-header box-xs">Kategori</span>
                                                     <span class="box-header box-s">Beden</span>
                                                     <span class="box-header box-xs">Adet</span>
@@ -428,9 +430,10 @@
                                                         <span class="box box-xs"><?php echo $order_basket['item_category']; ?></span>
                                                         <span class="box box-s"><?php echo $order_basket['item_size_name']; ?></span>
                                                         <span class="box box-xs">x<?php echo $order_basket['item_quantity']; ?></span>
-                                                        <span class="box box-xs"><?php echo $order_basket['item_discount_price']; ?>₺</span>
+                                                        <span class="box box-xs"><?php echo $order_basket['item_discount_price']; ?> ₺</span>
                                                     </div>
                                                 <?php endforeach; ?>
+                                                <div class="hr-line"></div>
                                                 <div class="order-container mt">
                                                     <span class="box-header box-m">Alıcının İsmi</span>
                                                     <span class="box-header box-l">Alıcının Adresi</span>
@@ -451,10 +454,14 @@
                                                         <span class="box box-xs-2">Kargoda</span>
                                                     <?php elseif ($order['order_informations']['status'] == 4) : ?>
                                                         <span class="box box-xs-2">Teslim Edildi</span>
+                                                    <?php elseif ($order['order_informations']['status'] == 5) : ?>
+                                                        <span class="box box-xs-2">İade Edildi</span>
                                                     <?php endif; ?>
                                                 </div>
                                                 <div class="basket-bot">
-                                                        iade iptal
+                                                    <div class="right">
+                                                        
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

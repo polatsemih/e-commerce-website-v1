@@ -132,6 +132,9 @@ class Input
     function SlashAndXSS($input) {
         return htmlentities(stripslashes($input), ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
+    function SlashAndXSSForId($input) {
+        return htmlentities(stripslashes($input), ENT_QUOTES, 'UTF-8');
+    }
     function DecodePreventXSS($input)
     {
         return html_entity_decode($input, ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -153,8 +156,24 @@ class Input
         }
         return null;
     }
+    function CheckGETInputWithMaxLength($input, int $input_length) {
+        $input = $this->IsString($input);
+        if (!is_null($input)) {
+            if (strlen($input) <= $input_length) {
+                return $this->PreventXSSForId(urlencode($input));
+            }
+        }
+        return null;
+    }
     function CheckPositiveGETInput($get_input) {
         $get_input = $this->IsIntegerAndPositiveOrZero($get_input);
+        if (!is_null($get_input)) {
+            return $this->PreventXSS(urlencode($get_input));
+        }
+        return null;
+    }
+    function CheckPositiveNonZeroGETInput($get_input) {
+        $get_input = $this->IsIntegerAndPositive($get_input);
         if (!is_null($get_input)) {
             return $this->PreventXSS(urlencode($get_input));
         }

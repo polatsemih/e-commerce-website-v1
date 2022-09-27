@@ -86,7 +86,7 @@ class ActionController extends Controller
                                                             $cookie_authentication_token1 = hash_hmac('SHA512', $extracted_cookie_authentication_token1, $cookie_authentication_salt['data'], false);
                                                             if (!empty($cookie_authentication_token1) && $this->ActionModel->CreateCookieAuthentication(array('user_id' => $two_fa_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'cookie_authentication_token1' => $cookie_authentication_token1, 'cookie_authentication_token2' => $extracted_cookie_authentication_token2, 'cookie_authentication_salt' => $cookie_authentication_salt['data'], 'date_cookie_authentication_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_COOKIE_AUTHENTICATION))))['result'] && $this->UserModel->UpdateUser(array('date_last_login' => date('Y-m-d H:i:s'), 'id' => $two_fa_user_from_database['data']['id']))['result'] && $this->ActionModel->CreateLogLogin(array('user_id' => $two_fa_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'login_success' => 1))['result'] && $this->cookie_control->SetCookie(COOKIE_AUTHENTICATION_NAME, $cookie_authentication_token, time() + (EXPIRY_COOKIE_AUTHENTICATION), COOKIE_PATH, COOKIE_DOMAIN, COOKIE_SECURE, COOKIE_HTTP_ONLY, COOKIE_SAMESITE)) {
                                                                 if (!empty($_SESSION[SESSION_REDIRECT_LOCATION_NAME])) {
-                                                                    if ($_SESSION[SESSION_REDIRECT_LOCATION_NAME] == URL_ORDER_CREDIT) {
+                                                                    if ($_SESSION[SESSION_REDIRECT_LOCATION_NAME] == URL_ORDER_INITIALIZE) {
                                                                         $this->session_control->KillSession(SESSION_REDIRECT_LOCATION_NAME);
                                                                         $this->input_control->Redirect(URL_CART);
                                                                     }
@@ -111,7 +111,7 @@ class ActionController extends Controller
                                                             $_SESSION[SESSION_REFRESH_NAME] = time() + (60 * 15);
                                                             $_SESSION[SESSION_AUTHENTICATION_NAME] = $session_authentication_token['data'];
                                                             if (!empty($_SESSION[SESSION_REDIRECT_LOCATION_NAME])) {
-                                                                if ($_SESSION[SESSION_REDIRECT_LOCATION_NAME] == URL_ORDER_CREDIT) {
+                                                                if ($_SESSION[SESSION_REDIRECT_LOCATION_NAME] == URL_ORDER_INITIALIZE) {
                                                                     $this->session_control->KillSession(SESSION_REDIRECT_LOCATION_NAME);
                                                                     $this->input_control->Redirect(URL_CART);
                                                                 }
@@ -264,7 +264,7 @@ class ActionController extends Controller
                                                                 $cookie_authentication_token1 = hash_hmac('SHA512', $extracted_cookie_authentication_token1, $cookie_authentication_salt['data'], false);
                                                                 if (!empty($cookie_authentication_token1) && $this->ActionModel->CreateCookieAuthentication(array('user_id' => $login_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'cookie_authentication_token1' => $cookie_authentication_token1, 'cookie_authentication_token2' => $extracted_cookie_authentication_token2, 'cookie_authentication_salt' => $cookie_authentication_salt['data'], 'date_cookie_authentication_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_COOKIE_AUTHENTICATION))))['result'] && $this->UserModel->UpdateUser(array('date_last_login' => date('Y-m-d H:i:s'), 'id' => $login_user_from_database['data']['id']))['result'] && $this->ActionModel->CreateLogLogin(array('user_id' => $login_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'login_success' => 1))['result'] && $this->cookie_control->SetCookie(COOKIE_AUTHENTICATION_NAME, $cookie_authentication_token, time() + (EXPIRY_COOKIE_AUTHENTICATION), COOKIE_PATH, COOKIE_DOMAIN, COOKIE_SECURE, COOKIE_HTTP_ONLY, COOKIE_SAMESITE)) {
                                                                     if (!empty($_SESSION[SESSION_REDIRECT_LOCATION_NAME])) {
-                                                                        if ($_SESSION[SESSION_REDIRECT_LOCATION_NAME] == URL_ORDER_CREDIT) {
+                                                                        if ($_SESSION[SESSION_REDIRECT_LOCATION_NAME] == URL_ORDER_INITIALIZE) {
                                                                             $this->session_control->KillSession(SESSION_REDIRECT_LOCATION_NAME);
                                                                             $this->input_control->Redirect(URL_CART);
                                                                         }
@@ -289,7 +289,7 @@ class ActionController extends Controller
                                                                 $_SESSION[SESSION_REFRESH_NAME] = time() + (60 * 15);
                                                                 $_SESSION[SESSION_AUTHENTICATION_NAME] = $session_authentication_token['data'];
                                                                 if (!empty($_SESSION[SESSION_REDIRECT_LOCATION_NAME])) {
-                                                                    if ($_SESSION[SESSION_REDIRECT_LOCATION_NAME] == URL_ORDER_CREDIT) {
+                                                                    if ($_SESSION[SESSION_REDIRECT_LOCATION_NAME] == URL_ORDER_INITIALIZE) {
                                                                         $this->session_control->KillSession(SESSION_REDIRECT_LOCATION_NAME);
                                                                         $this->input_control->Redirect(URL_CART);
                                                                     }
@@ -838,7 +838,7 @@ class ActionController extends Controller
                                                 if (password_needs_rehash($decrypted_hashed_password['data'], PASSWORD_BCRYPT, $bcrypt_options)) {
                                                     $new_hashed_password = password_hash($salted_password, PASSWORD_BCRYPT, $bcrypt_options);
                                                     $encrypted_hashed_password = $this->input_control->EncrypteData($new_hashed_password, PASSWORD_PEPPER);
-                                                    $this->UserModel->UpdateUser(array('password' => $encrypted_hashed_password, 'id' => $login_user_from_database['data']['id']));
+                                                    $this->UserModel->UpdateAdmin(array('password' => $encrypted_hashed_password, 'id' => $login_user_from_database['data']['id']));
                                                 }
                                                 $session_two_fa_token = $this->input_control->GenerateToken();
                                                 $session_two_fa_token_bytes = $this->action_control->GenerateConfirmTokenBytes();
@@ -854,7 +854,7 @@ class ActionController extends Controller
                                                 $this->input_control->Redirect(URL_ADMIN_LOGIN);
                                             } else {
                                                 $this->ActionModel->CreateLogLogin(array('user_id' => $login_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'login_success' => 0));
-                                                $this->UserModel->UpdateUser(array('fail_access_count' => $login_user_from_database['data']['fail_access_count'] + 1, 'date_last_fail_access_attempt' => date('Y-m-d H:i:s'), 'id' => $login_user_from_database['data']['id']));
+                                                $this->UserModel->UpdateAdmin(array('fail_access_count' => $login_user_from_database['data']['fail_access_count'] + 1, 'date_last_fail_access_attempt' => date('Y-m-d H:i:s'), 'id' => $login_user_from_database['data']['id']));
                                             }
                                         } else {
                                             $this->ActionModel->CreateLogLoginEmailFail(array('user_ip' => $_SERVER['REMOTE_ADDR']));
