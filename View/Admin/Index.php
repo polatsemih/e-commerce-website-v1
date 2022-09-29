@@ -15,6 +15,16 @@
         </section>
     </main>
     <?php require_once 'View/SharedAdmin/_admin_footer.php'; ?>
+    <script>
+        $(document).ready(function() {
+            $('#btn-hamburger').click(function() {
+                $.ajax({
+                    url: '<?php echo URL . URL_ADMIN_MENU; ?>',
+                    type: 'POST'
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

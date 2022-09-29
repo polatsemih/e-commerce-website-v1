@@ -412,19 +412,6 @@
                     type: 'POST'
                 });
             });
-            // var request;
-            // var requestUsable = true;
-            // $.each($('.item-gender .gender-select .option'), function(key, option) {
-            //     $(this).click(function() {
-            //         requestUsable = false;
-            //         const form = $('#form-gender-select');
-            //         request = $.ajax({
-            //             url: '<?php echo URL . URL_ADMIN_ITEMS; ?>',
-            //             type: 'GET',
-            //             data: form.serialize()
-            //         });
-            //     });
-            // });
         });
     </script>
 </body>

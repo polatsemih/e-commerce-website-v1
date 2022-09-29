@@ -126,8 +126,8 @@
                         <input id="submit-add-to-cart" class="btn-add-to-cart" type="submit" value="Sepete Ekle">
                     </form>
                     <ul class="info-nav">
-                        <li class="info-item">En geç <?php echo $web_data['item']['item_shipping_time']; ?> gün içerisinde kargoya teslim.</li>
-                        <li class="info-item"><?php echo $web_data['item']['item_give_back_time']; ?> gün içerisinde ücretsiz iade hakkı. Detaylar için <button id="btn-give-back-policy" class="btn-details-policy" title="İade Politakası">nasıl iade ederim?</button></li>
+                        <li class="info-item">En geç 20 gün içerisinde kargoya teslim.</li>
+                        <li class="info-item">Ücretsiz değişim hakkı. Detaylar için <button id="btn-give-back-policy" class="btn-details-policy" title="Değişim Politakası">ürünümü nasıl değiştiririm?</button></li>
                         <div id="popup-wrapper" class="give-back-wrapper disable">
                             <div class="popup-container">
                                 <div id="give-back-exit" class="popup-exit">

@@ -1629,8 +1629,6 @@ class HomeController extends Controller
                                                                 }
                                                                 imagedestroy($src_image);
                                                                 if ($error) {
-                                                                    echo 'a';
-                                                                    exit(0);
                                                                     $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
                                                                     break;
                                                                 }

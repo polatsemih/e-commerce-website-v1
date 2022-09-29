@@ -68,8 +68,18 @@ define('URL_ADMIN_COMMENT_REPLY_APPROVE', 'yonetici-yorum-cevap-onayla');
 define('URL_ADMIN_INDEX', 'yonetici');
 define('URL_ADMIN_LOGOUT', 'yonetici-cikis');
 define('URL_ADMIN_MENU', 'yonetici-menu');
+define('URL_ADMIN_LOGS', 'yonetici-istatistikler');
+define('URL_ADMIN_LOGS_PAGE', 'goruntulenen-sayfalar');
+define('URL_ADMIN_LOGS_ITEM', 'goruntulenen-ürünler');
+define('URL_ADMIN_LOGS_USER', 'kullanicilar');
+define('URL_ADMIN_LOGS_ERROR', 'hatalar');
+define('URL_ADMIN_LOGS_LOGIN', 'giris-denemeleri');
+define('URL_ADMIN_LOGS_EMAIL', 'gonderilen-emailler');
+define('URL_ADMIN_LOGS_CAPTCHA', 'robot-degilim-testleri');
 define('URL_ADMIN_ITEMS', 'yonetici-urunler');
 define('URL_ADMIN_ITEM_DETAILS', 'yonetici-urun');
+define('URL_ADMIN_ITEM_UPDATE', 'yonetici-urun-guncelle');
+define('URL_ADMIN_ITEM_DELETE', 'yonetici-urun-sil');
 define('URL_ADMIN_ITEM_CREATE', 'yonetici-urun-ekle');
 define('URL_ADMIN_ORDERS', 'yonetici-siparisler');
 
@@ -133,8 +143,11 @@ define('URL_MAPS', array(
     array('url' => 'yonetici', 'controller' => 'AdminController', 'action' => 'Index'),
     array('url' => 'yonetici-cikis', 'controller' => 'AdminController', 'action' => 'LogOut'),
     array('url' => 'yonetici-menu', 'controller' => 'AdminController', 'action' => 'Menu'),
+    array('url_pattern' => 'yonetici-istatistikler/?', 'controller' => 'AdminController', 'action' => 'Statistics'),
     array('url' => 'yonetici-urunler', 'controller' => 'AdminController', 'action' => 'Items'),
     array('url_pattern' => 'yonetici-urun/?', 'controller' => 'AdminController', 'action' => 'ItemDetails'),
+    array('url' => 'yonetici-urun-guncelle', 'controller' => 'AdminController', 'action' => 'ItemUpdate'),
+    array('url' => 'yonetici-urun-sil', 'controller' => 'AdminController', 'action' => 'ItemDelete'),
     array('url' => 'yonetici-urun-ekle', 'controller' => 'AdminController', 'action' => 'ItemCreate'),
     array('url' => 'yonetici-siparisler', 'controller' => 'AdminController', 'action' => 'Orders'),
 ));

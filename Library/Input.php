@@ -38,6 +38,12 @@ class Input
         }
         return null;
     }
+    function NumericIsString($input) {
+        if (is_string($input)) {
+            return stripslashes(trim($input));
+        }
+        return null;
+    }
     function IsNumeric($input)
     {
         if (is_numeric($input)) {
@@ -191,7 +197,11 @@ class Input
         $checked_inputs = array();
         $error = array();
         foreach ($posted_inputs as $key => $posted_input) {
-            $input = $this->IsString($posted_input['input']);
+            if (!empty($posted_input['numeric_is_string'])) {
+                $input = $this->NumericIsString($posted_input['input']);
+            } else {
+                $input = $this->IsString($posted_input['input']);
+            }
             if (!is_null($input)) {
                 if (!empty($posted_input['no_white_space'])) {
                     $input = $this->NoWhiteSpace($input);
@@ -254,10 +264,24 @@ class Input
                         return $error;
                     }
                 }
+                if (!empty($posted_input['is_integer_or_zero'])) {
+                    $input = $this->IsIntegerAndPositiveOrZero($input);
+                    if (is_null($input)) {
+                        $error['error_message'] = $posted_input['error_message_is_integer_or_zero'];
+                        return $error;
+                    }
+                }
                 if (!empty($posted_input['is_integer_and_positive'])) {
                     $input = $this->IsIntegerAndPositive($input);
                     if (is_null($input)) {
                         $error['error_message'] = $posted_input['error_message_is_integer_and_positive'];
+                        return $error;
+                    }
+                }
+                if (!empty($posted_input['is_float_and_positive'])) {
+                    $input = $this->IsFloatAndPositive($input);
+                    if (is_null($input)) {
+                        $error['error_message'] = $posted_input['error_message_is_float_and_positive'];
                         return $error;
                     }
                 }
@@ -315,6 +339,26 @@ class Input
             return array('result' => true, 'data' => $item);
         }
         return array('result' => false);
+    }
+    function GetItemImages(array $item)
+    {
+        $item_images = explode('_', $item['item_images']);
+        $item_images_name = array();
+        for ($i = 0; $i < count($item_images); $i++) {
+            $item_images_name[] = explode('-', $item_images[$i]);
+        }
+        $item['item_images'] = $item_images_name;
+        return $item;
+    }
+    function GetItemImagesDirect(string $item)
+    {
+        $item_images = explode('_', $item);
+        $item_images_name = array();
+        for ($i = 0; $i < count($item_images); $i++) {
+            $item_images_name[] = explode('-', $item_images[$i]);
+        }
+        $item = $item_images_name;
+        return $item;
     }
     function GetItemMainImageAndFormatedPrice(array $item)
     {
@@ -399,40 +443,27 @@ class Input
         }
         return array('result' => false);
     }
-
-    
-    
-
-
-
-
-
-
-
-    
-    
-    
-    
-    
-    function IsInteger($input)
+    function GenerateItemFileName()
     {
-        if (is_numeric($input)) {
-            return (int)$input;
+        $generated_token = strtolower(strtr(sodium_bin2base64(random_bytes(3), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING),  array('-' => 'r', '_' => 'f')));
+        if (!empty($generated_token) && strlen($generated_token) == 4) {
+            return array('result' => true, 'data' => $generated_token);
         }
-        return null;
+        return array('result' => false);
     }
-    function IsFloat($input)
+    function GenerateCartId()
     {
-        if (is_numeric($input)) {
-            return (float)$input;
+        $generated_token = strtolower(strtr(sodium_bin2base64(random_bytes(2), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING), array('-' => 'A', '_' => '9')));
+        if (!empty($generated_token) && strlen($generated_token) == 3) {
+            return array('result' => true, 'data' => $generated_token);
         }
-        return null;
+        return array('result' => false);
     }
     function GenerateUrl($url)
     {
         $url = str_replace(array('<', '>', '£', '#', '$', '½', '{', '[', ']', '}', '|', '"', 'é', '!', "'", '^', '+', '%', '&', '(', ')', '=', '*', '?', '_', '@', '€', '₺', '¨', '~', 'æ', 'ß', '´', '`', ',', ';', '.', ':'), '', $url);
-        $old = array('ş', 'Ş', 'ı', 'I', 'İ', 'ğ', 'Ğ', 'ü', 'Ü', 'ö', 'Ö', 'Ç', 'ç', 'x', 'X', 'w', 'W', 'q', 'Q');
-        $new = array('s', 's', 'i', 'i', 'i', 'g', 'g', 'u', 'u', 'o', 'o', 'c', 'c', '', '', '', '', '', '');
+        $old = array('ş', 'Ş', 'ı', 'I', 'İ', 'ğ', 'Ğ', 'ü', 'Ü', 'ö', 'Ö', 'Ç', 'ç');
+        $new = array('s', 's', 'i', 'i', 'i', 'g', 'g', 'u', 'u', 'o', 'o', 'c', 'c');
         $url = str_replace($old, $new, $url);
         $tr = array('ş', 'Ş', 'ı', 'I', 'İ', 'ğ', 'Ğ', 'ü', 'Ü', 'ö', 'Ö', 'Ç', 'ç', '(', ')', '/', ':', ',');
         $eng = array('s', 's', 'i', 'i', 'i', 'g', 'g', 'u', 'u', 'o', 'o', 'c', 'c', '', '', '-', '-', '');

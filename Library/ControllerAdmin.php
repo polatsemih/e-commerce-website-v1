@@ -76,12 +76,4 @@ class ControllerAdmin
         $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_CSRF);
         return false;
     }
-    function KillAuthentication(string $killed_function)
-    {
-        if (!empty($this->web_data['session_authentication_id'])) {
-            $this->ActionModel->UpdateSessionAuthentication(array('is_session_authentication_killed' => 1, 'date_session_authentication_killed' => date('Y-m-d H:i:s'), 'session_authentication_killed_function' => $killed_function, 'id' => $this->web_data['session_authentication_id']));
-            $this->session_control->KillSession(SESSION_AUTHENTICATION_NAME);
-            $this->notification_control->SetNotification('WARNING', TR_NOTIFICATION_SUCCESS_AUTHENTICATION_KILLED);
-        }
-    }
 }

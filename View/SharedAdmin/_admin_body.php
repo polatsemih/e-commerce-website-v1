@@ -1,11 +1,4 @@
 <?php require_once 'View/SharedCommon/_loader.php'; ?>
-<div class="notification-wrapper">
-    <?php if (!empty($_SESSION[SESSION_NOTIFICATION_NAME])) {
-        echo $_SESSION[SESSION_NOTIFICATION_NAME];
-        unset($_SESSION[SESSION_NOTIFICATION_NAME]);
-    }
-    ?>
-</div>
 <nav class="navbar navbar-default<?php echo $web_data['admin_menu'] == 1 ? ' toggler-active' : ''; ?>">
     <div class="navbar-top">
         <i class="navbar-mobile-close-toggler fas fa-times"></i>
@@ -23,7 +16,8 @@
                     <i class="fas fa-angle-right row-right dropdown-toggler-icon"></i>
                 </div>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-link nav-link" href="<?php // echo URL . URL_ADMIN_PROFILE; ?>">Profil</a></li>
+                    <li><a class="dropdown-link nav-link" href="<?php // echo URL . URL_ADMIN_PROFILE; 
+                                                                ?>">Profil</a></li>
                     <li><a class="dropdown-link nav-link" href="<?php echo URL . URL_ADMIN_LOGOUT; ?>">Çıkış Yap</a></li>
                 </ul>
             </li>
@@ -33,6 +27,8 @@
         <li><a class="nav-link" href="<?php echo URL . URL_ADMIN_ITEM_CREATE; ?>">Ürün Ekle</a></li>
         <span class="nav-title">SİPARİŞ AYARLARI</span>
         <li><a class="nav-link" href="<?php echo URL . URL_ADMIN_ORDERS; ?>">Siparişler</a></li>
+        <span class="nav-title">SEYİR DEFTERİ</span>
+        <li><a class="nav-link" href="<?php echo URL . URL_ADMIN_LOGS . '/' . URL_ADMIN_LOGS_PAGE; ?>">Kayıtlar</a></li>
     </ul>
 </nav>
 <div class="admin-panel admin-panel-default<?php echo $web_data['admin_menu'] == 1 ? ' toggler-active' : ''; ?>">
@@ -58,7 +54,8 @@
                         <span class="user-name">Profilim</span>
                         <i class="fas fa-chevron-down dropdown-profile-icon"></i>
                         <ul class="dropdown-profile-menu">
-                            <li><a class="dropdown-profile-link" href="<?php // echo URL . URL_ADMIN_PROFILE; ?>">Profil</a></li>
+                            <li><a class="dropdown-profile-link" href="<?php // echo URL . URL_ADMIN_PROFILE; 
+                                                                        ?>">Profil</a></li>
                             <li><a class="dropdown-profile-link" href="<?php echo URL . URL_ADMIN_LOGOUT; ?>">Çıkış Yap</a></li>
                         </ul>
                     </div>
@@ -66,3 +63,11 @@
             </div>
         </div>
     </header>
+    <main>
+        <div class="notification-wrapper">
+            <?php if (!empty($_SESSION[SESSION_NOTIFICATION_NAME])) {
+                echo $_SESSION[SESSION_NOTIFICATION_NAME];
+                unset($_SESSION[SESSION_NOTIFICATION_NAME]);
+            }
+            ?>
+        </div>

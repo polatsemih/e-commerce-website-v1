@@ -41,10 +41,6 @@ class AdminController extends ControllerAdmin
             $this->input_control->Redirect();
         }
     }
-    function Index()
-    {
-        parent::GetView('Admin/Index', $this->web_data);
-    }
     function LogOut()
     {
         try {
@@ -79,6 +75,22 @@ class AdminController extends ControllerAdmin
                 $_SESSION[SESSION_ADMIN_MENU_NAME] = false;
             } else {
                 $_SESSION[SESSION_ADMIN_MENU_NAME] = true;
+            }
+        }
+    }
+    function Index()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl();
+                parent::GetView('Admin/Index', $this->web_data);
+            }
+            $this->input_control->Redirect(URL_EXCEPTION);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function Index | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
             }
         }
     }
@@ -313,12 +325,53 @@ class AdminController extends ControllerAdmin
     function ItemDetails(string $item_url)
     {
         try {
-            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-                $this->input_control->CheckUrl();
-
-                echo $item_url;
-
-                parent::GetView('Admin/ItemDetails', $this->web_data);
+            $sizes_from_database = $this->AdminModel->GetSizes();
+            $genders_from_database = $this->AdminModel->GetGenders();
+            $categories_from_database = $this->AdminModel->GetCategories();
+            $colors_from_database = $this->AdminModel->GetColors();
+            if ($sizes_from_database['result'] && $genders_from_database['result'] && $categories_from_database['result'] && $colors_from_database['result']) {
+                if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                    $this->input_control->CheckUrl();
+                    $item_details_from_database = $this->AdminModel->GetItemDetails($item_url);
+                    if ($item_details_from_database['result']) {
+                        $this->web_data['item'] = $this->input_control->GetItemImages($item_details_from_database['data']);
+                    }
+                    $this->web_data['sizes'] = $sizes_from_database['data'];
+                    $this->web_data['genders'] = $genders_from_database['data'];
+                    $this->web_data['categories'] = $categories_from_database['data'];
+                    $this->web_data['colors'] = $colors_from_database['data'];
+                    if (!empty($_SESSION[SESSION_WEB_DATA_NAME])) {
+                        if (isset($_SESSION[SESSION_WEB_DATA_NAME]['item_name']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_keywords']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_description']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_price']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_discount_price']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_collection'])  && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_material']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_cut_model']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_thickness']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_pattern']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_lapel']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_sleeve_type']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_sleeve_length']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_sleeve_length']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_washing_style']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_model_size']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_model_height']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_model_weight']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_total_quantity']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['gender']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['category']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['sizes']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['colors']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['is_item_for_sale']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['is_item_home'])) {
+                            $this->web_data['item_name'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_name'];
+                            $this->web_data['item_keywords'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_keywords'];
+                            $this->web_data['item_description'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_description'];
+                            $this->web_data['item_price'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_price'];
+                            $this->web_data['item_discount_price'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_discount_price'];
+                            $this->web_data['item_collection'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_collection'];
+                            $this->web_data['item_material'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_material'];
+                            $this->web_data['item_cut_model'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_cut_model'];
+                            $this->web_data['item_thickness'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_thickness'];
+                            $this->web_data['item_pattern'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_pattern'];
+                            $this->web_data['item_lapel'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_lapel'];
+                            $this->web_data['item_sleeve_type'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_sleeve_type'];
+                            $this->web_data['item_sleeve_length'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_sleeve_length'];
+                            $this->web_data['item_washing_style'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_washing_style'];
+                            $this->web_data['item_model_size'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_model_size'];
+                            $this->web_data['item_model_height'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_model_height'];
+                            $this->web_data['item_model_weight'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_model_weight'];
+                            $this->web_data['item_total_quantity'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_total_quantity'];
+                            $this->web_data['posted_gender'] = $_SESSION[SESSION_WEB_DATA_NAME]['gender'];
+                            $this->web_data['posted_category'] = $_SESSION[SESSION_WEB_DATA_NAME]['category'];
+                            $this->web_data['posted_sizes'] = $_SESSION[SESSION_WEB_DATA_NAME]['sizes'];
+                            $this->web_data['posted_colors'] = $_SESSION[SESSION_WEB_DATA_NAME]['colors'];
+                            $this->web_data['is_item_for_sale'] = $_SESSION[SESSION_WEB_DATA_NAME]['is_item_for_sale'];
+                            $this->web_data['is_item_home'] = $_SESSION[SESSION_WEB_DATA_NAME]['is_item_home'];
+                        }
+                        $this->session_control->KillSession(SESSION_WEB_DATA_NAME);
+                    }
+                    $this->web_data['form_token'] = parent::SetCSRFToken('AdminItemUpdate');
+                    parent::GetView('Admin/ItemDetails', $this->web_data);
+                }
             }
             $this->input_control->Redirect(URL_ADMIN_INDEX);
         } catch (\Throwable $th) {
@@ -332,16 +385,605 @@ class AdminController extends ControllerAdmin
     function ItemCreate()
     {
         try {
-            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-                $this->input_control->CheckUrl();
-
-
-
-                parent::GetView('Admin/ItemCreate', $this->web_data);
+            $sizes_from_database = $this->AdminModel->GetSizes();
+            $genders_from_database = $this->AdminModel->GetGenders();
+            $categories_from_database = $this->AdminModel->GetCategories();
+            $colors_from_database = $this->AdminModel->GetColors();
+            if ($sizes_from_database['result'] && $genders_from_database['result'] && $categories_from_database['result'] && $colors_from_database['result']) {
+                if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                    $this->input_control->CheckUrl();
+                    $this->web_data['sizes'] = $sizes_from_database['data'];
+                    $this->web_data['genders'] = $genders_from_database['data'];
+                    $this->web_data['categories'] = $categories_from_database['data'];
+                    $this->web_data['colors'] = $colors_from_database['data'];
+                    $this->web_data['form_token'] = parent::SetCSRFToken('AdminItemCreate');
+                    if (!empty($_SESSION[SESSION_WEB_DATA_NAME])) {
+                        if (isset($_SESSION[SESSION_WEB_DATA_NAME]['item_name']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_keywords']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_description']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_price']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_discount_price']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_collection'])  && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_material']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_cut_model']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_thickness']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_pattern']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_lapel']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_sleeve_type']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_sleeve_length']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_sleeve_length']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_washing_style']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_model_size']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_model_height']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_model_weight']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['item_total_quantity']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['gender']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['category']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['sizes']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['colors']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['is_item_for_sale']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['is_item_home'])) {
+                            $this->web_data['item_name'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_name'];
+                            $this->web_data['item_keywords'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_keywords'];
+                            $this->web_data['item_description'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_description'];
+                            $this->web_data['item_price'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_price'];
+                            $this->web_data['item_discount_price'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_discount_price'];
+                            $this->web_data['item_collection'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_collection'];
+                            $this->web_data['item_material'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_material'];
+                            $this->web_data['item_cut_model'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_cut_model'];
+                            $this->web_data['item_thickness'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_thickness'];
+                            $this->web_data['item_pattern'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_pattern'];
+                            $this->web_data['item_lapel'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_lapel'];
+                            $this->web_data['item_sleeve_type'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_sleeve_type'];
+                            $this->web_data['item_sleeve_length'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_sleeve_length'];
+                            $this->web_data['item_washing_style'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_washing_style'];
+                            $this->web_data['item_model_size'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_model_size'];
+                            $this->web_data['item_model_height'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_model_height'];
+                            $this->web_data['item_model_weight'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_model_weight'];
+                            $this->web_data['item_total_quantity'] = $_SESSION[SESSION_WEB_DATA_NAME]['item_total_quantity'];
+                            $this->web_data['posted_gender'] = $_SESSION[SESSION_WEB_DATA_NAME]['gender'];
+                            $this->web_data['posted_category'] = $_SESSION[SESSION_WEB_DATA_NAME]['category'];
+                            $this->web_data['posted_sizes'] = $_SESSION[SESSION_WEB_DATA_NAME]['sizes'];
+                            $this->web_data['posted_colors'] = $_SESSION[SESSION_WEB_DATA_NAME]['colors'];
+                            $this->web_data['is_item_for_sale'] = $_SESSION[SESSION_WEB_DATA_NAME]['is_item_for_sale'];
+                            $this->web_data['is_item_home'] = $_SESSION[SESSION_WEB_DATA_NAME]['is_item_home'];
+                        }
+                        $this->session_control->KillSession(SESSION_WEB_DATA_NAME);
+                    }
+                    parent::GetView('Admin/ItemCreate', $this->web_data);
+                } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                    $item_name = isset($_POST['item_name']) ? $_POST['item_name'] : '';
+                    $item_keywords = isset($_POST['item_keywords']) ? $_POST['item_keywords'] : '';
+                    $item_description = isset($_POST['item_description']) ? $_POST['item_description'] : '';
+                    $item_price = isset($_POST['item_price']) ? $_POST['item_price'] : '';
+                    $item_discount_price = isset($_POST['item_discount_price']) ? $_POST['item_discount_price'] : '';
+                    $item_collection = isset($_POST['item_collection']) ? $_POST['item_collection'] : '';
+                    $item_material = isset($_POST['item_material']) ? $_POST['item_material'] : '';
+                    $item_cut_model = isset($_POST['item_cut_model']) ? $_POST['item_cut_model'] : '';
+                    $item_thickness = isset($_POST['item_thickness']) ? $_POST['item_thickness'] : '';
+                    $item_pattern = isset($_POST['item_pattern']) ? $_POST['item_pattern'] : '';
+                    $item_lapel = isset($_POST['item_lapel']) ? $_POST['item_lapel'] : '';
+                    $item_sleeve_type = isset($_POST['item_sleeve_type']) ? $_POST['item_sleeve_type'] : '';
+                    $item_sleeve_length = isset($_POST['item_sleeve_length']) ? $_POST['item_sleeve_length'] : '';
+                    $item_washing_style = isset($_POST['item_washing_style']) ? $_POST['item_washing_style'] : '';
+                    $item_model_size = isset($_POST['item_model_size']) ? $_POST['item_model_size'] : '';
+                    $item_model_height = isset($_POST['item_model_height']) ? $_POST['item_model_height'] : '';
+                    $item_model_weight = isset($_POST['item_model_weight']) ? $_POST['item_model_weight'] : '';
+                    $item_total_quantity = isset($_POST['item_total_quantity']) ? $_POST['item_total_quantity'] : '';
+                    $gender = isset($_POST['gender']) ? $_POST['gender'] : '';
+                    $category = isset($_POST['category']) ? $_POST['category'] : '';
+                    $is_item_for_sale = isset($_POST['is_item_for_sale']) ? 1 : 0;
+                    $is_item_home = isset($_POST['is_item_home']) ? 1 : 0;
+                    $check_posted_inputs = array(
+                        'item_name' => array('input' => $item_name, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_NAME, 'length_control' => true, 'max_length' => 45, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_NAME_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 45, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_NAME_MAX_LENGTH),
+                        'item_keywords' => array('input' => $item_keywords, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_KEYWORDS, 'length_control' => true, 'max_length' => 100, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_KEYWORDS_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 100, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_KEYWORDS_MAX_LENGTH),
+                        'item_description' => array('input' => $item_description, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_DESCRIPTION, 'length_control' => true, 'max_length' => 160, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_DESCRIPTION_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 200, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_DESCRIPTION_MAX_LENGTH),
+                        'item_price' => array('input' => $item_price, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_PRICE, 'preventxss' => true, 'is_float_and_positive' => true, 'error_message_is_float_and_positive' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_PRICE_NOT_POSITIVE),
+                        'item_discount_price' => array('input' => $item_discount_price, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_DISCOUNT_PRICE, 'preventxss' => true, 'is_float_and_positive' => true, 'error_message_is_float_and_positive' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_DISCOUNT_PRICE_NOT_POSITIVE),
+                        'item_collection' => array('input' => $item_collection, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_COLLECTION, 'length_control' => true, 'max_length' => 50, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_COLLECTION_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 50, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_COLLECTION_MAX_LENGTH),
+                        'item_material' => array('input' => $item_material, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_MATERIAL, 'length_control' => true, 'max_length' => 50, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MATERIAL_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 50, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MATERIAL_MAX_LENGTH),
+                        'item_cut_model' => array('input' => $item_cut_model, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_CUTMODEL, 'length_control' => true, 'max_length' => 50, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_CUTMODEL_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 50, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_CUTMODEL_MAX_LENGTH),
+                        'item_thickness' => array('input' => $item_thickness, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_THICKNESS, 'length_control' => true, 'max_length' => 50, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_THICKNESS_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 50, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_THICKNESS_MAX_LENGTH),
+                        'item_pattern' => array('input' => $item_pattern, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_PATTERN, 'length_control' => true, 'max_length' => 50, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_PATTERN_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 50, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_PATTERN_MAX_LENGTH),
+                        'item_lapel' => array('input' => $item_lapel, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_LAPEL, 'length_control' => true, 'max_length' => 50, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_LAPEL_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 50, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_LAPEL_MAX_LENGTH),
+                        'item_sleeve_type' => array('input' => $item_sleeve_type, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_SLEEVE_TYPE, 'length_control' => true, 'max_length' => 50, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_SLEEVE_TYPE_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 50, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_SLEEVE_TYPE_MAX_LENGTH),
+                        'item_sleeve_length' => array('input' => $item_sleeve_length, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_SLEEVE_LENGTH, 'length_control' => true, 'max_length' => 50, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_SLEEVE_LENGTH_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 50, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_SLEEVE_LENGTH_MAX_LENGTH),
+                        'item_washing_style' => array('input' => $item_washing_style, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_WASHING_STYLE, 'length_control' => true, 'max_length' => 200, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_WASHING_STYLE_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 200, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_WASHING_STYLE_MAX_LENGTH),
+                        'item_model_size' => array('input' => $item_model_size, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_MODEL_SIZE, 'length_control' => true, 'max_length' => 3, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MODEL_SIZE_NOT_VALID, 'preventxss' => true, 'length_limit' => 3, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MODEL_SIZE_NOT_VALID),
+                        'item_model_height' => array('input' => $item_model_height, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_MODEL_HEIGHT, 'length_control' => true, 'max_length' => 3, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MODEL_HEIGHT_NOT_VALID, 'preventxss' => true, 'length_limit' => 3, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MODEL_HEIGHT_NOT_VALID, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MODEL_HEIGHT_NOT_VALID),
+                        'item_model_weight' => array('input' => $item_model_weight, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_MODEL_WEIGHT, 'length_control' => true, 'max_length' => 3, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MODEL_WEIGHT_NOT_VALID, 'preventxss' => true, 'length_limit' => 3, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MODEL_WEIGHT_NOT_VALID, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MODEL_WEIGHT_NOT_VALID),
+                        'item_total_quantity' => array('input' => $item_total_quantity, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_TOTAL_QUANTITY, 'length_control' => true, 'max_length' => 8, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_TOTAL_QUANTITY_NOT_VALID, 'preventxss' => true, 'length_limit' => 8, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_TOTAL_QUANTITY_NOT_VALID, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_TOTAL_QUANTITY_NOT_VALID),
+                        'gender' => array('input' => $gender, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_GENDER, 'length_control' => true, 'max_length' => 250, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_GENDER_MAX_LENGTH, 'preventxssforid' => true, 'length_limit' => 250, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_GENDER_MAX_LENGTH),
+                        'category' => array('input' => $category, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_CATEGORY, 'length_control' => true, 'max_length' => 250, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_CATEGORY_MAX_LENGTH, 'preventxssforid' => true, 'length_limit' => 250, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_CATEGORY_MAX_LENGTH),
+                        'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                    );
+                    $posted_sizes = array();
+                    foreach ($sizes_from_database['data'] as $size) {
+                        $posted_sizes[$size['size_url']] = isset($_POST[$size['size_url']]) ? $_POST[$size['size_url']] : '';
+                        $check_posted_inputs[$size['size_url']] = array('input' => isset($_POST[$size['size_url']]) ? $_POST[$size['size_url']] : '', 'numeric_is_string' => true, 'length_control' => true, 'max_length' => 8, 'error_message_max_length' => 'Ürün ' . $size['size_name'] . ' adedi geçerli değil', 'preventxss' => true, 'length_limit' => 8, 'error_message_length_limit' => 'Ürün ' . $size['size_name'] . ' adedi geçerli değil', 'is_integer_or_zero' => true, 'error_message_is_integer_or_zero' => 'Ürün ' . $size['size_name'] . ' adedi geçerli değil');
+                    }
+                    $posted_colors = array();
+                    foreach ($colors_from_database['data'] as $color) {
+                        $posted_colors[$color['color_url']] = isset($_POST[$color['color_url']]) ? 1 : 0;
+                    }
+                    $checked_inputs = $this->input_control->CheckPostedInputs($check_posted_inputs);
+                    if (empty($checked_inputs['error_message'])) {
+                        if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'AdminItemCreate')) {
+                            $size_quantity = 0;
+                            foreach ($sizes_from_database['data'] as $size) {
+                                $size_quantity += $checked_inputs[$size['size_url']];
+                            }
+                            if ($checked_inputs['item_total_quantity'] == $size_quantity) {
+                                if (!empty($_FILES['item_images']) && is_array($_FILES['item_images']) && count($_FILES['item_images']['name']) >= 3 && count($_FILES['item_images']['name']) <= 6) {
+                                    $item_image_folder_create = false;
+                                    do {
+                                        $folder_name = $this->input_control->GenerateFolderName();
+                                        if ($folder_name['result']) {
+                                            $is_folder_unique = $this->AdminModel->IsItemImagePathUnique($folder_name['data']);
+                                            if (!$is_folder_unique['result'] && !empty($is_folder_unique['empty'])) {
+                                                $new_image_folder_name = 'assets/images/items/' . $folder_name['data'];
+                                                if (!is_dir($new_image_folder_name) && mkdir($new_image_folder_name, 0777, true)) {
+                                                    $item_image_folder_create = true;
+                                                    break;
+                                                }
+                                            }
+                                        } else {
+                                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_IMAGES);
+                                            break;
+                                        }
+                                    } while (true);
+                                    $image_file_name = $this->input_control->GenerateItemFileName();
+                                    if (!$image_file_name['result']) {
+                                        $item_image_folder_create = false;
+                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_IMAGES);
+                                    }
+                                    $item_image_create = true;
+                                    $item_images_for_db = '';
+                                    if ($item_image_folder_create) {
+                                        for ($i = 0; $i < count($_FILES['item_images']['name']); $i++) {
+                                            if ($_FILES['item_images']['error'][$i] == 0) {
+                                                if ($_FILES['item_images']['size'][$i] <= (1024 * 1024 * 10)) {
+                                                    if ($_FILES['item_images']['type'][$i] == 'image/png') {
+                                                        $image_type = 'png';
+                                                    } elseif ($_FILES['item_images']['type'][$i] == 'image/jpeg') {
+                                                        $image_type = 'jpg';
+                                                    } else {
+                                                        $item_image_create = false;
+                                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_ITEM_IMAGES_EXTENSION);
+                                                        break;
+                                                    }
+                                                    if (!empty($image_type)) {
+                                                        $dst_width = 1200;
+                                                        $dst_width_mini = 129;
+                                                        $dst_height = 1800;
+                                                        $dst_height_mini = 193;
+                                                        $dst_image = imagecreatetruecolor($dst_width, $dst_height);
+                                                        $dst_image_mini = imagecreatetruecolor($dst_width_mini, $dst_height_mini);
+                                                        $image_infos = getimagesize($_FILES['item_images']['tmp_name'][$i]);
+                                                        if (!empty($dst_image) && !empty($dst_image_mini) && !empty($image_infos)) {
+                                                            if ($image_infos[2] == 2) {
+                                                                $src_image = imagecreatefromjpeg($_FILES['item_images']['tmp_name'][$i]);
+                                                                if (!empty($src_image) && imagecopyresampled($dst_image, $src_image, 0, 0, 0, 0, $dst_width, $dst_height, $image_infos[0], $image_infos[1]) && imagejpeg($dst_image, $new_image_folder_name . '/' . $image_file_name['data'] . $i . '.' . $image_type, 100) && imagecopyresampled($dst_image_mini, $src_image, 0, 0, 0, 0, $dst_width_mini, $dst_height_mini, $image_infos[0], $image_infos[1]) && imagejpeg($dst_image_mini, $new_image_folder_name . '/mini' . $image_file_name['data'] . $i . '.' . $image_type, 100)) {
+                                                                    $item_images_for_db .= ($i + 1) . '-' . $image_file_name['data'] . $i . '.' . $image_type . '_';
+                                                                } else {
+                                                                    $item_image_create = false;
+                                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_IMAGES);
+                                                                    break;
+                                                                }
+                                                                imagedestroy($src_image);
+                                                            } elseif ($image_infos[2] == 3) {
+                                                                $src_image = imagecreatefrompng($_FILES['item_images']['tmp_name'][$i]);
+                                                                if (!empty($src_image) && imagecopyresampled($dst_image, $src_image, 0, 0, 0, 0, $dst_width, $dst_height, $image_infos[0], $image_infos[1]) && imagepng($dst_image, $new_image_folder_name . '/' . $image_file_name['data'] . $i . '.' . $image_type, 9) && imagecopyresampled($dst_image_mini, $src_image, 0, 0, 0, 0, $dst_width_mini, $dst_height_mini, $image_infos[0], $image_infos[1]) && imagepng($dst_image_mini, $new_image_folder_name . '/mini' . $image_file_name['data'] . $i . '.' . $image_type, 9)) {
+                                                                    $item_images_for_db .= ($i + 1) . '-' . $image_file_name['data'] . $i . '.' . $image_type . '_';
+                                                                } else {
+                                                                    $item_image_create = false;
+                                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_IMAGES);
+                                                                    break;
+                                                                }
+                                                                imagedestroy($src_image);
+                                                            } else {
+                                                                $item_image_create = false;
+                                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_IMAGES);
+                                                                break;
+                                                            }
+                                                        } else {
+                                                            $item_image_create = false;
+                                                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_IMAGES);
+                                                            break;
+                                                        }
+                                                    }
+                                                } else {
+                                                    $item_image_create = false;
+                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_IMAGES_SIZE_LIMIT);
+                                                    break;
+                                                }
+                                            } else {
+                                                $item_image_create = false;
+                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_IMAGES);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if ($item_image_create && !empty($item_images_for_db)) {
+                                        $cart_id = $this->input_control->GenerateCartId();
+                                        if ($cart_id['result']) {
+                                            $is_item_cart_id_unique = $this->AdminModel->IsItemCartIdUnique($cart_id['data']);
+                                            if (!$is_item_cart_id_unique['result'] && !empty($is_item_cart_id_unique['empty'])) {
+                                                $item_url = $this->input_control->GenerateUrl($checked_inputs['item_name']);
+                                                $is_item_url_unique = $this->AdminModel->IsItemUrlUnique($item_url);
+                                                if (!$is_item_url_unique['result'] && !empty($is_item_url_unique['empty'])) {
+                                                    $create_item_array = array(
+                                                        'item_cart_id' => $cart_id['data'],
+                                                        'is_item_home' => $is_item_home,
+                                                        'is_item_for_sale' => $is_item_for_sale,
+                                                        'item_keywords' => $checked_inputs['item_keywords'],
+                                                        'item_description' => $checked_inputs['item_description'],
+                                                        'item_name' => $checked_inputs['item_name'],
+                                                        'item_name' => $checked_inputs['item_name'],
+                                                        'item_url' => $item_url,
+                                                        'item_price' => $checked_inputs['item_price'],
+                                                        'item_discount_price' => $checked_inputs['item_discount_price'],
+                                                        'item_collection' => $checked_inputs['item_collection'],
+                                                        'item_material' => $checked_inputs['item_material'],
+                                                        'item_cut_model' => $checked_inputs['item_cut_model'],
+                                                        'item_thickness' => $checked_inputs['item_thickness'],
+                                                        'item_pattern' => $checked_inputs['item_pattern'],
+                                                        'item_lapel' => $checked_inputs['item_lapel'],
+                                                        'item_sleeve_type' => $checked_inputs['item_sleeve_type'],
+                                                        'item_sleeve_length' => $checked_inputs['item_sleeve_length'],
+                                                        'item_washing_style' => $checked_inputs['item_washing_style'],
+                                                        'item_model_size' => $checked_inputs['item_model_size'],
+                                                        'item_model_height' => $checked_inputs['item_model_height'],
+                                                        'item_model_weight' => $checked_inputs['item_model_weight'],
+                                                        'item_images_path' => $folder_name['data'],
+                                                        'item_images' => rtrim($item_images_for_db, '_'),
+                                                        'item_total_quantity' => $checked_inputs['item_total_quantity'],
+                                                        'gender' => $checked_inputs['gender'],
+                                                        'category' => $checked_inputs['category'],
+                                                    );
+                                                    foreach ($sizes_from_database['data'] as $size) {
+                                                        $create_item_array[$size['size_url']] = $checked_inputs[$size['size_url']];
+                                                    }
+                                                    foreach ($colors_from_database['data'] as $color) {
+                                                        $create_item_array[$color['color_url']] = isset($_POST[$color['color_url']]) ? 1 : 0;
+                                                    }
+                                                    $result_item_create = $this->AdminModel->CreateItem($create_item_array);
+                                                    if ($result_item_create['result']) {
+                                                        $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_ADMIN_SUCCESS_ITEM_CREATE);
+                                                        $this->input_control->Redirect(URL_ADMIN_ITEMS);
+                                                    } else {
+                                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_CREATE);
+                                                    }
+                                                } else {
+                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_NOT_UNIQUE_URL);
+                                                }
+                                            } else {
+                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_CREATE);
+                                            }
+                                        } else {
+                                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_CREATE);
+                                        }
+                                    }
+                                } else {
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_IMAGES);
+                                }
+                            } else {
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_QUNATITY_NOT_EQUAL);
+                            }
+                        }
+                    } else {
+                        $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                    }
+                    $_SESSION[SESSION_WEB_DATA_NAME] = array(
+                        'item_name' => $item_name,
+                        'item_keywords' => $item_keywords,
+                        'item_description' => $item_description,
+                        'item_price' => $item_price,
+                        'item_discount_price' => $item_discount_price,
+                        'item_collection' => $item_collection,
+                        'item_material' => $item_material,
+                        'item_cut_model' => $item_cut_model,
+                        'item_thickness' => $item_thickness,
+                        'item_pattern' => $item_pattern,
+                        'item_lapel' => $item_lapel,
+                        'item_sleeve_type' => $item_sleeve_type,
+                        'item_sleeve_length' => $item_sleeve_length,
+                        'item_washing_style' => $item_washing_style,
+                        'item_model_size' => $item_model_size,
+                        'item_model_height' => $item_model_height,
+                        'item_model_weight' => $item_model_weight,
+                        'item_total_quantity' => $item_total_quantity,
+                        'gender' => $gender,
+                        'category' => $category,
+                        'sizes' => $posted_sizes,
+                        'colors' => $posted_colors,
+                        'is_item_for_sale' => $is_item_for_sale,
+                        'is_item_home' => $is_item_home,
+                    );
+                    $this->input_control->Redirect(URL_ADMIN_ITEM_CREATE);
+                }
             }
             $this->input_control->Redirect(URL_ADMIN_INDEX);
         } catch (\Throwable $th) {
             if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function ItemCreate | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function ItemUpdate()
+    {
+        try {
+            $sizes_from_database = $this->AdminModel->GetSizes();
+            $genders_from_database = $this->AdminModel->GetGenders();
+            $categories_from_database = $this->AdminModel->GetCategories();
+            $colors_from_database = $this->AdminModel->GetColors();
+            if ($sizes_from_database['result'] && $genders_from_database['result'] && $categories_from_database['result'] && $colors_from_database['result']) {
+                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                    $item_hidden_url = $this->input_control->CheckGETInput(isset($_POST['item_hidden_url']) ? $_POST['item_hidden_url'] : '');
+                    $item_name = isset($_POST['item_name']) ? $_POST['item_name'] : '';
+                    $item_keywords = isset($_POST['item_keywords']) ? $_POST['item_keywords'] : '';
+                    $item_description = isset($_POST['item_description']) ? $_POST['item_description'] : '';
+                    $item_price = isset($_POST['item_price']) ? $_POST['item_price'] : '';
+                    $item_discount_price = isset($_POST['item_discount_price']) ? $_POST['item_discount_price'] : '';
+                    $item_collection = isset($_POST['item_collection']) ? $_POST['item_collection'] : '';
+                    $item_material = isset($_POST['item_material']) ? $_POST['item_material'] : '';
+                    $item_cut_model = isset($_POST['item_cut_model']) ? $_POST['item_cut_model'] : '';
+                    $item_thickness = isset($_POST['item_thickness']) ? $_POST['item_thickness'] : '';
+                    $item_pattern = isset($_POST['item_pattern']) ? $_POST['item_pattern'] : '';
+                    $item_lapel = isset($_POST['item_lapel']) ? $_POST['item_lapel'] : '';
+                    $item_sleeve_type = isset($_POST['item_sleeve_type']) ? $_POST['item_sleeve_type'] : '';
+                    $item_sleeve_length = isset($_POST['item_sleeve_length']) ? $_POST['item_sleeve_length'] : '';
+                    $item_washing_style = isset($_POST['item_washing_style']) ? $_POST['item_washing_style'] : '';
+                    $item_model_size = isset($_POST['item_model_size']) ? $_POST['item_model_size'] : '';
+                    $item_model_height = isset($_POST['item_model_height']) ? $_POST['item_model_height'] : '';
+                    $item_model_weight = isset($_POST['item_model_weight']) ? $_POST['item_model_weight'] : '';
+                    $item_total_quantity = isset($_POST['item_total_quantity']) ? $_POST['item_total_quantity'] : '';
+                    $gender = isset($_POST['gender']) ? $_POST['gender'] : '';
+                    $category = isset($_POST['category']) ? $_POST['category'] : '';
+                    $is_item_for_sale = isset($_POST['is_item_for_sale']) ? 1 : 0;
+                    $is_item_home = isset($_POST['is_item_home']) ? 1 : 0;
+                    $check_posted_inputs = array(
+                        'item_name' => array('input' => $item_name, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_NAME, 'length_control' => true, 'max_length' => 45, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_NAME_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 45, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_NAME_MAX_LENGTH),
+                        'item_keywords' => array('input' => $item_keywords, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_KEYWORDS, 'length_control' => true, 'max_length' => 100, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_KEYWORDS_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 100, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_KEYWORDS_MAX_LENGTH),
+                        'item_description' => array('input' => $item_description, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_DESCRIPTION, 'length_control' => true, 'max_length' => 160, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_DESCRIPTION_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 200, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_DESCRIPTION_MAX_LENGTH),
+                        'item_price' => array('input' => $item_price, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_PRICE, 'preventxss' => true, 'is_float_and_positive' => true, 'error_message_is_float_and_positive' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_PRICE_NOT_POSITIVE),
+                        'item_discount_price' => array('input' => $item_discount_price, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_DISCOUNT_PRICE, 'preventxss' => true, 'is_float_and_positive' => true, 'error_message_is_float_and_positive' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_DISCOUNT_PRICE_NOT_POSITIVE),
+                        'item_collection' => array('input' => $item_collection, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_COLLECTION, 'length_control' => true, 'max_length' => 50, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_COLLECTION_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 50, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_COLLECTION_MAX_LENGTH),
+                        'item_material' => array('input' => $item_material, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_MATERIAL, 'length_control' => true, 'max_length' => 50, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MATERIAL_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 50, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MATERIAL_MAX_LENGTH),
+                        'item_cut_model' => array('input' => $item_cut_model, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_CUTMODEL, 'length_control' => true, 'max_length' => 50, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_CUTMODEL_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 50, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_CUTMODEL_MAX_LENGTH),
+                        'item_thickness' => array('input' => $item_thickness, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_THICKNESS, 'length_control' => true, 'max_length' => 50, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_THICKNESS_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 50, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_THICKNESS_MAX_LENGTH),
+                        'item_pattern' => array('input' => $item_pattern, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_PATTERN, 'length_control' => true, 'max_length' => 50, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_PATTERN_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 50, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_PATTERN_MAX_LENGTH),
+                        'item_lapel' => array('input' => $item_lapel, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_LAPEL, 'length_control' => true, 'max_length' => 50, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_LAPEL_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 50, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_LAPEL_MAX_LENGTH),
+                        'item_sleeve_type' => array('input' => $item_sleeve_type, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_SLEEVE_TYPE, 'length_control' => true, 'max_length' => 50, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_SLEEVE_TYPE_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 50, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_SLEEVE_TYPE_MAX_LENGTH),
+                        'item_sleeve_length' => array('input' => $item_sleeve_length, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_SLEEVE_LENGTH, 'length_control' => true, 'max_length' => 50, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_SLEEVE_LENGTH_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 50, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_SLEEVE_LENGTH_MAX_LENGTH),
+                        'item_washing_style' => array('input' => $item_washing_style, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_WASHING_STYLE, 'length_control' => true, 'max_length' => 200, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_WASHING_STYLE_MAX_LENGTH, 'preventxss' => true, 'length_limit' => 200, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_WASHING_STYLE_MAX_LENGTH),
+                        'item_model_size' => array('input' => $item_model_size, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_MODEL_SIZE, 'length_control' => true, 'max_length' => 3, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MODEL_SIZE_NOT_VALID, 'preventxss' => true, 'length_limit' => 3, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MODEL_SIZE_NOT_VALID),
+                        'item_model_height' => array('input' => $item_model_height, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_MODEL_HEIGHT, 'length_control' => true, 'max_length' => 3, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MODEL_HEIGHT_NOT_VALID, 'preventxss' => true, 'length_limit' => 3, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MODEL_HEIGHT_NOT_VALID, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MODEL_HEIGHT_NOT_VALID),
+                        'item_model_weight' => array('input' => $item_model_weight, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_MODEL_WEIGHT, 'length_control' => true, 'max_length' => 3, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MODEL_WEIGHT_NOT_VALID, 'preventxss' => true, 'length_limit' => 3, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MODEL_WEIGHT_NOT_VALID, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_MODEL_WEIGHT_NOT_VALID),
+                        'item_total_quantity' => array('input' => $item_total_quantity, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_TOTAL_QUANTITY, 'length_control' => true, 'max_length' => 8, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_TOTAL_QUANTITY_NOT_VALID, 'preventxss' => true, 'length_limit' => 8, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_TOTAL_QUANTITY_NOT_VALID, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_TOTAL_QUANTITY_NOT_VALID),
+                        'gender' => array('input' => $gender, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_GENDER, 'length_control' => true, 'max_length' => 250, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_GENDER_MAX_LENGTH, 'preventxssforid' => true, 'length_limit' => 250, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_GENDER_MAX_LENGTH),
+                        'category' => array('input' => $category, 'error_message_empty' => TR_NOTIFICATION_ADMIN_ERROR_EMPTY_ITEM_CATEGORY, 'length_control' => true, 'max_length' => 250, 'error_message_max_length' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_CATEGORY_MAX_LENGTH, 'preventxssforid' => true, 'length_limit' => 250, 'error_message_length_limit' => TR_NOTIFICATION_ADMIN_ERROR_ITEM_CATEGORY_MAX_LENGTH),
+                        'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                    );
+                    $posted_sizes = array();
+                    foreach ($sizes_from_database['data'] as $size) {
+                        $posted_sizes[$size['size_url']] = isset($_POST[$size['size_url']]) ? $_POST[$size['size_url']] : '';
+                        $check_posted_inputs[$size['size_url']] = array('input' => isset($_POST[$size['size_url']]) ? $_POST[$size['size_url']] : '', 'numeric_is_string' => true, 'length_control' => true, 'max_length' => 8, 'error_message_max_length' => 'Ürün ' . $size['size_name'] . ' adedi geçerli değil', 'preventxss' => true, 'length_limit' => 8, 'error_message_length_limit' => 'Ürün ' . $size['size_name'] . ' adedi geçerli değil', 'is_integer_or_zero' => true, 'error_message_is_integer_or_zero' => 'Ürün ' . $size['size_name'] . ' adedi geçerli değil');
+                    }
+                    $posted_colors = array();
+                    foreach ($colors_from_database['data'] as $color) {
+                        $posted_colors[$color['color_url']] = isset($_POST[$color['color_url']]) ? 1 : 0;
+                    }
+                    $checked_inputs = $this->input_control->CheckPostedInputs($check_posted_inputs);
+                    if (empty($checked_inputs['error_message'])) {
+                        if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'AdminItemUpdate')) {
+                            $size_quantity = 0;
+                            foreach ($sizes_from_database['data'] as $size) {
+                                $size_quantity += $checked_inputs[$size['size_url']];
+                            }
+                            if ($checked_inputs['item_total_quantity'] == $size_quantity) {
+                                if (!empty($item_hidden_url)) {
+                                    $item_details_from_db = $this->AdminModel->GetItemForUpdate($item_hidden_url);
+                                    if ($item_details_from_db['result']) {
+                                        $item_image_create = true;
+                                        $item_images_for_db = '';
+                                        $item_image_change = false;
+                                        if (!empty($_FILES['item_images']) && is_array($_FILES['item_images']) && count($_FILES['item_images']['name']) >= 3 && count($_FILES['item_images']['name']) <= 6) {
+                                            $item_images_exploded_from_db = $this->input_control->GetItemImagesDirect($item_details_from_db['data']['item_images']);
+                                            $new_image_folder_name = 'assets/images/items/' . $item_details_from_db['data']['item_images_path'];
+                                            $image_file_name = $this->input_control->GenerateItemFileName();
+                                            if ($image_file_name['result']) {
+                                                for ($i = 0; $i < count($_FILES['item_images']['name']); $i++) {
+                                                    if (!empty($_FILES['item_images']['name'][$i])) {
+                                                        $item_image_change = true;
+                                                        if ($_FILES['item_images']['error'][$i] == 0) {
+                                                            if ($_FILES['item_images']['size'][$i] <= (1024 * 1024 * 10)) {
+                                                                if ($_FILES['item_images']['type'][$i] == 'image/png') {
+                                                                    $image_type = 'png';
+                                                                } elseif ($_FILES['item_images']['type'][$i] == 'image/jpeg') {
+                                                                    $image_type = 'jpg';
+                                                                } else {
+                                                                    $item_image_create = false;
+                                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_ITEM_IMAGES_EXTENSION);
+                                                                    break;
+                                                                }
+                                                                if (!empty($image_type)) {
+                                                                    $dst_width = 1200;
+                                                                    $dst_width_mini = 129;
+                                                                    $dst_height = 1800;
+                                                                    $dst_height_mini = 193;
+                                                                    $dst_image = imagecreatetruecolor($dst_width, $dst_height);
+                                                                    $dst_image_mini = imagecreatetruecolor($dst_width_mini, $dst_height_mini);
+                                                                    $image_infos = getimagesize($_FILES['item_images']['tmp_name'][$i]);
+                                                                    if (!empty($dst_image) && !empty($dst_image_mini) && !empty($image_infos)) {
+                                                                        if ($image_infos[2] == 2) {
+                                                                            $src_image = imagecreatefromjpeg($_FILES['item_images']['tmp_name'][$i]);
+                                                                            if (!empty($src_image) && unlink($new_image_folder_name . '/' . $item_images_exploded_from_db[$i][1]) && unlink($new_image_folder_name . '/mini' . $item_images_exploded_from_db[$i][1]) && imagecopyresampled($dst_image, $src_image, 0, 0, 0, 0, $dst_width, $dst_height, $image_infos[0], $image_infos[1]) && imagejpeg($dst_image, $new_image_folder_name . '/' . $image_file_name['data'] . $i . '.' . $image_type, 100) && imagecopyresampled($dst_image_mini, $src_image, 0, 0, 0, 0, $dst_width_mini, $dst_height_mini, $image_infos[0], $image_infos[1]) && imagejpeg($dst_image_mini, $new_image_folder_name . '/mini' . $image_file_name['data'] . $i . '.' . $image_type, 100)) {
+                                                                                $item_images_for_db .= ($i + 1) . '-' . $image_file_name['data'] . $i . '.' . $image_type . '_';
+                                                                            } else {
+                                                                                $item_image_create = false;
+                                                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_IMAGES);
+                                                                                break;
+                                                                            }
+                                                                            imagedestroy($src_image);
+                                                                        } elseif ($image_infos[2] == 3) {
+                                                                            $src_image = imagecreatefrompng($_FILES['item_images']['tmp_name'][$i]);
+                                                                            if (!empty($src_image) && unlink($new_image_folder_name . '/' . $item_images_exploded_from_db[$i][1]) && unlink($new_image_folder_name . '/mini' . $item_images_exploded_from_db[$i][1]) && imagecopyresampled($dst_image, $src_image, 0, 0, 0, 0, $dst_width, $dst_height, $image_infos[0], $image_infos[1]) && imagepng($dst_image, $new_image_folder_name . '/' . $image_file_name['data'] . $i . '.' . $image_type, 9) && imagecopyresampled($dst_image_mini, $src_image, 0, 0, 0, 0, $dst_width_mini, $dst_height_mini, $image_infos[0], $image_infos[1]) && imagepng($dst_image_mini, $new_image_folder_name . '/mini' . $image_file_name['data'] . $i . '.' . $image_type, 9)) {
+                                                                                $item_images_for_db .= ($i + 1) . '-' . $image_file_name['data'] . $i . '.' . $image_type . '_';
+                                                                            } else {
+                                                                                $item_image_create = false;
+                                                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_IMAGES);
+                                                                                break;
+                                                                            }
+                                                                            imagedestroy($src_image);
+                                                                        } else {
+                                                                            $item_image_create = false;
+                                                                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_IMAGES);
+                                                                            break;
+                                                                        }
+                                                                    } else {
+                                                                        $item_image_create = false;
+                                                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_IMAGES);
+                                                                        break;
+                                                                    }
+                                                                }
+                                                            } else {
+                                                                $item_image_create = false;
+                                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_IMAGES_SIZE_LIMIT);
+                                                                break;
+                                                            }
+                                                        } else {
+                                                            $item_image_create = false;
+                                                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_IMAGES);
+                                                            break;
+                                                        }
+                                                    } else {
+                                                        $item_images_for_db .= $item_images_exploded_from_db[$i][0] . '-' . $item_images_exploded_from_db[$i][1] . '_';
+                                                    }
+                                                }
+                                            } else {
+                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_IMAGES);
+                                            }
+                                        } else {
+                                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_UPDATE);
+                                        }
+                                        if ($item_image_create) {
+                                            $url_unique = false;
+                                            $item_url = $this->input_control->GenerateUrl($checked_inputs['item_name']);
+                                            if ($item_details_from_db['data']['item_url'] == $item_url) {
+                                                $url_unique = true;
+                                            } else {
+                                                $is_item_url_unique = $this->AdminModel->IsItemUrlUnique($item_url);
+                                                if (!$is_item_url_unique['result'] && !empty($is_item_url_unique['empty'])) {
+                                                    $url_unique = true;
+                                                } else {
+                                                    $url_unique = false;
+                                                }
+                                            }
+                                            if ($url_unique) {
+                                                $create_item_array = array(
+                                                    'is_item_home' => $is_item_home,
+                                                    'is_item_for_sale' => $is_item_for_sale,
+                                                    'item_keywords' => $checked_inputs['item_keywords'],
+                                                    'item_description' => $checked_inputs['item_description'],
+                                                    'item_name' => $checked_inputs['item_name'],
+                                                    'item_url' => $item_url,
+                                                    'item_price' => $checked_inputs['item_price'],
+                                                    'item_discount_price' => $checked_inputs['item_discount_price'],
+                                                    'item_collection' => $checked_inputs['item_collection'],
+                                                    'item_material' => $checked_inputs['item_material'],
+                                                    'item_cut_model' => $checked_inputs['item_cut_model'],
+                                                    'item_thickness' => $checked_inputs['item_thickness'],
+                                                    'item_pattern' => $checked_inputs['item_pattern'],
+                                                    'item_lapel' => $checked_inputs['item_lapel'],
+                                                    'item_sleeve_type' => $checked_inputs['item_sleeve_type'],
+                                                    'item_sleeve_length' => $checked_inputs['item_sleeve_length'],
+                                                    'item_washing_style' => $checked_inputs['item_washing_style'],
+                                                    'item_model_size' => $checked_inputs['item_model_size'],
+                                                    'item_model_height' => $checked_inputs['item_model_height'],
+                                                    'item_model_weight' => $checked_inputs['item_model_weight'],
+                                                    'item_total_quantity' => $checked_inputs['item_total_quantity'],
+                                                    'gender' => $checked_inputs['gender'],
+                                                    'category' => $checked_inputs['category'],
+                                                );
+                                                foreach ($sizes_from_database['data'] as $size) {
+                                                    $create_item_array[$size['size_url']] = $checked_inputs[$size['size_url']];
+                                                }
+                                                foreach ($colors_from_database['data'] as $color) {
+                                                    $create_item_array[$color['color_url']] = isset($_POST[$color['color_url']]) ? 1 : 0;
+                                                }
+                                                if ($item_image_change && !empty($item_images_for_db)) {
+                                                    $create_item_array['item_images'] = rtrim($item_images_for_db, '_');
+                                                }
+                                                $create_item_array['id'] = $item_details_from_db['data']['id'];
+                                                $result_item_create = $this->AdminModel->UpdateItem($create_item_array);
+                                                if ($result_item_create['result']) {
+                                                    $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_ADMIN_SUCCESS_ITEM_UPDATE);
+                                                    $this->input_control->Redirect(URL_ADMIN_ITEMS);
+                                                } else {
+                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_UPDATE);
+                                                }
+                                            } else {
+                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_NOT_UNIQUE_URL);
+                                            }
+                                        }
+                                    } else {
+                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_UPDATE);
+                                    }
+                                } else {
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_UPDATE);
+                                }
+                            } else {
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_QUNATITY_NOT_EQUAL);
+                            }
+                        }
+                    } else {
+                        $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                    }
+                    $_SESSION[SESSION_WEB_DATA_NAME] = array(
+                        'item_name' => $item_name,
+                        'item_keywords' => $item_keywords,
+                        'item_description' => $item_description,
+                        'item_price' => $item_price,
+                        'item_discount_price' => $item_discount_price,
+                        'item_collection' => $item_collection,
+                        'item_material' => $item_material,
+                        'item_cut_model' => $item_cut_model,
+                        'item_thickness' => $item_thickness,
+                        'item_pattern' => $item_pattern,
+                        'item_lapel' => $item_lapel,
+                        'item_sleeve_type' => $item_sleeve_type,
+                        'item_sleeve_length' => $item_sleeve_length,
+                        'item_washing_style' => $item_washing_style,
+                        'item_model_size' => $item_model_size,
+                        'item_model_height' => $item_model_height,
+                        'item_model_weight' => $item_model_weight,
+                        'item_total_quantity' => $item_total_quantity,
+                        'gender' => $gender,
+                        'category' => $category,
+                        'sizes' => $posted_sizes,
+                        'colors' => $posted_colors,
+                        'is_item_for_sale' => $is_item_for_sale,
+                        'is_item_home' => $is_item_home,
+                    );
+                    if (!empty($item_hidden_url)) {
+                        $this->input_control->Redirect(URL_ADMIN_ITEM_DETAILS . '/' . $item_hidden_url);
+                    } else {
+                        $this->input_control->Redirect(URL_ADMIN_ITEMS);
+                    }
+                }
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function ItemUpdate | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function ItemDelete()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'id' => array('input' => isset($_POST['id']) ? $_POST['id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'length_control' => true, 'max_length' => 250, 'error_message_max_length' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true, 'length_limit' => 250, 'error_message_length_limit' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT),
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'AdminItemUpdate')) {
+                        if ($this->AdminModel->UpdateItem(array('is_item_deleted' => 1, 'date_item_deleted' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['id']))['result']) {
+                            $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_ADMIN_SUCCESS_ITEM_DELETE);
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ITEM_DELETE);
+                        }
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                }
+                $this->input_control->Redirect(URL_ADMIN_ITEMS);
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function ItemDelete | ' . $th))['result']) {
                 $this->input_control->Redirect(URL_EXCEPTION);
             } else {
                 $this->input_control->Redirect(URL_SHUTDOWN);
@@ -363,7 +1005,63 @@ class AdminController extends ControllerAdmin
         }
         parent::GetView('Admin/Orders', $this->web_data);
     }
-
+    function Statistics(string $statistics_url)
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl();
+                $case_matched = false;
+                switch ($statistics_url) {
+                    case URL_ADMIN_LOGS_PAGE:
+                        $case_matched = true;
+                        $this->web_data['statistics_type'] = URL_ADMIN_LOGS_PAGE;
+                        $this->web_data['statistics_title'] = URL_ADMIN_LOGS_PAGE_TITLE;
+                        
+                        break;
+                    case URL_ADMIN_LOGS_ITEM:
+                        $case_matched = true;
+                        $this->web_data['statistics_type'] = URL_ADMIN_LOGS_ITEM;
+                        $this->web_data['statistics_title'] = URL_ADMIN_LOGS_ITEM_TITLE;
+                        break;
+                    case URL_ADMIN_LOGS_USER:
+                        $case_matched = true;
+                        $this->web_data['statistics_type'] = URL_ADMIN_LOGS_USER;
+                        $this->web_data['statistics_title'] = URL_ADMIN_LOGS_USER_TITLE;
+                        break;
+                    case URL_ADMIN_LOGS_ERROR:
+                        $case_matched = true;
+                        $this->web_data['statistics_type'] = URL_ADMIN_LOGS_ERROR;
+                        $this->web_data['statistics_title'] = URL_ADMIN_LOGS_ERROR_TITLE;
+                        break;
+                    case URL_ADMIN_LOGS_LOGIN:
+                        $case_matched = true;
+                        $this->web_data['statistics_type'] = URL_ADMIN_LOGS_LOGIN;
+                        $this->web_data['statistics_title'] = URL_ADMIN_LOGS_LOGIN_TITLE;
+                        break;
+                    case URL_ADMIN_LOGS_EMAIL:
+                        $case_matched = true;
+                        $this->web_data['statistics_type'] = URL_ADMIN_LOGS_EMAIL;
+                        $this->web_data['statistics_title'] = URL_ADMIN_LOGS_EMAIL_TITLE;
+                        break;
+                    case URL_ADMIN_LOGS_CAPTCHA:
+                        $case_matched = true;
+                        $this->web_data['statistics_type'] = URL_ADMIN_LOGS_CAPTCHA;
+                        $this->web_data['statistics_title'] = URL_ADMIN_LOGS_CAPTCHA_TITLE;
+                        break;
+                }
+                if ($case_matched) {
+                    parent::GetView('Admin/Statistics', $this->web_data);
+                }
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function Statistics | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
 
 
 
