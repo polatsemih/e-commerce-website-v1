@@ -994,10 +994,52 @@ class AdminController extends ControllerAdmin
     {
         try {
             if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl();
             }
             $this->input_control->Redirect(URL_ADMIN_INDEX);
         } catch (\Throwable $th) {
             if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function Orders | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+        parent::GetView('Admin/Orders', $this->web_data);
+    }
+    function Users()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl();
+                $users = $this->AdminModel->GetUsers();
+                if ($users['result']) {
+                    $this->web_data['users'] = $users['data'];
+                }
+                parent::GetView('Admin/Users', $this->web_data);
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function Users | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+        parent::GetView('Admin/Orders', $this->web_data);
+    }
+    function SendEmail()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl();
+                $this->web_data['form_token'] = parent::SetCSRFToken('AdminSendEmail');
+                parent::GetView('Admin/SendEmail', $this->web_data);
+            } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function SendEmail | ' . $th))['result']) {
                 $this->input_control->Redirect(URL_EXCEPTION);
             } else {
                 $this->input_control->Redirect(URL_SHUTDOWN);
@@ -1016,37 +1058,309 @@ class AdminController extends ControllerAdmin
                         $case_matched = true;
                         $this->web_data['statistics_type'] = URL_ADMIN_LOGS_PAGE;
                         $this->web_data['statistics_title'] = URL_ADMIN_LOGS_PAGE_TITLE;
-                        
-                        break;
-                    case URL_ADMIN_LOGS_ITEM:
-                        $case_matched = true;
-                        $this->web_data['statistics_type'] = URL_ADMIN_LOGS_ITEM;
-                        $this->web_data['statistics_title'] = URL_ADMIN_LOGS_ITEM_TITLE;
+                        $logs_view_once = $this->AdminModel->GetLogsViewOnce();
+                        $logs_view_all = $this->AdminModel->GetLogsViewAll();
+                        $genders_from_database = $this->AdminModel->GetGendersForCount();
+                        $items_from_database = $this->AdminModel->GetItemsForCount();
+                        if ($logs_view_once['result'] && $logs_view_all['result'] && $genders_from_database['result'] && $items_from_database['result']) {
+                            $this->web_data['genders_count'] = array();
+                            $this->web_data['genders_count_all'] = array();
+                            foreach ($genders_from_database['data'] as $gender_from_database) {
+                                $this->web_data['genders_count'][$gender_from_database['gender_name']] = 0;
+                                $this->web_data['genders_count_all'][$gender_from_database['gender_name']] = 0;
+                            }
+                            $this->web_data['items_count'] = array();
+                            $this->web_data['items_count_all'] = array();
+                            foreach ($items_from_database['data'] as $item_from_database) {
+                                $this->web_data['items_count'][$item_from_database['item_name']] = 0;
+                                $this->web_data['items_count_all'][$item_from_database['item_name']] = 0;
+                            }
+                            $this->web_data['agreements_count'] = array();
+                            $this->web_data['agreements_count'][URL_TERMS_TITLE] = 0;
+                            $this->web_data['agreements_count'][URL_PRIVACY_TITLE] = 0;
+                            $this->web_data['agreements_count'][URL_RETURN_POLICY_TITLE] = 0;
+                            $this->web_data['profile_count'] = array();
+                            $this->web_data['profile_count'][URL_PROFILE_INFO_TITLE] = 0;
+                            $this->web_data['profile_count'][URL_PROFILE_IDENTITY_TITLE] = 0;
+                            $this->web_data['profile_count'][URL_PROFILE_ADDRESS_TITLE] = 0;
+                            $this->web_data['profile_count'][URL_PROFILE_PWD_TITLE] = 0;
+                            $this->web_data['profile_count'][URL_PROFILE_EMAIL_TITLE] = 0;
+                            $this->web_data['profile_count'][URL_PROFILE_TEL_TITLE] = 0;
+                            $this->web_data['profile_count'][URL_PROFILE_PHOTO_TITLE] = 0;
+                            $this->web_data['profile_count'][URL_PROFILE_ORDERS_TITLE] = 0;
+                            $this->web_data['home_index'] = 0;
+                            $this->web_data['home_cart'] = 0;
+                            $this->web_data['home_favorites'] = 0;
+                            $this->web_data['home_emailupdateconfirm'] = 0;
+                            $this->web_data['home_orderinitialize_name'] = 0;
+                            $this->web_data['home_orderinitialize_identity'] = 0;
+                            $this->web_data['home_orderinitialize_address'] = 0;
+                            $this->web_data['home_orderinitialize_credit'] = 0;
+                            $this->web_data['home_orderinitialize_3D'] = 0;
+                            $this->web_data['home_orderpayment'] = 0;
+                            $this->web_data['action_twofa'] = 0;
+                            $this->web_data['action_login'] = 0;
+                            $this->web_data['action_register_confirm'] = 0;
+                            $this->web_data['action_register_cancel'] = 0;
+                            $this->web_data['action_register'] = 0;
+                            $this->web_data['action_reset_password'] = 0;
+                            $this->web_data['action_admin_login'] = 0;
+                            foreach ($logs_view_once['data'] as $log_view_once) {
+                                if (str_contains($log_view_once['viewed_page'], '_')) {
+                                    $exploded_log_view_once = explode('_', $log_view_once['viewed_page']);
+                                    if ($exploded_log_view_once[0] == 'Home-Items') {
+                                        foreach ($genders_from_database['data'] as $gender_from_database) {
+                                            if ($gender_from_database['gender_url'] == $exploded_log_view_once[1]) {
+                                                $this->web_data['genders_count'][$gender_from_database['gender_name']] += 1;
+                                            }
+                                        }
+                                    } elseif ($exploded_log_view_once[0] == 'Home-ItemDetails') {
+                                        foreach ($items_from_database['data'] as $item_from_database) {
+                                            if ($item_from_database['item_url'] == $exploded_log_view_once[1]) {
+                                                $this->web_data['items_count'][$item_from_database['item_name']] += 1;
+                                            }
+                                        }
+                                    } elseif ($exploded_log_view_once[0] == 'Home-Agreements') {
+                                        if ($exploded_log_view_once[1] == URL_TERMS_TITLE) {
+                                            $this->web_data['agreements_count'][URL_TERMS_TITLE] += 1;
+                                        } elseif ($exploded_log_view_once[1] == URL_PRIVACY_TITLE) {
+                                            $this->web_data['agreements_count'][URL_PRIVACY_TITLE] += 1;
+                                        } elseif ($exploded_log_view_once[1] == URL_RETURN_POLICY_TITLE) {
+                                            $this->web_data['agreements_count'][URL_RETURN_POLICY_TITLE] += 1;
+                                        }
+                                    } elseif ($exploded_log_view_once[0] == 'Home-Profile') {
+                                        if ($exploded_log_view_once[1] == URL_PROFILE_INFO_TITLE) {
+                                            $this->web_data['profile_count'][URL_PROFILE_INFO_TITLE] += 1;
+                                        } elseif ($exploded_log_view_once[1] == URL_PROFILE_IDENTITY_TITLE) {
+                                            $this->web_data['profile_count'][URL_PROFILE_IDENTITY_TITLE] += 1;
+                                        } elseif ($exploded_log_view_once[1] == URL_PROFILE_ADDRESS_TITLE) {
+                                            $this->web_data['profile_count'][URL_PROFILE_ADDRESS_TITLE] += 1;
+                                        } elseif ($exploded_log_view_once[1] == URL_PROFILE_PWD_TITLE) {
+                                            $this->web_data['profile_count'][URL_PROFILE_PWD_TITLE] += 1;
+                                        } elseif ($exploded_log_view_once[1] == URL_PROFILE_EMAIL_TITLE) {
+                                            $this->web_data['profile_count'][URL_PROFILE_EMAIL_TITLE] += 1;
+                                        } elseif ($exploded_log_view_once[1] == URL_PROFILE_TEL_TITLE) {
+                                            $this->web_data['profile_count'][URL_PROFILE_TEL_TITLE] += 1;
+                                        } elseif ($exploded_log_view_once[1] == URL_PROFILE_PHOTO_TITLE) {
+                                            $this->web_data['profile_count'][URL_PROFILE_PHOTO_TITLE] += 1;
+                                        } elseif ($exploded_log_view_once[1] == URL_PROFILE_ORDERS_TITLE) {
+                                            $this->web_data['profile_count'][URL_PROFILE_ORDERS_TITLE] += 1;
+                                        }
+                                    }
+                                } else {
+                                    if ($log_view_once['viewed_page'] == 'Home-Index') {
+                                        $this->web_data['home_index'] += 1;
+                                    } elseif ($log_view_once['viewed_page'] == 'Home-Cart') {
+                                        $this->web_data['home_cart'] += 1;
+                                    } elseif ($log_view_once['viewed_page'] == 'Home-Favorites') {
+                                        $this->web_data['home_favorites'] += 1;
+                                    } elseif ($log_view_once['viewed_page'] == 'Home-EmailUpdateConfirm') {
+                                        $this->web_data['home_emailupdateconfirm'] += 1;
+                                    } elseif ($log_view_once['viewed_page'] == 'Home-OrderInitialize-Name') {
+                                        $this->web_data['home_orderinitialize_name'] += 1;
+                                    } elseif ($log_view_once['viewed_page'] == 'Home-OrderInitialize-Identity') {
+                                        $this->web_data['home_orderinitialize_identity'] += 1;
+                                    } elseif ($log_view_once['viewed_page'] == 'Home-OrderInitialize-Address') {
+                                        $this->web_data['home_orderinitialize_address'] += 1;
+                                    } elseif ($log_view_once['viewed_page'] == 'Home-OrderInitialize-Credit') {
+                                        $this->web_data['home_orderinitialize_credit'] += 1;
+                                    } elseif ($log_view_once['viewed_page'] == 'Home-OrderInitialize-3D') {
+                                        $this->web_data['home_orderinitialize_3D'] += 1;
+                                    } elseif ($log_view_once['viewed_page'] == 'Home-OrderPayment') {
+                                        $this->web_data['home_orderpayment'] += 1;
+                                    } elseif ($log_view_once['viewed_page'] == 'Action-TwoFA') {
+                                        $this->web_data['action_twofa'] += 1;
+                                    } elseif ($log_view_once['viewed_page'] == 'Action-Login') {
+                                        $this->web_data['action_login'] += 1;
+                                    } elseif ($log_view_once['viewed_page'] == 'Action-RegisterConfirm') {
+                                        $this->web_data['action_register_confirm'] += 1;
+                                    } elseif ($log_view_once['viewed_page'] == 'Action-RegisterCancel') {
+                                        $this->web_data['action_register_cancel'] += 1;
+                                    } elseif ($log_view_once['viewed_page'] == 'Action-Register') {
+                                        $this->web_data['action_register'] += 1;
+                                    } elseif ($log_view_once['viewed_page'] == 'Action-ResetPassword') {
+                                        $this->web_data['action_reset_password'] += 1;
+                                    } elseif ($log_view_once['viewed_page'] == 'Action-AdminLogin') {
+                                        $this->web_data['action_admin_login'] += 1;
+                                    }
+                                }
+                            }
+                            $this->web_data['agreements_count_all'] = array();
+                            $this->web_data['agreements_count_all'][URL_TERMS_TITLE] = 0;
+                            $this->web_data['agreements_count_all'][URL_PRIVACY_TITLE] = 0;
+                            $this->web_data['agreements_count_all'][URL_RETURN_POLICY_TITLE] = 0;
+                            $this->web_data['profile_count_all'] = array();
+                            $this->web_data['profile_count_all'][URL_PROFILE_INFO_TITLE] = 0;
+                            $this->web_data['profile_count_all'][URL_PROFILE_IDENTITY_TITLE] = 0;
+                            $this->web_data['profile_count_all'][URL_PROFILE_ADDRESS_TITLE] = 0;
+                            $this->web_data['profile_count_all'][URL_PROFILE_PWD_TITLE] = 0;
+                            $this->web_data['profile_count_all'][URL_PROFILE_EMAIL_TITLE] = 0;
+                            $this->web_data['profile_count_all'][URL_PROFILE_TEL_TITLE] = 0;
+                            $this->web_data['profile_count_all'][URL_PROFILE_PHOTO_TITLE] = 0;
+                            $this->web_data['profile_count_all'][URL_PROFILE_ORDERS_TITLE] = 0;
+                            $this->web_data['home_index_all'] = 0;
+                            $this->web_data['home_cart_all'] = 0;
+                            $this->web_data['home_favorites_all'] = 0;
+                            $this->web_data['home_emailupdateconfirm_all'] = 0;
+                            $this->web_data['home_orderinitialize_name_all'] = 0;
+                            $this->web_data['home_orderinitialize_identity_all'] = 0;
+                            $this->web_data['home_orderinitialize_address_all'] = 0;
+                            $this->web_data['home_orderinitialize_credit_all'] = 0;
+                            $this->web_data['home_orderinitialize_3D_all'] = 0;
+                            $this->web_data['home_orderpayment_all'] = 0;
+                            $this->web_data['action_twofa_all'] = 0;
+                            $this->web_data['action_login_all'] = 0;
+                            $this->web_data['action_register_confirm_all'] = 0;
+                            $this->web_data['action_register_cancel_all'] = 0;
+                            $this->web_data['action_register_all'] = 0;
+                            $this->web_data['action_reset_password_all'] = 0;
+                            $this->web_data['action_admin_login_all'] = 0;
+                            foreach ($logs_view_all['data'] as $log_view_all) {
+                                if (str_contains($log_view_all['viewed_page'], '_')) {
+                                    $exploded_log_view_all = explode('_', $log_view_all['viewed_page']);
+                                    if ($exploded_log_view_all[0] == 'Home-Items') {
+                                        foreach ($genders_from_database['data'] as $gender_from_database) {
+                                            if ($gender_from_database['gender_url'] == $exploded_log_view_all[1]) {
+                                                $this->web_data['genders_count_all'][$gender_from_database['gender_name']] += 1;
+                                            }
+                                        }
+                                    } elseif ($exploded_log_view_all[0] == 'Home-ItemDetails') {
+                                        foreach ($items_from_database['data'] as $item_from_database) {
+                                            if ($item_from_database['item_url'] == $exploded_log_view_all[1]) {
+                                                $this->web_data['items_count_all'][$item_from_database['item_name']] += 1;
+                                            }
+                                        }
+                                    } elseif ($exploded_log_view_all[0] == 'Home-Agreements') {
+                                        if ($exploded_log_view_all[1] == URL_TERMS_TITLE) {
+                                            $this->web_data['agreements_count_all'][URL_TERMS_TITLE] += 1;
+                                        } elseif ($exploded_log_view_all[1] == URL_PRIVACY_TITLE) {
+                                            $this->web_data['agreements_count_all'][URL_PRIVACY_TITLE] += 1;
+                                        } elseif ($exploded_log_view_all[1] == URL_RETURN_POLICY_TITLE) {
+                                            $this->web_data['agreements_count_all'][URL_RETURN_POLICY_TITLE] += 1;
+                                        }
+                                    } elseif ($exploded_log_view_all[0] == 'Home-Profile') {
+                                        if ($exploded_log_view_all[1] == URL_PROFILE_INFO_TITLE) {
+                                            $this->web_data['profile_count_all'][URL_PROFILE_INFO_TITLE] += 1;
+                                        } elseif ($exploded_log_view_all[1] == URL_PROFILE_IDENTITY_TITLE) {
+                                            $this->web_data['profile_count_all'][URL_PROFILE_IDENTITY_TITLE] += 1;
+                                        } elseif ($exploded_log_view_all[1] == URL_PROFILE_ADDRESS_TITLE) {
+                                            $this->web_data['profile_count_all'][URL_PROFILE_ADDRESS_TITLE] += 1;
+                                        } elseif ($exploded_log_view_all[1] == URL_PROFILE_PWD_TITLE) {
+                                            $this->web_data['profile_count_all'][URL_PROFILE_PWD_TITLE] += 1;
+                                        } elseif ($exploded_log_view_all[1] == URL_PROFILE_EMAIL_TITLE) {
+                                            $this->web_data['profile_count_all'][URL_PROFILE_EMAIL_TITLE] += 1;
+                                        } elseif ($exploded_log_view_all[1] == URL_PROFILE_TEL_TITLE) {
+                                            $this->web_data['profile_count_all'][URL_PROFILE_TEL_TITLE] += 1;
+                                        } elseif ($exploded_log_view_all[1] == URL_PROFILE_PHOTO_TITLE) {
+                                            $this->web_data['profile_count_all'][URL_PROFILE_PHOTO_TITLE] += 1;
+                                        } elseif ($exploded_log_view_all[1] == URL_PROFILE_ORDERS_TITLE) {
+                                            $this->web_data['profile_count_all'][URL_PROFILE_ORDERS_TITLE] += 1;
+                                        }
+                                    }
+                                } else {
+                                    if ($log_view_all['viewed_page'] == 'Home-Index') {
+                                        $this->web_data['home_index_all'] += 1;
+                                    } elseif ($log_view_all['viewed_page'] == 'Home-Cart') {
+                                        $this->web_data['home_cart_all'] += 1;
+                                    } elseif ($log_view_all['viewed_page'] == 'Home-Favorites') {
+                                        $this->web_data['home_favorites_all'] += 1;
+                                    } elseif ($log_view_all['viewed_page'] == 'Home-EmailUpdateConfirm') {
+                                        $this->web_data['home_emailupdateconfirm_all'] += 1;
+                                    } elseif ($log_view_all['viewed_page'] == 'Home-OrderInitialize-Name') {
+                                        $this->web_data['home_orderinitialize_name_all'] += 1;
+                                    } elseif ($log_view_all['viewed_page'] == 'Home-OrderInitialize-Identity') {
+                                        $this->web_data['home_orderinitialize_identity_all'] += 1;
+                                    } elseif ($log_view_all['viewed_page'] == 'Home-OrderInitialize-Address') {
+                                        $this->web_data['home_orderinitialize_address_all'] += 1;
+                                    } elseif ($log_view_all['viewed_page'] == 'Home-OrderInitialize-Credit') {
+                                        $this->web_data['home_orderinitialize_credit_all'] += 1;
+                                    } elseif ($log_view_all['viewed_page'] == 'Home-OrderInitialize-3D') {
+                                        $this->web_data['home_orderinitialize_3D_all'] += 1;
+                                    } elseif ($log_view_all['viewed_page'] == 'Home-OrderPayment') {
+                                        $this->web_data['home_orderpayment_all'] += 1;
+                                    } elseif ($log_view_all['viewed_page'] == 'Action-TwoFA') {
+                                        $this->web_data['action_twofa_all'] += 1;
+                                    } elseif ($log_view_all['viewed_page'] == 'Action-Login') {
+                                        $this->web_data['action_login_all'] += 1;
+                                    } elseif ($log_view_all['viewed_page'] == 'Action-RegisterConfirm') {
+                                        $this->web_data['action_register_confirm_all'] += 1;
+                                    } elseif ($log_view_all['viewed_page'] == 'Action-RegisterCancel') {
+                                        $this->web_data['action_register_cancel_all'] += 1;
+                                    } elseif ($log_view_all['viewed_page'] == 'Action-Register') {
+                                        $this->web_data['action_register_all'] += 1;
+                                    } elseif ($log_view_all['viewed_page'] == 'Action-ResetPassword') {
+                                        $this->web_data['action_reset_password_all'] += 1;
+                                    } elseif ($log_view_all['viewed_page'] == 'Action-AdminLogin') {
+                                        $this->web_data['action_admin_login_all'] += 1;
+                                    }
+                                }
+                            }
+                        }
                         break;
                     case URL_ADMIN_LOGS_USER:
                         $case_matched = true;
                         $this->web_data['statistics_type'] = URL_ADMIN_LOGS_USER;
                         $this->web_data['statistics_title'] = URL_ADMIN_LOGS_USER_TITLE;
+                        $users = $this->AdminModel->GetUsersForCount();
+                        $admins = $this->AdminModel->GetAdminsForCount();
+                        if ($users['result'] && $admins['result']) {
+                            $this->web_data['user_count'] = count($users['data']);
+                            $this->web_data['admin_count'] = count($admins['data']);
+                        }
                         break;
                     case URL_ADMIN_LOGS_ERROR:
                         $case_matched = true;
                         $this->web_data['statistics_type'] = URL_ADMIN_LOGS_ERROR;
                         $this->web_data['statistics_title'] = URL_ADMIN_LOGS_ERROR_TITLE;
+                        $log_error = $this->AdminModel->GetLogError();
+                        if ($log_error['result']) {
+                            $this->web_data['log_error'] = $log_error['data'];
+                        }
+                        break;
+                    case URL_ADMIN_LOGS_LOGIN_ACCOUNT:
+                        $case_matched = true;
+                        $this->web_data['statistics_type'] = URL_ADMIN_LOGS_LOGIN_ACCOUNT;
+                        $this->web_data['statistics_title'] = URL_ADMIN_LOGS_LOGIN_ACCOUNT_TITLE;
+                        $log_login = $this->AdminModel->GetLogLogin();
+                        if ($log_login['result']) {
+                            $this->web_data['log_login'] = $log_login['data'];
+                        }
                         break;
                     case URL_ADMIN_LOGS_LOGIN:
                         $case_matched = true;
                         $this->web_data['statistics_type'] = URL_ADMIN_LOGS_LOGIN;
                         $this->web_data['statistics_title'] = URL_ADMIN_LOGS_LOGIN_TITLE;
+                        $log_login_fail = $this->AdminModel->GetLogLoginFail();
+                        if ($log_login_fail['result']) {
+                            $this->web_data['log_login_fail'] = $log_login_fail['data'];
+                        }
                         break;
                     case URL_ADMIN_LOGS_EMAIL:
                         $case_matched = true;
                         $this->web_data['statistics_type'] = URL_ADMIN_LOGS_EMAIL;
                         $this->web_data['statistics_title'] = URL_ADMIN_LOGS_EMAIL_TITLE;
+                        $log_email_sent = $this->AdminModel->GetLogEmailSent();
+                        if ($log_email_sent['result']) {
+                            $this->web_data['log_email_sent'] = $log_email_sent['data'];
+                        }
                         break;
                     case URL_ADMIN_LOGS_CAPTCHA:
                         $case_matched = true;
                         $this->web_data['statistics_type'] = URL_ADMIN_LOGS_CAPTCHA;
                         $this->web_data['statistics_title'] = URL_ADMIN_LOGS_CAPTCHA_TITLE;
+                        $log_captcha = $this->AdminModel->GetLogCaptcha();
+                        if ($log_captcha['result']) {
+                            $this->web_data['log_captcha'] = $log_captcha['data'];
+                        }
+                        break;
+                    case URL_ADMIN_LOGS_CAPTCHA_TIMEOUT:
+                        $case_matched = true;
+                        $this->web_data['statistics_type'] = URL_ADMIN_LOGS_CAPTCHA_TIMEOUT;
+                        $this->web_data['statistics_title'] = URL_ADMIN_LOGS_CAPTCHA_TIMEOUT_TITLE;
+                        $log_captcha_timeout = $this->AdminModel->GetLogCaptchaTimeout();
+                        if ($log_captcha_timeout['result']) {
+                            $this->web_data['log_captcha_timeout'] = $log_captcha_timeout['data'];
+                        }
                         break;
                 }
                 if ($case_matched) {
@@ -1055,7 +1369,7 @@ class AdminController extends ControllerAdmin
             }
             $this->input_control->Redirect(URL_ADMIN_INDEX);
         } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function Statistics | ' . $th))['result']) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function Statistics | ' . $th))['result']) {
                 $this->input_control->Redirect(URL_EXCEPTION);
             } else {
                 $this->input_control->Redirect(URL_SHUTDOWN);

@@ -9,7 +9,7 @@
     </div>
     <ul class="navbar-nav">
         <div class="user-profile-mobile">
-            <span class="nav-title">Profilim</span>
+            <span class="nav-title">Ayarlar</span>
             <li>
                 <div class="dropdown-toggler nav-link">
                     <span class="row-left">Profil Ayarları</span>
@@ -27,6 +27,9 @@
         <li><a class="nav-link" href="<?php echo URL . URL_ADMIN_ITEM_CREATE; ?>">Ürün Ekle</a></li>
         <span class="nav-title">SİPARİŞ AYARLARI</span>
         <li><a class="nav-link" href="<?php echo URL . URL_ADMIN_ORDERS; ?>">Siparişler</a></li>
+        <span class="nav-title">KULLANICI AYARLARI</span>
+        <li><a class="nav-link" href="<?php echo URL . URL_ADMIN_USERS; ?>">Kullancılar</a></li>
+        <li><a class="nav-link" href="<?php echo URL . URL_ADMIN_SEND_EMAIL; ?>">Email Gönder</a></li>
         <span class="nav-title">SEYİR DEFTERİ</span>
         <li><a class="nav-link" href="<?php echo URL . URL_ADMIN_LOGS . '/' . URL_ADMIN_LOGS_PAGE; ?>">Kayıtlar</a></li>
     </ul>
@@ -51,7 +54,7 @@
                 </div>
                 <div class="row-center row-right">
                     <div class="btn-header user-profile">
-                        <span class="user-name">Profilim</span>
+                        <span class="user-name">Ayarlar</span>
                         <i class="fas fa-chevron-down dropdown-profile-icon"></i>
                         <ul class="dropdown-profile-menu">
                             <li><a class="dropdown-profile-link" href="<?php // echo URL . URL_ADMIN_PROFILE; 

@@ -57,4 +57,56 @@ class AdminModel extends Model
     {
         return $this->database->Update(TABLE_ITEM, $inputs);
     }
+    function GetLogsViewOnce()
+    {
+        return $this->database->Get(TABLE_LOG_VIEW_ONCE, 'id,user_ip,viewed_page,date_viewed', '', '', 'PLURAL');
+    }
+    function GetLogsViewAll()
+    {
+        return $this->database->Get(TABLE_LOG_VIEW_ALL, 'id,user_ip,viewed_page,date_viewed', '', '', 'PLURAL');
+    }
+    function GetGendersForCount()
+    {
+        return $this->database->Get(TABLE_FILTER_GENDER, 'gender_name,gender_url', 'ORDER BY date_gender_created ASC', '', 'PLURAL');
+    }
+    function GetItemsForCount()
+    {
+        return $this->database->Get(TABLE_ITEM, 'item_name,item_url', 'WHERE is_item_deleted=0', '', 'PLURAL');
+    }
+    function GetUsersForCount()
+    {
+        return $this->database->Get(TABLE_USER, 'id', 'WHERE is_user_deleted=0', '', 'PLURAL');
+    }
+    function GetAdminsForCount()
+    {
+        return $this->database->Get(TABLE_ADMIN, 'id', '', '', 'PLURAL');
+    }
+    function GetLogError()
+    {
+        return $this->database->Get(TABLE_LOG_ERROR, 'user_ip,error_message,date_error_occurred', 'ORDER BY date_error_occurred DESC', '', 'PLURAL');
+    }
+    function GetLogLogin()
+    {
+        return $this->database->Get(TABLE_LOG_LOGIN, 'user_id,user_ip,login_success,date_login', 'ORDER BY date_login DESC', '', 'PLURAL');
+    }
+    function GetLogLoginFail()
+    {
+        return $this->database->Get(TABLE_LOG_LOGIN_EMAIL_FAIL, 'user_ip,date_fail_login', 'ORDER BY date_fail_login DESC', '', 'PLURAL');
+    }
+    function GetLogEmailSent()
+    {
+        return $this->database->Get(TABLE_LOG_EMAIL_SENT, 'user_id,user_ip,email_type,date_email_sent', 'ORDER BY date_email_sent DESC', '', 'PLURAL');
+    }
+    function GetLogCaptcha()
+    {
+        return $this->database->Get(TABLE_LOG_CAPTCHA, 'user_ip,success,credit,date_captcha_used', 'ORDER BY date_captcha_used DESC', '', 'PLURAL');
+    }
+    function GetLogCaptchaTimeout()
+    {
+        return $this->database->Get(TABLE_CAPTCHA_TIMEOUT, 'user_ip,captcha_error_count,captcha_total_error_count,date_captcha_timeout_expiry,date_captcha_timeout_created', 'ORDER BY date_captcha_timeout_created DESC', '', 'PLURAL');
+    }
+    function GetUsers()
+    {
+        return $this->database->Get(TABLE_USER, 'id', 'WHERE is_user_deleted=0', '', 'PLURAL');
+    }
 }

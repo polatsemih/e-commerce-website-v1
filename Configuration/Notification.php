@@ -197,9 +197,10 @@ define('TR_NOTIFICATION_ADMIN_SUCCESS_ITEM_UPDATE', 'Ürün başarıyla güncell
 define('TR_NOTIFICATION_ADMIN_SUCCESS_ITEM_DELETE', 'Ürün başarıyla silindi');
 define('TR_NOTIFICATION_ADMIN_ERROR_ITEM_DELETE', 'Ürün silinirken bir hata oldu. Lütfen tekrar deneyin.');
 define('URL_ADMIN_LOGS_PAGE_TITLE', 'Görüntülenen Sayfalar');
-define('URL_ADMIN_LOGS_ITEM_TITLE', 'Görüntülenen Ürünler');
 define('URL_ADMIN_LOGS_USER_TITLE', 'Kullanıcılar');
 define('URL_ADMIN_LOGS_ERROR_TITLE', 'Sistem Hataları');
-define('URL_ADMIN_LOGS_LOGIN_TITLE', 'Girişler');
-define('URL_ADMIN_LOGS_EMAIL_TITLE', 'Email Geçmişi');
+define('URL_ADMIN_LOGS_LOGIN_ACCOUNT_TITLE', 'Hesaba Girişler');
+define('URL_ADMIN_LOGS_LOGIN_TITLE', 'Hatalı Girişler');
+define('URL_ADMIN_LOGS_EMAIL_TITLE', 'Sistem Emailleri');
 define('URL_ADMIN_LOGS_CAPTCHA_TITLE', 'Robot Testi');
+define('URL_ADMIN_LOGS_CAPTCHA_TIMEOUT_TITLE', 'Robot Testi Kısıtlama');
