@@ -1530,8 +1530,522 @@ main {
 .statistics-section .statistics-container .title {
     font-size: 1.7rem;
     color: var(--color-primary-dark);
+    margin-bottom: 3rem;
+}
+
+.statistics-section .second-title {
+    font-size: 1.5rem;
+    color: var(--color-secondary-theme);
+    margin-bottom: 1rem;
+}
+
+.statistics-section .row-log {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
     margin-bottom: 2rem;
 }
+
+.statistics-section .log-box {
+    box-shadow: var(--box-shadow-primary);
+    margin-right: 2rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    width: 20%;
+    min-height: 10rem;
+    position: relative;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.statistics-section .log-box.home {
+    background-color: #009570;
+    color: var(--color-primary-light);
+}
+
+.statistics-section .log-box.item {
+    background-color: #b3a100;
+    color: var(--color-primary-light);
+}
+
+.statistics-section .log-box.order {
+    background-color: #910000;
+    color: var(--color-primary-light);
+}
+
+.statistics-section .log-box.action {
+    background-color: #6466ec;
+    color: var(--color-primary-light);
+}
+
+.statistics-section .log-box.profile {
+    background-color: #fb6c25;
+    color: var(--color-primary-light);
+}
+
+.statistics-section .log-box.agreements {
+    background-color: #b951d3;
+    color: var(--color-primary-light);
+}
+
+.statistics-section .log-box .text {
+    display: block;
+    font-size: 1.3rem;
+    line-height: 1.4;
+}
+
+.statistics-section .log-box .text-1 {
+    margin-bottom: 2rem;
+}
+
+.statistics-section .view-eye-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.statistics-section .view-eye-row .text-2 {
+    margin-left: auto;
+}
+
+.statistics-section .log-box .fa-eye {
+    font-size: 1.3rem;
+    margin-right: 0.5rem;
+}
+
+.statistics-section .table-header {
+    display: flex;
+    background-color: var(--color-primary-light);
+}
+
+.statistics-section .table-header .th {
+    font-size: 1.3rem;
+    color: var(--color-primary-dark);
+    display: block;
+    padding: 0.5rem;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #cacaca;
+    line-height: 1.4;
+}
+
+.statistics-section .table-header .th.theme {
+    color: var(--color-secondary-theme) !important;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.statistics-section .table-header .th.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.statistics-section .table-header .th.box-s {
+    width: 15%;
+    text-align: center;
+}
+
+.statistics-section .table-header .th.box-ms {
+    width: 25%;
+    word-break: break-all;
+}
+
+.statistics-section .table-header .th.box-m {
+    min-width: 70%;
+    max-width: 70%;
+    word-break: break-all;
+}
+
+.statistics-section .table-header .th.box-l {
+    width: 50%;
+    text-align: center;   
+}
+
+.statistics-section .table-header .th.box-xs {
+    width: 25%;
+}
+
+.statistics-section .table-header .th.box-xxs {
+    width: 20%;
+}
+
+.statistics-section .table-header .th.box-xys {
+    width: 40%;
+}
+
+.statistics-section .table-header .hovered-id-container {
+    position: relative;
+    padding: 0 !important;
+}
+
+.statistics-section .table-header .hovered-id {
+    position: absolute;
+    left: 100%;
+    display: none;
+    width: 300%;
+    background-color: var(--color-primary-dark);
+    box-shadow: var(--box-shadow-primary);
+    padding: 1.5rem;
+    z-index: 2;
+    font-size: 1.3rem;
+    color: var(--color-primary-light);
+}
+
+.statistics-section .table-header .hovered-id .hovered-id-triangle {
+    position: absolute;
+    top: 40%;
+    left: -1rem;
+    background-color: var(--color-primary-dark);
+    width: 2rem;
+    height: 2rem;
+    transform: rotate(45deg);
+    z-index: 1;
+}
+
+.statistics-section .table-header .hovered-id:hover {
+    display: block !important;
+}
+
+.statistics-section .table-header .fa-info:hover~.hovered-id {
+    display: block !important;
+}
+
+.statistics-section .table-header .fa-info {
+    font-size: 1.3rem;
+    color: var(--color-primary-dark);
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sendemail-section {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+}
+
+.sendemail-section .title {
+    margin-bottom: 4rem;
+}
+
+.sendemail-section .wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+.sendemail-section .row {
+    display: flex;
+    align-items: center;
+    width: 50%;
+    margin-bottom: 1rem;
+}
+
+.sendemail-section .row .col-label {
+    width: 30%;
+}
+
+.sendemail-section .row .col-input {
+    width: 70%;
+}
+
+.sendemail-section .row .col-input .create-input {
+    height: 3rem;
+    width: 100%;
+    border-top-width: 1px;
+    border-top-style: solid;
+    border-top-color: #cacaca;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: #cacaca;
+    border-right-width: 1px;
+    border-right-style: solid;
+    border-right-color: #cacaca;
+    border-left: none;
+    color: var(--color-primary-dark);
+    background-color: var(--color-primary-light);
+    padding: 1rem;
+    font-size: 1.3rem;
+}
+
+.sendemail-section .row .col-input .create-input:focus {
+    outline: 1px solid var(--color-secondary-theme);
+}
+
+.sendemail-section .row .col-label .create-label {
+    display: flex;
+    align-items: center;
+    height: 3rem;
+    font-size: 1.3rem;
+    color: var(--color-primary-light);
+    background-color: var(--color-secondary-theme);
+    padding: 1rem;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: #ffffff;
+}
+
+.sendemail-section .email-type {
+    position: relative;
+    background-color: var(--color-primary-light);
+    border-top-width: 1px;
+    border-top-style: solid;
+    border-top-color: #cacaca;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: #cacaca;
+    border-right-width: 1px;
+    border-right-style: solid;
+    border-right-color: #cacaca;
+    padding: 1rem;
+    height: 3rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.sendemail-section .email-type .email-select {
+    display: none;
+}
+
+.sendemail-section .email-type .email-select::-ms-expand {
+    display: none;
+}
+
+.sendemail-section .email-type .select-text {
+    font-size: 1.4rem;
+    color: var(--color-primary-dark);
+}
+
+.sendemail-section .email-type .select-triangle {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
+.sendemail-section .email-type .select-triangle .fa-angle-down {
+    font-size: 1.8rem;
+    color: var(--color-primary-dark);
+}
+
+.sendemail-section .email-type .details-select {
+    z-index: 2;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    background-color: var(--color-primary-light);
+}
+
+.sendemail-section .email-type .details-select.active {
+    display: flex !important;
+}
+
+.sendemail-section .email-type .details-select .option {
+    display: block;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    font-size: 1.4rem;
+    color: var(--color-primary-dark);
+    border-width: 1px;
+    border-style: solid;
+    border-color: #cacaca;
+}
+
+.sendemail-section .email-type .details-select .option:hover {
+    background-color: var(--bg-primary-dark);
+    color: var(--color-primary-light);
+    cursor: pointer;
+}
+
+.sendemail-section .row .right {
+    margin-left: auto;
+}
+
+.sendemail-section .btn-email-send {
+    padding: 0.5rem;
+    background-color: var(--success);
+    color: var(--color-primary-light);
+    font-size: 1.3rem;
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+}
+
+.sendemail-section .btn-email-send:hover {
+    background-color: var(--hover-success);
+}
+
+.sendemail-section .btn-change-message {
+    padding: 0.5rem;
+    background-color: var(--warning);
+    color: var(--color-primary-light);
+    font-size: 1.3rem;
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+}
+
+.sendemail-section .btn-change-message:hover {
+    background-color: var(--hover-warning);
+}
+
+.sendemail-section .row .col-label .create-label.textarea {
+    height: 10rem !important;
+}
+
+.sendemail-section .create-textarea {
+    height: 10rem;
+    width: 100%;
+    border-top-width: 1px;
+    border-top-style: solid;
+    border-top-color: #cacaca;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: #cacaca;
+    border-right-width: 1px;
+    border-right-style: solid;
+    border-right-color: #cacaca;
+    border-left: none;
+    color: var(--color-primary-dark);
+    background-color: var(--color-primary-light);
+    padding: 1rem;
+    font-size: 1.3rem;
+    resize: none;
+    font-family: var(--family-primary);
+}
+
+.sendemail-section .create-textarea:focus {
+    outline: 1px solid var(--color-secondary-theme);
+}
+
+.sendemail-section .manuel-checkbox-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.sendemail-section .manuel-checkbox-wrapper .manuel-bg {
+    position: relative;
+    background-color: var(--warning);
+    box-shadow: var(--box-shadow-primary);
+    border-radius: 1rem;
+    width: 22.5rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.sendemail-section .manuel-inner-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    font-size: 1.1rem;
+    color: var(--color-primary-light);
+}
+
+.sendemail-section .manuel-checkbox-wrapper .manuel-bg .manuel-ball {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background-color: var(--bg-primary-light);
+    -webkit-transition-property: transform;
+    -moz-transition-property: transform;
+    -o-transition-property: transform;
+    transition-property: transform;
+    -webkit-transition-duration: 0.3s;
+    -moz-transition-duration: 0.3s;
+    -o-transition-duration: 0.3s;
+    transition-duration: 0.3s;
+    -webkit-transition-timing-function: ease;
+    -moz-transition-timing-function: ease;
+    -o-transition-timing-function: ease;
+    transition-timing-function: ease;
+}
+
+.sendemail-section .manuel-checkbox-wrapper .manuel-checkbox {
+    display: none;
+}
+
+.sendemail-section .manuel-checkbox-wrapper .manuel-checkbox:checked~.manuel-bg .manuel-ball {
+    -webkit-transform: translateX(300%);
+    -moz-transform: translateX(300%);
+    -ms-transform: translateX(300%);
+    -o-transform: translateX(300%);
+    transform: translateX(800%);
+}
+
+.sendemail-section .manuel-checkbox-wrapper .manuel-text {
+    font-size: 1.2rem;
+    color: var(--color-primary-dark);
+    margin-left: 0.5rem;
+}
+
+#ready-messages.hidden {
+    display: none !important;
+}
+
+#manuel-messages-id {
+    display: none;
+}
+
+#manuel-messages-id.active {
+    display: flex !important;
+}
+
+.users-section {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+}
+
+.user-not-found {
+    display: block;
+    color: var(--danger);
+    font-size: 1.6rem;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1786,12 +2300,7 @@ footer {
         display: flex;
         justify-content: center;
         align-items: center;
-    }
-
-    .user-profile-image {
-        width: 3.5rem;
-        border-radius: 50%;
-        margin-right: 1rem;
+        height: 100% !important;
     }
 
     .user-name {
@@ -1970,7 +2479,9 @@ footer {
     .statistics-section .nav-menu {
         flex-basis: 20%;
         position: sticky;
-        top: 6rem;
+        min-height: calc(100vh - 6rem);
+        max-height: calc(100vh - 6rem);
+        top: 7rem;
     }
 
     .statistics-section .statistics-container {
