@@ -105,8 +105,28 @@ class AdminModel extends Model
     {
         return $this->database->Get(TABLE_CAPTCHA_TIMEOUT, 'user_ip,captcha_error_count,captcha_total_error_count,date_captcha_timeout_expiry,date_captcha_timeout_created', 'ORDER BY date_captcha_timeout_created DESC', '', 'PLURAL');
     }
-    function GetUsers()
+    function GetUsers(string $condition, $item_bind_params)
     {
-        return $this->database->Get(TABLE_USER, 'id', 'WHERE is_user_deleted=0', '', 'PLURAL');
+        return $this->database->Get(TABLE_USER, 'id,first_name,last_name,email,email_confirmed,is_user_shopped', $condition, $item_bind_params, 'PLURAL');
+    }
+    function GetUsersDetails(string $user_id)
+    {
+        return $this->database->Get(TABLE_USER, '*', 'WHERE id=?', $user_id, 'SINGULAR');
+    }
+    function GetUsersCount($condition, $inputs)
+    {
+        return $this->database->Get(TABLE_USER, 'id', $condition, $inputs, 'PLURAL');
+    }
+    function GetLogEmailOrder()
+    {
+        return $this->database->Get(TABLE_LOG_EMAIL_ORDER, 'email_to,email_message,email_shipping_number,date_email_sent', 'ORDER BY date_email_sent DESC', '', 'PLURAL');
+    }
+    function GetAdminByAdminId(string $columns, string $user_id)
+    {
+        return $this->database->Get(TABLE_ADMIN, $columns, 'WHERE id=?', $user_id, 'SINGULAR');
+    }
+    function UpdateAdmin(array $inputs)
+    {
+        return $this->database->Update(TABLE_ADMIN, $inputs);
     }
 }

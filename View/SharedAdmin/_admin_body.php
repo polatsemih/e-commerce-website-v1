@@ -16,8 +16,7 @@
                     <i class="fas fa-angle-right row-right dropdown-toggler-icon"></i>
                 </div>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-link nav-link" href="<?php // echo URL . URL_ADMIN_PROFILE; 
-                                                                ?>">Profil</a></li>
+                    <li><a class="dropdown-link nav-link" href="<?php echo URL . URL_ADMIN_PROFILE . '/' . URL_ADMIN_PROFILE_INFORMATIONS; ?>">Profil</a></li>
                     <li><a class="dropdown-link nav-link" href="<?php echo URL . URL_ADMIN_LOGOUT; ?>">Çıkış Yap</a></li>
                 </ul>
             </li>
@@ -57,8 +56,7 @@
                         <span class="user-name">Ayarlar</span>
                         <i class="fas fa-chevron-down dropdown-profile-icon"></i>
                         <ul class="dropdown-profile-menu">
-                            <li><a class="dropdown-profile-link" href="<?php // echo URL . URL_ADMIN_PROFILE; 
-                                                                        ?>">Profil</a></li>
+                            <li><a class="dropdown-profile-link" href="<?php echo URL . URL_ADMIN_PROFILE . '/' . URL_ADMIN_PROFILE_INFORMATIONS; ?>">Profil</a></li>
                             <li><a class="dropdown-profile-link" href="<?php echo URL . URL_ADMIN_LOGOUT; ?>">Çıkış Yap</a></li>
                         </ul>
                     </div>

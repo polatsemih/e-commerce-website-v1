@@ -289,6 +289,8 @@ class AdminController extends ControllerAdmin
                         $this->web_data['selected_limit'] = $limit_from_get_form;
                         $url_for_selected_filters_limit = 'limit=' . $limit_from_get_form . '&';
                         $item_bind_params[] = $limit_from_get_form;
+                    } else {
+                        $this->input_control->CheckUrl(array('cinsiyet', 'ara', 'sayfa', 'anasayfada', 'satista', 'eklenme-tarihi', 'isim-azalan', 'isim-artan', 'fiyat-azalan', 'fiyat-artan', 'indirimli-fiyat-azalan', 'indirimli-fiyat-artan', 'adet-azalan', 'adet-artan'));
                     }
                 }
                 if ($limit_not_used) {
@@ -1010,8 +1012,76 @@ class AdminController extends ControllerAdmin
     {
         try {
             if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-                $this->input_control->CheckUrl();
-                $users = $this->AdminModel->GetUsers();
+                $this->input_control->CheckUrl(array('limit', 'ara', 'silinen-kullanicilar'));
+                $item_conditions = '';
+                $item_bind_params = array();
+                $url_for_selected_filters_deleted = '';
+                $url_for_selected_filters_search = '';
+                $url_for_selected_filters_limit = '';
+                if (isset($_GET['silinen-kullanicilar'])) {
+                    $deleted_from_get_form = $this->input_control->CheckPositiveGETInput($_GET['silinen-kullanicilar']);
+                    if (isset($deleted_from_get_form) && ($deleted_from_get_form == 0 || $deleted_from_get_form == 1)) {
+                        $this->web_data['selected_deleted'] = $deleted_from_get_form;
+                        $url_for_selected_filters_deleted = 'silinen-kullanicilar=' . $deleted_from_get_form . '&';
+                        if (!empty($item_conditions)) {
+                            $item_conditions .= ' AND is_user_deleted=?';
+                        } else {
+                            $item_conditions .= 'WHERE is_user_deleted=?';
+                        }
+                        $item_bind_params[] = $deleted_from_get_form;
+                    } else {
+                        $this->input_control->CheckUrl(array('limit', 'ara'));
+                    }
+                }
+                $user_count = $this->AdminModel->GetUsersCount($item_conditions, $item_bind_params);
+                if ($user_count['result']) {
+                    $this->web_data['user_count'] = $user_count['data'];
+                }
+                if (isset($_GET['ara'])) {
+                    $search_from_get_form = $this->input_control->CheckGETInputWithMaxLength($_GET['ara'], 250);
+                    if (isset($search_from_get_form)) {
+                        $this->web_data['selected_search'] = $search_from_get_form;
+                        $url_for_selected_filters_search = 'ara=' . $search_from_get_form . '&';
+                        if (!empty($item_conditions)) {
+                            $item_conditions .= ' AND (id LIKE ? OR first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR phone_number LIKE ? OR identity_number LIKE ?)';
+                        } else {
+                            $item_conditions .= 'WHERE (id LIKE ? OR first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR phone_number LIKE ? OR identity_number LIKE ?)';
+                        }
+                        $item_bind_params[] = '%' . $search_from_get_form . '%';
+                        $item_bind_params[] = '%' . $search_from_get_form . '%';
+                        $item_bind_params[] = '%' . $search_from_get_form . '%';
+                        $item_bind_params[] = '%' . $search_from_get_form . '%';
+                        $item_bind_params[] = '%' . $search_from_get_form . '%';
+                        $item_bind_params[] = '%' . $search_from_get_form . '%';
+                    } else {
+                        $this->input_control->CheckUrl(array('limit', 'silinen-kullanicilar'));
+                    }
+                }
+                if (!empty($item_conditions)) {
+                    $item_conditions .= ' LIMIT ?';
+                } else {
+                    $item_conditions .= 'LIMIT ?';
+                }
+                $limit_not_used = true;
+                if (isset($_GET['limit'])) {
+                    $limit_from_get_form = $this->input_control->CheckPositiveNonZeroGETInput($_GET['limit']);
+                    if (!empty($limit_from_get_form)) {
+                        $limit_not_used = false;
+                        $this->web_data['selected_limit'] = $limit_from_get_form;
+                        $url_for_selected_filters_limit = 'limit=' . $limit_from_get_form . '&';
+                        $item_bind_params[] = $limit_from_get_form;
+                    } else {
+                        $this->input_control->CheckUrl(array('ara', 'silinen-kullanicilar'));
+                    }
+                }
+                if ($limit_not_used) {
+                    $this->web_data['selected_limit'] = 20;
+                    $item_bind_params[] = 20;
+                }
+                $this->web_data['url_search'] = rtrim($url_for_selected_filters_deleted . $url_for_selected_filters_limit, '&');
+                $this->web_data['url_limit'] = rtrim($url_for_selected_filters_deleted . $url_for_selected_filters_search, '&');
+                $this->web_data['url_deleted'] = rtrim($url_for_selected_filters_limit . $url_for_selected_filters_search, '&');
+                $users = $this->AdminModel->GetUsers($item_conditions, $item_bind_params);
                 if ($users['result']) {
                     $this->web_data['users'] = $users['data'];
                 }
@@ -1025,7 +1095,26 @@ class AdminController extends ControllerAdmin
                 $this->input_control->Redirect(URL_SHUTDOWN);
             }
         }
-        parent::GetView('Admin/Orders', $this->web_data);
+    }
+    function UserDetails(string $user_url)
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl();
+                $user = $this->AdminModel->GetUsersDetails($user_url);
+                if ($user['result']) {
+                    $this->web_data['user'] = $user['data'];
+                }
+                parent::GetView('Admin/UserDetails', $this->web_data);
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function UserDetails | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
     }
     function SendEmail()
     {
@@ -1035,7 +1124,47 @@ class AdminController extends ControllerAdmin
                 $this->web_data['form_token'] = parent::SetCSRFToken('AdminSendEmail');
                 parent::GetView('Admin/SendEmail', $this->web_data);
             } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'user_email' => array('input' => isset($_POST['user_email']) ? $_POST['user_email'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'no_white_space' => true, 'error_message_no_white_space' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL, 'is_email' => true, 'error_message_is_email' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL, 'length_control' => true, 'max_length' => EMAIL_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL, 'preventxss' => true, 'length_limit' => EMAIL_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL),
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'AdminSendEmail')) {
+                        $mail_send_success = false;
+                        if (!empty($_POST['email_ready_message'])) {
+                            switch ($_POST['email_ready_message']) {
+                                case '1':
+                                    if (!empty($_POST['shipping_number'])) {
+                                        $mail_send_success = true;
+                                        // Sipariş Kargoya Verildi
+                                    }
+                                    break;
+                                case '2':
+                                    $mail_send_success = true;
+                                    // Sipariş Teslim Edildi
+                                    break;
+                                case '3':
+                                    $mail_send_success = true;
+                                    // Sipariş İptal Edildi
+                                    break;
+                                case '4':
+                                    if (!empty($_POST['shipping_number'])) {
+                                        $mail_send_success = true;
+                                        // İade Edilen Sipariş Kargoya Verildi
+                                    }
+                                    break;
+                                case '5':
+                                    $mail_send_success = true;
+                                    // İade Edilen Sipariş Teslim Edildi
+                                    break;
+                            }
+                        } elseif (!empty($_POST['email_manuel_message'])) {
+                        }
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                }
+                $this->input_control->Redirect(URL_ADMIN_SEND_EMAIL);
             }
             $this->input_control->Redirect(URL_ADMIN_INDEX);
         } catch (\Throwable $th) {
@@ -1045,7 +1174,6 @@ class AdminController extends ControllerAdmin
                 $this->input_control->Redirect(URL_SHUTDOWN);
             }
         }
-        parent::GetView('Admin/Orders', $this->web_data);
     }
     function Statistics(string $statistics_url)
     {
@@ -1091,6 +1219,7 @@ class AdminController extends ControllerAdmin
                             $this->web_data['home_index'] = 0;
                             $this->web_data['home_cart'] = 0;
                             $this->web_data['home_favorites'] = 0;
+                            $this->web_data['home_contact'] = 0;
                             $this->web_data['home_emailupdateconfirm'] = 0;
                             $this->web_data['home_orderinitialize_name'] = 0;
                             $this->web_data['home_orderinitialize_identity'] = 0;
@@ -1154,6 +1283,8 @@ class AdminController extends ControllerAdmin
                                         $this->web_data['home_cart'] += 1;
                                     } elseif ($log_view_once['viewed_page'] == 'Home-Favorites') {
                                         $this->web_data['home_favorites'] += 1;
+                                    } elseif ($log_view_once['viewed_page'] == 'Home-Contact') {
+                                        $this->web_data['home_contact'] += 1;
                                     } elseif ($log_view_once['viewed_page'] == 'Home-EmailUpdateConfirm') {
                                         $this->web_data['home_emailupdateconfirm'] += 1;
                                     } elseif ($log_view_once['viewed_page'] == 'Home-OrderInitialize-Name') {
@@ -1201,6 +1332,7 @@ class AdminController extends ControllerAdmin
                             $this->web_data['home_index_all'] = 0;
                             $this->web_data['home_cart_all'] = 0;
                             $this->web_data['home_favorites_all'] = 0;
+                            $this->web_data['home_contact_all'] = 0;
                             $this->web_data['home_emailupdateconfirm_all'] = 0;
                             $this->web_data['home_orderinitialize_name_all'] = 0;
                             $this->web_data['home_orderinitialize_identity_all'] = 0;
@@ -1264,6 +1396,8 @@ class AdminController extends ControllerAdmin
                                         $this->web_data['home_cart_all'] += 1;
                                     } elseif ($log_view_all['viewed_page'] == 'Home-Favorites') {
                                         $this->web_data['home_favorites_all'] += 1;
+                                    } elseif ($log_view_all['viewed_page'] == 'Home-Contact') {
+                                        $this->web_data['home_contact_all'] += 1;
                                     } elseif ($log_view_all['viewed_page'] == 'Home-EmailUpdateConfirm') {
                                         $this->web_data['home_emailupdateconfirm_all'] += 1;
                                     } elseif ($log_view_all['viewed_page'] == 'Home-OrderInitialize-Name') {
@@ -1344,6 +1478,15 @@ class AdminController extends ControllerAdmin
                             $this->web_data['log_email_sent'] = $log_email_sent['data'];
                         }
                         break;
+                    case URL_ADMIN_LOGS_EMAIL_ORDER:
+                        $case_matched = true;
+                        $this->web_data['statistics_type'] = URL_ADMIN_LOGS_EMAIL_ORDER;
+                        $this->web_data['statistics_title'] = URL_ADMIN_LOGS_EMAIL_ORDER_TITLE;
+                        $log_order_email = $this->AdminModel->GetLogEmailOrder();
+                        if ($log_order_email['result']) {
+                            $this->web_data['log_order_email'] = $log_order_email['data'];
+                        }
+                        break;
                     case URL_ADMIN_LOGS_CAPTCHA:
                         $case_matched = true;
                         $this->web_data['statistics_type'] = URL_ADMIN_LOGS_CAPTCHA;
@@ -1376,11 +1519,276 @@ class AdminController extends ControllerAdmin
             }
         }
     }
-
-
-
-
-
+    function Profile(string $profile_url)
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl();
+                $case_matched = false;
+                switch ($profile_url) {
+                    case URL_ADMIN_PROFILE_INFORMATIONS:
+                        $case_matched = true;
+                        $this->web_data['profile_type'] = URL_ADMIN_PROFILE_INFORMATIONS;
+                        $this->web_data['profile_title'] = URL_ADMIN_PROFILE_INFO_TITLE;
+                        $user_from_database = $this->AdminModel->GetAdminByAdminId('first_name,last_name', $this->web_data['authenticated_user']);
+                        break;
+                    case URL_ADMIN_PROFILE_PASSWORD:
+                        $case_matched = true;
+                        $this->web_data['profile_type'] = URL_ADMIN_PROFILE_PASSWORD;
+                        $this->web_data['profile_title'] = URL_ADMIN_PROFILE_PWD_TITLE;
+                        break;
+                    case URL_ADMIN_PROFILE_PHOTO:
+                        $case_matched = true;
+                        $this->web_data['profile_type'] = URL_ADMIN_PROFILE_PHOTO;
+                        $this->web_data['profile_title'] = URL_ADMIN_PROFILE_PHOTO_TITLE;
+                        $user_from_database = $this->AdminModel->GetAdminByAdminId('profile_image_path,profile_image', $this->web_data['authenticated_user']);
+                        break;
+                }
+                if ($case_matched) {
+                    if (!empty($user_from_database) && $user_from_database['result']) {
+                        $this->web_data['authenticated_admin'] = $user_from_database['data'];
+                    }
+                    $this->web_data['form_token'] = parent::SetCSRFToken('AdminProfile');
+                    parent::GetView('Admin/Profile', $this->web_data);
+                }
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function Profile | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function ProfileInformationsUpdate()
+    {
+        try {
+            if (empty($this->web_data['authenticated_user'])) {
+                $this->input_control->Redirect(URL_LOGIN);
+            }
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'user_first_name' => array('input' => isset($_POST['user_first_name']) ? $_POST['user_first_name'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_USER_NAME, 'length_control' => true, 'max_length' => USER_NAME_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_MAX_LIMIT_USER_NAME, 'preventxss' => true, 'length_limit' => USER_NAME_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_MAX_LIMIT_USER_NAME),
+                    'user_last_name' => array('input' => isset($_POST['user_last_name']) ? $_POST['user_last_name'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_USER_LAST_NAME, 'length_control' => true, 'max_length' => USER_NAME_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_MAX_LIMIT_USER_LAST_NAME, 'preventxss' => true, 'length_limit' => USER_NAME_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_MAX_LIMIT_USER_LAST_NAME),
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'AdminProfile')) {
+                        $confirmed_user_from_db = $this->AdminModel->GetAdminByAdminId('id,first_name,last_name', $this->web_data['authenticated_user']);
+                        if ($confirmed_user_from_db['result']) {
+                            if ($confirmed_user_from_db['data']['first_name'] == $checked_inputs['user_first_name'] && $confirmed_user_from_db['data']['last_name'] == $checked_inputs['user_last_name']) {
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_NEW_USER_NAME);
+                            } else {
+                                if ($this->AdminModel->UpdateAdmin(array('first_name' => $checked_inputs['user_first_name'], 'last_name' => $checked_inputs['user_last_name'], 'date_last_profile_update' => date('Y-m-d H:i:s'), 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                                    $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_PROFILE_USER_NAME_UPDATE);
+                                } else {
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                }
+                            }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                        }
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                }
+                $this->input_control->Redirect(URL_ADMIN_PROFILE . '/' . URL_ADMIN_PROFILE_INFORMATIONS);
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function ProfileInformationsUpdate | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function ProfilePasswordUpdate()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'user_old_password' => array('input' => isset($_POST['user_old_password']) ? $_POST['user_old_password'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_PASSWORD),
+                    'user_new_password' => array('input' => isset($_POST['user_new_password']) ? $_POST['user_new_password'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_PASSWORD, 'no_white_space' => true, 'error_message_no_white_space' => TR_NOTIFICATION_ERROR_NO_WHITE_SPACE_PASSWORD, 'length_control' => true, 'min_length' => PASSWORD_MIN_LIMIT, 'error_message_min_length' => TR_NOTIFICATION_ERROR_MIN_LENGTH_PASSWORD, 'is_password' => true, 'error_message_is_password' => TR_NOTIFICATION_ERROR_PATTERN_PASSWORD),
+                    'user_new_re_password' => array('input' => isset($_POST['user_new_re_password']) ? $_POST['user_new_re_password'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_RE_PASSWORD, 'no_white_space' => true, 'error_message_no_white_space' => TR_NOTIFICATION_ERROR_NO_WHITE_SPACE_PASSWORD, 'length_control' => true, 'min_length' => PASSWORD_MIN_LIMIT, 'error_message_min_length' => TR_NOTIFICATION_ERROR_MIN_LENGTH_PASSWORD, 'is_password' => true, 'error_message_is_password' => TR_NOTIFICATION_ERROR_PATTERN_PASSWORD),
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'AdminProfile')) {
+                        $confirmed_user_from_db = $this->AdminModel->GetAdminByAdminId('id,password,password_salt', $this->web_data['authenticated_user']);
+                        if ($confirmed_user_from_db['result']) {
+                            $salted_old_password = hash_hmac('sha512', $confirmed_user_from_db['data']['password_salt'] . str_replace("\0", "", $checked_inputs['user_old_password']), PASSWORD_SECRET_KEY, true);
+                            $decrypted_old_hashed_password = $this->input_control->DecrypteData($confirmed_user_from_db['data']['password'], PASSWORD_PEPPER);
+                            if ($decrypted_old_hashed_password['result'] && !empty($salted_old_password)) {
+                                if (password_verify($salted_old_password, $decrypted_old_hashed_password['data'])) {
+                                    $password_salt = strtr(sodium_bin2base64(random_bytes(75), SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING), array('-' => '2', '_' => '4'));
+                                    $salted_password = hash_hmac('sha512', $password_salt . str_replace("\0", "", $checked_inputs['user_new_password']), PASSWORD_SECRET_KEY, true);
+                                    $salted_re_password = hash_hmac('sha512', $password_salt . str_replace("\0", "", $checked_inputs['user_new_re_password']), PASSWORD_SECRET_KEY, true);
+                                    if (!empty($salted_password) && !empty($salted_re_password)) {
+                                        $hashed_password = password_hash($salted_password, PASSWORD_BCRYPT, $this->password_control->BcryptOptions());
+                                        if (password_verify($salted_re_password, $hashed_password)) {
+                                            if ($this->AdminModel->UpdateAdmin(array('password' => $this->input_control->EncrypteData($hashed_password, PASSWORD_PEPPER), 'password_salt' => $password_salt, 'date_last_profile_update' => date('Y-m-d H:i:s'), 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                                                $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_PROFILE_PASSWORD_UPDATE);
+                                            } else {
+                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                            }
+                                        } else {
+                                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_NOT_SAME_PASSWORDS);
+                                        }
+                                    } else {
+                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_PROFILE_PASSWORD_UPDATE);
+                                    }
+                                } else {
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_WRONG_OLD_PASSWORD);
+                                }
+                            } else {
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_PROFILE_PASSWORD_UPDATE);
+                            }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                        }
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                }
+                $this->input_control->Redirect(URL_ADMIN_PROFILE . '/' . URL_ADMIN_PROFILE_PASSWORD);
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function ProfilePasswordUpdate | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function ProfilePhotoUpdate()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile_photo'])) {
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'AdminProfile')) {
+                        $confirmed_user_from_db = $this->AdminModel->GetAdminByAdminId('id,profile_image_path,profile_image', $this->web_data['authenticated_user']);
+                        if ($confirmed_user_from_db['result']) {
+                            if (isset($_FILES['user_image']) && $_FILES['user_image']['error'] == 0) {
+                                if ($_FILES['user_image']['size'] <= (1024 * 1024 * 2)) {
+                                    if ($_FILES['user_image']['type'] == 'image/png') {
+                                        $image_type = 'png';
+                                    } elseif ($_FILES['user_image']['type'] == 'image/jpeg') {
+                                        $image_type = 'jpg';
+                                    } else {
+                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_EXTENSION_PROFILE_PHOTO_UPDATE);
+                                    }
+                                    if (!empty($image_type)) {
+                                        do {
+                                            $folder_name = $this->input_control->GenerateFolderName();
+                                            $image_file_name = $this->input_control->GenerateFileName();
+                                            if ($folder_name['result'] && $image_file_name['result']) {
+                                                $is_folder_unique = $this->UserModel->IsProfileImagePathUnique($folder_name['data']);
+                                                if (!$is_folder_unique['result'] && !empty($is_folder_unique['empty'])) {
+                                                    $new_image_folder_name = 'assets/images/users/' . $folder_name['data'];
+                                                    if (!is_dir($new_image_folder_name)) {
+                                                        $dst_width = 200;
+                                                        $dst_height = 200;
+                                                        $dst_image = imagecreatetruecolor($dst_width, $dst_height);
+                                                        $image_infos = getimagesize($_FILES['user_image']['tmp_name']);
+                                                        if (!empty($dst_image) && !empty($image_infos)) {
+                                                            if ($image_infos[2] == 2) {
+                                                                $src_image = imagecreatefromjpeg($_FILES['user_image']['tmp_name']);
+                                                                $error = true;
+                                                                if (!empty($src_image) && imagecopyresampled($dst_image, $src_image, 0, 0, 0, 0, $dst_width, $dst_height, $image_infos[0], $image_infos[1])) {
+                                                                    $success = true;
+                                                                    if ($confirmed_user_from_db['data']['profile_image'] != 'b6lfjkh5q9qfmfq.jpg' && $confirmed_user_from_db['data']['profile_image'] != 'etflxet4l6tlifm.jpg' && $confirmed_user_from_db['data']['profile_image_path'] != '1qiunjdt0p8cao66xoz' && $confirmed_user_from_db['data']['profile_image_path'] != '2cp61vrjuyraawv68ve') {
+                                                                        if (unlink('assets/images/users/' . $confirmed_user_from_db['data']['profile_image_path'] . '/' . $confirmed_user_from_db['data']['profile_image']) && rmdir('assets/images/users/' . $confirmed_user_from_db['data']['profile_image_path'])) {
+                                                                            $success = true;
+                                                                        } else {
+                                                                            $success = false;
+                                                                        }
+                                                                    }
+                                                                    if ($success && mkdir($new_image_folder_name, 0777, true) && imagejpeg($dst_image, $new_image_folder_name . '/' . $image_file_name['data'] . '.' . $image_type, 100)) {
+                                                                        $error = false;
+                                                                    }
+                                                                }
+                                                                imagedestroy($src_image);
+                                                                if ($error) {
+                                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
+                                                                    break;
+                                                                }
+                                                            } elseif ($image_infos[2] == 3) {
+                                                                $src_image = imagecreatefrompng($_FILES['user_image']['tmp_name']);
+                                                                $error = true;
+                                                                if (!empty($src_image) && imagecopyresampled($dst_image, $src_image, 0, 0, 0, 0, $dst_width, $dst_height, $image_infos[0], $image_infos[1])) {
+                                                                    $success = true;
+                                                                    if ($confirmed_user_from_db['data']['profile_image'] != 'b6lfjkh5q9qfmfq.jpg' && $confirmed_user_from_db['data']['profile_image'] != 'etflxet4l6tlifm.jpg' &&  $confirmed_user_from_db['data']['profile_image_path'] != '1qiunjdt0p8cao66xoz' && $confirmed_user_from_db['data']['profile_image_path'] != '2cp61vrjuyraawv68ve') {
+                                                                        if (unlink('assets/images/users/' . $confirmed_user_from_db['data']['profile_image_path'] . '/' . $confirmed_user_from_db['data']['profile_image']) && rmdir('assets/images/users/' . $confirmed_user_from_db['data']['profile_image_path'])) {
+                                                                            $success = true;
+                                                                        } else {
+                                                                            $success = false;
+                                                                        }
+                                                                    }
+                                                                    if ($success && mkdir($new_image_folder_name, 0777, true) && imagepng($dst_image, $new_image_folder_name . '/' . $image_file_name['data'] . '.' . $image_type, 9)) {
+                                                                        $error = false;
+                                                                    }
+                                                                }
+                                                                imagedestroy($src_image);
+                                                                if ($error) {
+                                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
+                                                                    break;
+                                                                }
+                                                            } else {
+                                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
+                                                                break;
+                                                            }
+                                                            if ($this->AdminModel->UpdateAdmin(array('profile_image_path' => $folder_name['data'], 'profile_image' => $image_file_name['data'] . '.' . $image_type, 'date_last_profile_update' => date('Y-m-d H:i:s'), 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                                                                $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_PROFILE_PHOTO_UPDATE);
+                                                                break;
+                                                            } else {
+                                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
+                                                                break;
+                                                            }
+                                                        } else {
+                                                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
+                                                            break;
+                                                        }
+                                                    } else {
+                                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
+                                                        break;
+                                                    }
+                                                }
+                                            } else {
+                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
+                                                break;
+                                            }
+                                        } while (true);
+                                    }
+                                } else {
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_LIMIT_PROFILE_PHOTO_UPDATE);
+                                }
+                            } else {
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_PROFILE_PHOTO_UPDATE);
+                            }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
+                        }
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                }
+                $this->input_control->Redirect(URL_ADMIN_PROFILE . '/' . URL_ADMIN_PROFILE_PHOTO);
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function ProfilePhotoUpdate | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
 
 
 

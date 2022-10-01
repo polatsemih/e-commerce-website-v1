@@ -2,9 +2,9 @@
 <html lang="tr">
 
 <head>
-    <title>Şifremi Unuttum | <?php echo BRAND; ?></title>
+    <title>İletişim | <?php echo BRAND; ?></title>
     <meta name="robots" content="all" />
-    <meta name="description" content="<?php echo BRAND; ?> Şifremi Unuttum" />
+    <meta name="description" content="<?php echo BRAND; ?> İletişim" />
     <meta name="keywords" content="blanck basic, blnckk" />
     <?php require_once 'View/SharedHome/_home_head.php'; ?>
 </head>
@@ -13,17 +13,34 @@
     <div class="notification-client"></div>
     <?php require_once 'View/SharedHome/_home_body.php'; ?>
     <main>
-        <section class="action-section">
+        <section class="action-section contact">
             <div class="action-container">
-                <h1 class="forgot-password-title">Şifrenizi sıfırlamak için email adresinizi girin</h1>
-                <form id="form-forgot-password" action="<?php echo URL . URL_FORGOT_PASSWORD; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                <h1 class="title">İletişim</h1>
+                <form id="form-contact" action="<?php echo URL . URL_CONTACT; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
                     <?php if (!empty($web_data['form_token'])) : ?>
                         <input type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
                     <?php endif; ?>
                     <div class="form-row">
                         <div class="group">
-                            <input class="input-action" id="input-email" type="email" name="email" autofocus>
+                            <input class="input-action" id="input-first-name" type="text" name="first_name" autofocus>
+                            <span class="input-action-label">İsim</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="group">
+                            <input class="input-action" id="input-last-name" type="text" name="last_name">
+                            <span class="input-action-label">Soy İsim</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="group">
+                            <input class="input-action" id="input-email" type="email" name="email">
                             <span class="input-action-label">Email</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="group">
+                            <textarea class="input-textarea" id="input-message" name="message" placeholder="Mesaj"></textarea>
                         </div>
                     </div>
                     <div class="captcha-popup">
@@ -39,14 +56,9 @@
                         </div>
                     </div>
                     <div class="form-row">
-                        <button id="btn-forgot-password" class="btn-action-submit">Şifremi Sıfırla</button>
+                        <button id="btn-contact" class="btn-action-submit">Gönder</button>
                     </div>
                 </form>
-                <div class="action-link-container">
-                    <a href="<?php echo URL . URL_LOGIN; ?>" class="text-2 m-right">Giriş Yap</a>
-                    <span class="text-2 m-right">|</span>
-                    <a href="<?php echo URL . URL_REGISTER; ?>" class="text-2">Hesap oluştur</a>
-                </div>
             </div>
         </section>
     </main>
@@ -156,12 +168,24 @@
                 }
             });
             const captchaPopup = $('.captcha-popup');
-            $('#btn-forgot-password').click(function(e) {
+            $('#btn-contact').click(function(e) {
                 e.preventDefault();
+                const inputFirstName = $('#input-first-name');
+                const inputLastName = $('#input-last-name');
                 const inputEmail = $('#input-email');
-                if (inputEmail.val() == '') {
+                const inputMessage = $('#input-message');
+                if (inputFirstName.val() == '') {
+                    inputFirstName.focus();
+                    setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_EMPTY_USER_NAME; ?></span></div>');
+                } else if (inputLastName.val() == '') {
+                    inputLastName.focus();
+                    setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_EMPTY_USER_LAST_NAME; ?></span></div>');
+                } else if (inputEmail.val() == '') {
                     inputEmail.focus();
                     setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_EMPTY_EMAIL; ?></span></div>');
+                } else if (inputMessage.val() == '') {
+                    inputMessage.focus();
+                    setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_EMPTY_CONTACT_MESSAGE; ?></span></div>');
                 } else {
                     clearTimeout(notificationHidden);
                     clearTimeout(notificationRemoved);
@@ -201,7 +225,7 @@
             if (!bodyElement.classList.contains('noscroll')) {
                 bodyElement.classList.add('noscroll');
             }
-            document.getElementById('form-forgot-password').submit();
+            document.getElementById('form-contact').submit();
         }
     </script>
 </body>

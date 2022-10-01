@@ -18,6 +18,7 @@ define('TABLE_LINK_FORGOT_PASSWORD', 'link_forgot_password_1a02y65v5s');
 define('TABLE_LINK_REGISTER_CANCEL', 'link_register_cancel_16ayr0mn9y');
 define('TABLE_LOG_CAPTCHA', 'log_captcha_jaimx196g4');
 define('TABLE_LOG_CSRF', 'log_csrf_y4auf0u3rm');
+define('TABLE_LOG_EMAIL_ORDER', 'log_email_order_admin_kma18jd67n');
 define('TABLE_LOG_EMAIL_SENT', 'log_email_sent_j7r4a3cfgh');
 define('TABLE_LOG_ERROR', 'log_error_bat142mku7');
 define('TABLE_LOG_LOGIN_EMAIL_FAIL', 'log_login_email_fail_cur2zkq6y0');

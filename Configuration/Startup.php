@@ -42,6 +42,7 @@ define('URL_ORDER_ADDRESS', 'adres-sec');
 define('URL_ORDER_INITIALIZE', 'siparis-ver');
 define('URL_INSTALLMENT', 'taksit-sorgula');
 define('URL_ORDER_PAYMENT', 'siparis-sonuc');
+define('URL_CONTACT', 'iletisim');
 // ActionController
 define('URL_LOGIN', 'giris');
 define('URL_TWO_FA', 'iki-asamali-dogrulama');
@@ -75,6 +76,7 @@ define('URL_ADMIN_LOGS_ERROR', 'hatalar');
 define('URL_ADMIN_LOGS_LOGIN_ACCOUNT', 'hesaba-giris-denemeleri');
 define('URL_ADMIN_LOGS_LOGIN', 'giris-denemeleri');
 define('URL_ADMIN_LOGS_EMAIL', 'sistem-emailleri');
+define('URL_ADMIN_LOGS_EMAIL_ORDER', 'siparis-emailleri');
 define('URL_ADMIN_LOGS_CAPTCHA', 'robot-degilim-testleri');
 define('URL_ADMIN_LOGS_CAPTCHA_TIMEOUT', 'robot-degilim-kisitlama');
 define('URL_ADMIN_ITEMS', 'yonetici-urunler');
@@ -85,6 +87,14 @@ define('URL_ADMIN_ITEM_CREATE', 'yonetici-urun-ekle');
 define('URL_ADMIN_ORDERS', 'yonetici-siparisler');
 define('URL_ADMIN_USERS', 'yonetici-kullanicilar');
 define('URL_ADMIN_SEND_EMAIL', 'yonetici-email-gonder');
+define('URL_ADMIN_USER_DETAILS', 'yonetici-kullanici');
+define('URL_ADMIN_PROFILE', 'yonetici-profil');
+define('URL_ADMIN_PROFILE_INFORMATIONS', 'isim-degistir');
+define('URL_ADMIN_PROFILE_PASSWORD', 'sifre-degistir');
+define('URL_ADMIN_PROFILE_PHOTO', 'resim-degistir');
+define('URL_ADMIN_PROFILE_UPDATE', 'yonetici-ismimi-guncelle');
+define('URL_ADMIN_PASSWORD_UPDATE', 'yonetici-sifremi-guncelle');
+define('URL_ADMIN_PROFILE_PHOTO_UPDATE', 'yonetici-resmimi-guncelle');
 define('URL_MAPS', array(
     // ErrorController
     array('url' => 'anasayfaya-don', 'controller' => 'ErrorController', 'action' => 'GoHome'),
@@ -118,6 +128,7 @@ define('URL_MAPS', array(
     array('url' => 'siparis-ver', 'controller' => 'HomeController', 'action' => 'OrderInitialize'),
     array('url' => 'taksit-sorgula', 'controller' => 'AccountController', 'action' => 'OrderInstallment'),
     array('url' => 'siparis-sonuc', 'controller' => 'OrderController', 'action' => 'OrderPayment'),
+    array('url' => 'iletisim', 'controller' => 'HomeController', 'action' => 'Contact'),
     // ActionController
     array('url' => 'giris', 'controller' => 'ActionController', 'action' => 'Login'),
     array('url' => 'iki-asamali-dogrulama', 'controller' => 'ActionController', 'action' => 'TwoFA'),
@@ -153,4 +164,9 @@ define('URL_MAPS', array(
     array('url' => 'yonetici-siparisler', 'controller' => 'AdminController', 'action' => 'Orders'),
     array('url' => 'yonetici-kullanicilar', 'controller' => 'AdminController', 'action' => 'Users'),
     array('url' => 'yonetici-email-gonder', 'controller' => 'AdminController', 'action' => 'SendEmail'),
+    array('url_pattern' => 'yonetici-kullanici/?', 'controller' => 'AdminController', 'action' => 'UserDetails'),
+    array('url_pattern' => 'yonetici-profil/?', 'controller' => 'AdminController', 'action' => 'Profile'),
+    array('url' => 'yonetici-ismimi-guncelle', 'controller' => 'AdminController', 'action' => 'ProfileInformationsUpdate'),
+    array('url' => 'yonetici-sifremi-guncelle', 'controller' => 'AdminController', 'action' => 'ProfilePasswordUpdate'),
+    array('url' => 'yonetici-resmimi-guncelle', 'controller' => 'AdminController', 'action' => 'ProfilePhotoUpdate')
 ));

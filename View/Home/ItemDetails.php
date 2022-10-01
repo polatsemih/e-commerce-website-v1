@@ -1101,7 +1101,7 @@
                             $.each(response['searched_items'], function(key, searchitem) {
                                 let s2 = $("<li></li>").addClass('search-item');
                                 s1.append(s2);
-                                let s3 = $("<a></a>").addClass('search-link').attr('href', '<?php echo URL . URL_ITEM_DETAILS . '/' ?>' + searchitem['item_url']).append(searchitem['item_name']);
+                                let s3 = $("<a></a>").addClass('search-link').attr('href', '<?php echo URL . URL_ITEM_DETAILS . '/' ?>' + searchitem['item_url']).text(searchitem['item_name']);
                                 s2.append(s3);
                             });
                             navSearch.append(s1);

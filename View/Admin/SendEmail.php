@@ -21,7 +21,7 @@
                         <label class="create-label" for="user_email">Kime</label>
                     </div>
                     <div class="col-input">
-                        <input class="create-input" id="user_email" type="text" name="user_email">
+                        <input class="create-input" id="user_email" type="text" name="user_email" autofocus>
                     </div>
                 </div>
                 <div id="ready-messages" class="row">
@@ -54,7 +54,15 @@
                         <label class="create-label textarea" for="user_email">Mesaj</label>
                     </div>
                     <div class="col-input">
-                        <textarea class="create-textarea" name="email_manuel_message"></textarea>
+                        <textarea class="create-textarea" id="email_manuel_message" name="email_manuel_message"></textarea>
+                    </div>
+                </div>
+                <div id="shipping-number-wrapper" class="row">
+                    <div class="col-label">
+                        <label class="create-label" for="shipping_number">Kargo Takip Numarası</label>
+                    </div>
+                    <div class="col-input">
+                        <input class="create-input" id="shipping_number" type="text" name="shipping_number">
                     </div>
                 </div>
                 <div class="row">
@@ -80,11 +88,21 @@
             e.preventDefault();
             document.getElementById('details-select').classList.toggle('active');
         });
+        const shippingNumberWrapper = document.getElementById('shipping-number-wrapper');
         document.querySelectorAll('.email-type .details-select .option').forEach(detailsSelectOption => {
             detailsSelectOption.addEventListener('click', (e) => {
                 e.preventDefault();
                 document.getElementById('details-option-' + detailsSelectOption.dataset.option).selected = true;
                 document.getElementById('select-text').innerHTML = detailsSelectOption.dataset.url;
+                if (detailsSelectOption.dataset.option == 1 || detailsSelectOption.dataset.option == 4) {
+                    if (!shippingNumberWrapper.classList.contains('active')) {
+                        shippingNumberWrapper.classList.add('active');
+                    }
+                } else {
+                    if (shippingNumberWrapper.classList.contains('active')) {
+                        shippingNumberWrapper.classList.remove('active');
+                    }
+                }
             });
         });
         const manuelInnerText = document.querySelector('.manuel-inner-text');

@@ -795,6 +795,25 @@ class HomeController extends Controller
             }
         }
     }
+    function Contact()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl();
+                parent::LogView('Home-Contact');
+                $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
+                $this->web_data['form_token'] = parent::SetCSRFToken('Contact');
+                parent::GetView('Home/Contact', $this->web_data);
+            }
+            $this->input_control->Redirect();
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class HomeController function Contact | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
     function Agreements(string $agreement_url)
     {
         try {
@@ -1006,7 +1025,7 @@ class HomeController extends Controller
                             if ($confirmed_user_from_db['data']['first_name'] == $checked_inputs['user_first_name'] && $confirmed_user_from_db['data']['last_name'] == $checked_inputs['user_last_name']) {
                                 $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_NEW_USER_NAME);
                             } else {
-                                if ($this->UserModel->UpdateUser(array('first_name' => $checked_inputs['user_first_name'], 'last_name' => $checked_inputs['user_last_name'], 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                                if ($this->UserModel->UpdateUser(array('first_name' => $checked_inputs['user_first_name'], 'last_name' => $checked_inputs['user_last_name'], 'date_last_profile_update' => date('Y-m-d H:i:s'), 'id' => $confirmed_user_from_db['data']['id']))['result']) {
                                     if (empty($_SESSION[SESSION_COMPLETE_PROFILE_NAME])) {
                                         $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_PROFILE_USER_NAME_UPDATE);
                                     }
@@ -1060,7 +1079,7 @@ class HomeController extends Controller
                                         $identity_validation += substr($checked_inputs['identity_number'], $i, 1);
                                     }
                                     if ($identity_validation % 10 == substr($checked_inputs['identity_number'], 10, 1) && (((substr($checked_inputs['identity_number'], 0, 1) + substr($checked_inputs['identity_number'], 2, 1) + substr($checked_inputs['identity_number'], 4, 1) + substr($checked_inputs['identity_number'], 6, 1) + substr($checked_inputs['identity_number'], 8, 1)) * 7) - (substr($checked_inputs['identity_number'], 1, 1) + substr($checked_inputs['identity_number'], 3, 1) + substr($checked_inputs['identity_number'], 5, 1) + substr($checked_inputs['identity_number'], 7, 1))) % 10 == substr($checked_inputs['identity_number'], 9, 1)) {
-                                        if ($this->UserModel->UpdateUser(array('identity_number' => $checked_inputs['identity_number'], 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                                        if ($this->UserModel->UpdateUser(array('identity_number' => $checked_inputs['identity_number'], 'date_last_profile_update' => date('Y-m-d H:i:s'), 'id' => $confirmed_user_from_db['data']['id']))['result']) {
                                             if (empty($_SESSION[SESSION_COMPLETE_PROFILE_IDENTITY])) {
                                                 $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_PROFILE_IDENTITY_NUMBER_UPDATE);
                                             }
@@ -1124,7 +1143,7 @@ class HomeController extends Controller
                                 $two_fa_not = TR_NOTIFICATION_SUCCESS_PROFILE_2FA_ACTIVE;
                             }
                             if (isset($new_two_fa) && !empty($two_fa_sta) && !empty($two_fa_not)) {
-                                if ($this->UserModel->UpdateUser(array('two_fa_enable' => $new_two_fa, 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                                if ($this->UserModel->UpdateUser(array('two_fa_enable' => $new_two_fa, 'date_last_profile_update' => date('Y-m-d H:i:s'), 'id' => $confirmed_user_from_db['data']['id']))['result']) {
                                     $this->notification_control->SetNotification($two_fa_sta, $two_fa_not);
                                 } else {
                                     $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
@@ -1355,7 +1374,7 @@ class HomeController extends Controller
                                     if (!empty($salted_password) && !empty($salted_re_password)) {
                                         $hashed_password = password_hash($salted_password, PASSWORD_BCRYPT, $this->password_control->BcryptOptions());
                                         if (password_verify($salted_re_password, $hashed_password)) {
-                                            if ($this->UserModel->UpdateUser(array('password' => $this->input_control->EncrypteData($hashed_password, PASSWORD_PEPPER), 'password_salt' => $password_salt, 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                                            if ($this->UserModel->UpdateUser(array('password' => $this->input_control->EncrypteData($hashed_password, PASSWORD_PEPPER), 'password_salt' => $password_salt, 'date_last_profile_update' => date('Y-m-d H:i:s'), 'id' => $confirmed_user_from_db['data']['id']))['result']) {
                                                 $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_PROFILE_PASSWORD_UPDATE);
                                             } else {
                                                 $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
@@ -1496,7 +1515,7 @@ class HomeController extends Controller
                                     if ($email_update_token_from_database['data']['update_email_hashed_tokens'] == $hashed_token) {
                                         $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id', $this->web_data['authenticated_user']);
                                         if ($confirmed_user_from_db['result']) {
-                                            if ($this->UserModel->UpdateUser(array('email' => $checked_email, 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                                            if ($this->UserModel->UpdateUser(array('email' => $checked_email, 'date_last_profile_update' => date('Y-m-d H:i:s'), 'id' => $confirmed_user_from_db['data']['id']))['result']) {
                                                 $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_EMAIL_UPDATE);
                                             } else {
                                                 $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
@@ -1549,7 +1568,7 @@ class HomeController extends Controller
                             if ($confirmed_user_from_db['data']['phone_number'] == $checked_inputs['user_phone_number']) {
                                 $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_NEW_PHONE_NUMBER);
                             } else {
-                                if ($this->UserModel->UpdateUser(array('phone_number' => $checked_inputs['user_phone_number'], 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                                if ($this->UserModel->UpdateUser(array('phone_number' => $checked_inputs['user_phone_number'], 'date_last_profile_update' => date('Y-m-d H:i:s'), 'id' => $confirmed_user_from_db['data']['id']))['result']) {
                                     $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_PROFILE_PHONE_NUMBER_UPDATE);
                                 } else {
                                     $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
@@ -1657,7 +1676,7 @@ class HomeController extends Controller
                                                                 $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_IDK_PROFILE_PHOTO_UPDATE);
                                                                 break;
                                                             }
-                                                            if ($this->UserModel->UpdateUser(array('profile_image_path' => $folder_name['data'], 'profile_image' => $image_file_name['data'] . '.' . $image_type, 'id' => $confirmed_user_from_db['data']['id']))['result']) {
+                                                            if ($this->UserModel->UpdateUser(array('profile_image_path' => $folder_name['data'], 'profile_image' => $image_file_name['data'] . '.' . $image_type, 'date_last_profile_update' => date('Y-m-d H:i:s'), 'id' => $confirmed_user_from_db['data']['id']))['result']) {
                                                                 $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_PROFILE_PHOTO_UPDATE);
                                                                 break;
                                                             } else {

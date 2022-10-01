@@ -18,6 +18,7 @@
                 <a class="link<?php echo $web_data['statistics_type'] == URL_ADMIN_LOGS_LOGIN_ACCOUNT ? ' active' : ''; ?>" href="<?php echo URL . URL_ADMIN_LOGS . '/' . URL_ADMIN_LOGS_LOGIN_ACCOUNT; ?>">Hesaba Girişler</a>
                 <a class="link<?php echo $web_data['statistics_type'] == URL_ADMIN_LOGS_LOGIN ? ' active' : ''; ?>" href="<?php echo URL . URL_ADMIN_LOGS . '/' . URL_ADMIN_LOGS_LOGIN; ?>">Hatalı Giriş Denemeleri</a>
                 <a class="link<?php echo $web_data['statistics_type'] == URL_ADMIN_LOGS_EMAIL ? ' active' : ''; ?>" href="<?php echo URL . URL_ADMIN_LOGS . '/' . URL_ADMIN_LOGS_EMAIL; ?>">Sistem Emailleri</a>
+                <a class="link<?php echo $web_data['statistics_type'] == URL_ADMIN_LOGS_EMAIL_ORDER ? ' active' : ''; ?>" href="<?php echo URL . URL_ADMIN_LOGS . '/' . URL_ADMIN_LOGS_EMAIL_ORDER; ?>">Sipariş Emailleri</a>
                 <a class="link<?php echo $web_data['statistics_type'] == URL_ADMIN_LOGS_CAPTCHA ? ' active' : ''; ?>" href="<?php echo URL . URL_ADMIN_LOGS . '/' . URL_ADMIN_LOGS_CAPTCHA; ?>">Robot Testi</a>
                 <a class="link<?php echo $web_data['statistics_type'] == URL_ADMIN_LOGS_CAPTCHA_TIMEOUT ? ' active' : ''; ?>" href="<?php echo URL . URL_ADMIN_LOGS . '/' . URL_ADMIN_LOGS_CAPTCHA_TIMEOUT; ?>">Robot Testi Kısıtlananlar</a>
             </div>
@@ -50,6 +51,15 @@
                                 <div class="view-eye-row">
                                     <span class="text" title="Farklı Görüntülenme"><i class="far fa-eye"></i><?php echo $web_data['home_favorites']; ?></span>
                                     <span class="text" title="Toplam Görüntülenme"><i class="far fa-eye"></i><?php echo $web_data['home_favorites_all']; ?></span>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        <?php if (isset($web_data['home_contact']) && isset($web_data['home_contact_all'])) : ?>
+                            <div class="log-box home">
+                                <span class="text text-1">İletişim</span>
+                                <div class="view-eye-row">
+                                    <span class="text" title="Farklı Görüntülenme"><i class="far fa-eye"></i><?php echo $web_data['home_contact']; ?></span>
+                                    <span class="text" title="Toplam Görüntülenme"><i class="far fa-eye"></i><?php echo $web_data['home_contact_all']; ?></span>
                                 </div>
                             </div>
                         <?php endif; ?>
@@ -342,6 +352,24 @@
                                 <span class="th box-xxs center"><?php echo $log_email_sent['user_ip']; ?></span>
                                 <span class="th box-xys center"><?php echo $log_email_sent['email_type']; ?></span>
                                 <span class="th box-xxs center"><?php echo date('d/m/Y H:i:s', strtotime($log_email_sent['date_email_sent'])); ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                <?php elseif ($web_data['statistics_type'] == URL_ADMIN_LOGS_EMAIL_ORDER) : ?>
+                    <h1 class="title mb">Sipariş Emailleri</h1>
+                    <?php if (!empty($web_data['log_order_email'])) : ?>
+                        <div class="table-header">
+                            <span class="th box-ms theme">Kime</span>
+                            <span class="th box-ms theme">Mesaj</span>
+                            <span class="th box-ms theme">Kargo Numarası</span>
+                            <span class="th box-ms theme">Tarih</span>
+                        </div>
+                        <?php foreach ($web_data['log_order_email'] as $log_order_email) : ?>
+                            <div class="table-header">
+                                <span class="th box-ms center"><?php echo $log_order_email['email_to']; ?></span>
+                                <span class="th box-ms center"><?php echo $log_order_email['email_message']; ?></span>
+                                <span class="th box-ms center"><?php echo $log_order_email['email_shipping_number']; ?></span>
+                                <span class="th box-ms center"><?php echo date('d/m/Y H:i:s', strtotime($log_order_email['date_email_sent'])); ?></span>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>

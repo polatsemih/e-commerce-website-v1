@@ -56,7 +56,11 @@
             </div>
             <?php if (!empty($web_data['selected_search'])) : ?>
                 <div class="search-tree">
-                    <a class="text underline" href="<?php echo URL . URL_ADMIN_ITEMS . '?' . $web_data['url_search']; ?>">Ürünler</a>
+                    <?php if (!empty($web_data['url_search'])) : ?>
+                        <a class="text underline" href="<?php echo URL . URL_ADMIN_ITEMS . '?' . $web_data['url_search']; ?>">Ürünler</a>
+                    <?php else : ?>
+                        <a class="text underline" href="<?php echo URL . URL_ADMIN_ITEMS; ?>">Ürünler</a>
+                    <?php endif; ?>
                     <span class="text">></span>
                     <span class="link text underline"><?php echo $web_data['selected_search']; ?></span>
                 </div>
