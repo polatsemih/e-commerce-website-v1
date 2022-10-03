@@ -4998,6 +4998,17 @@ a {
     margin-bottom: 3rem;
 }
 
+.action-section .contact-not {
+    margin-bottom: 2rem;
+    display: block;
+    background-color: var(--success);
+    padding: 1rem;
+    border-radius: 1rem;
+    color: var(--color-primary-light);
+    font-size: 1.4rem;
+    line-height: 1.4;
+}
+
 .action-section .message-container {
     padding: 1rem;
     margin-bottom: 3rem;
@@ -5519,19 +5530,6 @@ a {
 
 .verify-token-container .go-back-login.active {
     display: block !important;
-}
-
-/* Contact Settings */
-.section-contact {
-    padding-top: 5rem;
-    padding-bottom: 5rem;
-    min-height: calc(100vh - 6rem);
-}
-
-.section-contact .title {
-    font-size: 1.8rem;
-    color: var(--color-primary-dark);
-    margin-bottom: 2rem;
 }
 
 /* Media Settings */
