@@ -14,6 +14,7 @@
             <div class="nav-menu">
                 <a class="link<?php echo $web_data['statistics_type'] == URL_ADMIN_LOGS_PAGE ? ' active' : ''; ?>" href="<?php echo URL . URL_ADMIN_LOGS . '/' . URL_ADMIN_LOGS_PAGE; ?>">Görüntülenen Sayfalar</a>
                 <a class="link<?php echo $web_data['statistics_type'] == URL_ADMIN_LOGS_USER ? ' active' : ''; ?>" href="<?php echo URL . URL_ADMIN_LOGS . '/' . URL_ADMIN_LOGS_USER; ?>">Kullanıcılar</a>
+                <a class="link<?php echo $web_data['statistics_type'] == URL_ADMIN_LOGS_MESSAGE ? ' active' : ''; ?>" href="<?php echo URL . URL_ADMIN_LOGS . '/' . URL_ADMIN_LOGS_MESSAGE; ?>">Mesajlar</a>
                 <a class="link<?php echo $web_data['statistics_type'] == URL_ADMIN_LOGS_ERROR ? ' active' : ''; ?>" href="<?php echo URL . URL_ADMIN_LOGS . '/' . URL_ADMIN_LOGS_ERROR; ?>">Sistem Hataları</a>
                 <a class="link<?php echo $web_data['statistics_type'] == URL_ADMIN_LOGS_LOGIN_ACCOUNT ? ' active' : ''; ?>" href="<?php echo URL . URL_ADMIN_LOGS . '/' . URL_ADMIN_LOGS_LOGIN_ACCOUNT; ?>">Hesaba Girişler</a>
                 <a class="link<?php echo $web_data['statistics_type'] == URL_ADMIN_LOGS_LOGIN ? ' active' : ''; ?>" href="<?php echo URL . URL_ADMIN_LOGS . '/' . URL_ADMIN_LOGS_LOGIN; ?>">Hatalı Giriş Denemeleri</a>
@@ -272,6 +273,28 @@
                             </div>
                         <?php endif; ?>
                     </div>
+                <?php elseif ($web_data['statistics_type'] == URL_ADMIN_LOGS_MESSAGE) : ?>
+                    <h1 class="title mb">Kullanıcı Mesajları</h1>
+                    <?php if (!empty($web_data['log_contact'])) : ?>
+                        <div class="table-header">
+                            <span class="th box-contact-s theme">Kullanıcı IP</span>
+                            <span class="th box-contact-s theme">İsim</span>
+                            <span class="th box-contact-s theme">Soy İsim</span>
+                            <span class="th box-contact-s theme">Email</span>
+                            <span class="th box-contact-l theme">Mesaj</span>
+                            <span class="th box-contact-s theme">Tarih</span>
+                        </div>
+                        <?php foreach ($web_data['log_contact'] as $log_contact) : ?>
+                            <div class="table-header">
+                                <span class="th box-contact-s center"><?php echo $log_contact['user_ip']; ?></span>
+                                <span class="th box-contact-s"><?php echo $log_contact['first_name']; ?></span>
+                                <span class="th box-contact-s"><?php echo $log_contact['last_name']; ?></span>
+                                <span class="th box-contact-s"><?php echo $log_contact['email']; ?></span>
+                                <span class="th box-contact-l"><?php echo $log_contact['message']; ?></span>
+                                <span class="th box-contact-s center"><?php echo date('d/m/Y H:i:s', strtotime($log_contact['date_contact_created'])); ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 <?php elseif ($web_data['statistics_type'] == URL_ADMIN_LOGS_ERROR) : ?>
                     <h1 class="title mb">Sistem Hataları</h1>
                     <?php if (!empty($web_data['log_error'])) : ?>

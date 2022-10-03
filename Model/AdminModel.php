@@ -129,4 +129,48 @@ class AdminModel extends Model
     {
         return $this->database->Update(TABLE_ADMIN, $inputs);
     }
+    function GetLogContact()
+    {
+        return $this->database->Get(TABLE_CONTACT, 'user_ip,first_name,last_name,email,message,date_contact_created', 'ORDER BY date_contact_created DESC', '', 'PLURAL'); 
+    }
+    function GetOrderInitializeInformations()
+    {
+        return $this->database->Get(TABLE_ORDER_INITIALIZE_INFORMATIONS, '*', 'ORDER BY date_order_initialize_created DESC', '', 'PLURAL');
+    }
+    function GetOrderInitializeBasket(string $order_initialize_information_id)
+    {
+        return $this->database->Get(TABLE_ORDER_INITIALIZE_BASKET, '*', 'WHERE order_initialize_information_id=?', $order_initialize_information_id, 'PLURAL');
+    }
+    function GetOrderPayment(string $order_initialize_information_id)
+    {
+        return $this->database->Get(TABLE_ORDER_PAYMENT, '*', 'WHERE order_initialize_information_id=?', $order_initialize_information_id, 'SINGULAR');
+    }
+    function GetOrderPaymentItemTransaction(string $payment_id)
+    {
+        return $this->database->Get(TABLE_ORDER_PAYMENT_ITEM_TRANSACTION, '*', 'WHERE payment_id=?', $payment_id, 'PLURAL');
+    }
+    function GetOrderConversationErrors()
+    {
+        return $this->database->Get(TABLE_ORDER_CONVERSATION_ERROR, 'conversation_id_request,conversation_id_response,system_time,user_id,user_ip,function_type,date_error_occured', 'ORDER BY date_error_occured DESC', '', 'PLURAL');
+    }
+    function GetOrderStatusErrors()
+    {
+        return $this->database->Get(TABLE_ORDER_STATUS_ERROR, 'conversation_id_request,conversation_id_response,status,mdStatus,error_code,error_message,error_group,system_time,user_id,user_ip,function_type,date_error_occred', 'ORDER BY date_error_occred DESC', '', 'PLURAL');
+    }
+    function GetOrderStatusCodes()
+    {
+        return $this->database->Get(TABLE_ORDER_STATUS, 'status_number,status_message', 'ORDER BY status_number ASC', '', 'PLURAL');
+    }
+    function GetOrderMDStatusCodes()
+    {
+        return $this->database->Get(TABLE_ORDER_MD_STATUS, 'md_status_number,md_status_message', 'ORDER BY md_status_number ASC', '', 'PLURAL');
+    }
+    function GetUserForBlock(string $user_id)
+    {
+        return $this->database->Get(TABLE_USER, 'is_user_blocked', 'WHERE id=?', $user_id, 'SINGULAR');
+    }
+    function UpdateUser(array $inputs)
+    {
+        return $this->database->Update(TABLE_USER, $inputs);
+    }
 }

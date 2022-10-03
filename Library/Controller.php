@@ -53,10 +53,15 @@ class Controller
                     $session_authentication_from_database = $this->ActionModel->GetSessionAuthentication(array($_SERVER['REMOTE_ADDR'], $_SESSION[SESSION_AUTHENTICATION_NAME]));
                     if ($session_authentication_from_database['result']) {
                         if ($session_authentication_from_database['data']['date_session_authentication_expiry'] > date('Y-m-d H:i:s') && $session_authentication_from_database['data']['is_session_authentication_logout'] == 0) {
-                            $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id', $session_authentication_from_database['data']['user_id']);
+                            $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id,is_user_blocked', $session_authentication_from_database['data']['user_id']);
                             if ($authenticated_user_from_database['result']) {
                                 $session_authentication_error = false;
                                 $this->web_data['authenticated_user'] = $authenticated_user_from_database['data']['id'];
+                                if ($authenticated_user_from_database['data']['is_user_blocked'] == 0) {
+                                    $this->web_data['authenticated_user_blocked'] = false;
+                                } else {
+                                    $this->web_data['authenticated_user_blocked'] = true;
+                                }
                                 $this->web_data['session_authentication_id'] = $session_authentication_from_database['data']['id'];
                             }
                         }
@@ -84,10 +89,15 @@ class Controller
                                     if ($cookie_authentication_from_database['data']['date_cookie_authentication_expiry'] > date('Y-m-d H:i:s') && $cookie_authentication_from_database['data']['is_cookie_authentication_logout'] == 0) {
                                         $cookie_authentication_token1 = hash_hmac('SHA512', $extracted_cookie_authentication_token1, $cookie_authentication_from_database['data']['cookie_authentication_salt'], false);
                                         if (hash_equals($cookie_authentication_from_database['data']['cookie_authentication_token1'], $cookie_authentication_token1)) {
-                                            $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id', $cookie_authentication_from_database['data']['user_id']);
+                                            $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id,is_user_blocked', $cookie_authentication_from_database['data']['user_id']);
                                             if ($authenticated_user_from_database['result']) {
                                                 $cookie_authentication_error = false;
                                                 $this->web_data['authenticated_user'] = $authenticated_user_from_database['data']['id'];
+                                                if ($authenticated_user_from_database['data']['is_user_blocked'] == 0) {
+                                                    $this->web_data['authenticated_user_blocked'] = false;
+                                                } else {
+                                                    $this->web_data['authenticated_user_blocked'] = true;
+                                                }
                                                 $this->web_data['cookie_authentication_id'] = $cookie_authentication_from_database['data']['id'];
                                             }
                                         }

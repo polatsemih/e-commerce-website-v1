@@ -17,4 +17,8 @@ class ErrorController extends Controller
     {
         parent::GetView('Error/Shutdown');
     }
+    function UserBlocked()
+    {
+        parent::GetView('Error/Blocked');
+    }
 }

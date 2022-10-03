@@ -4,6 +4,19 @@ class HomeController extends Controller
     function __construct()
     {
         parent::__construct();
+        if (!empty($this->web_data['authenticated_user_blocked']) && $this->web_data['authenticated_user_blocked']) {
+            $this->session_control->KillAllSessions();
+            if (!empty($_COOKIE[COOKIE_AUTHENTICATION_CROSS_SITE_NAME])) {
+                $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_CROSS_SITE_NAME);
+            }
+            if (!empty($_COOKIE[COOKIE_CART_NAME])) {
+                $this->cookie_control->EmptyCookie(COOKIE_CART_NAME);
+            }
+            if (!empty($_COOKIE[COOKIE_AUTHENTICATION_NAME])) {
+                $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_NAME);
+            }
+            $this->input_control->Redirect(URL_USER_BLOCKED);
+        }
     }
     function Index()
     {
@@ -802,8 +815,90 @@ class HomeController extends Controller
                 $this->input_control->CheckUrl();
                 parent::LogView('Home-Contact');
                 $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
+                if (!empty($_SESSION[SESSION_WEB_DATA_NAME])) {
+                    if (isset($_SESSION[SESSION_WEB_DATA_NAME]['first_name']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['last_name']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['email']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['message'])) {
+                        $this->web_data['first_name'] = $_SESSION[SESSION_WEB_DATA_NAME]['first_name'];
+                        $this->web_data['last_name'] = $_SESSION[SESSION_WEB_DATA_NAME]['last_name'];
+                        $this->web_data['email'] = $_SESSION[SESSION_WEB_DATA_NAME]['email'];
+                        $this->web_data['message'] = $_SESSION[SESSION_WEB_DATA_NAME]['message'];
+                    }
+                    $this->session_control->KillSession(SESSION_WEB_DATA_NAME);
+                }
+                if (!empty($_SESSION[SESSION_CONTACT_NOT_NAME])) {
+                    $this->web_data['contact_notification'] = $_SESSION[SESSION_CONTACT_NOT_NAME];
+                    $this->session_control->KillSession(SESSION_CONTACT_NOT_NAME);
+                }
                 $this->web_data['form_token'] = parent::SetCSRFToken('Contact');
                 parent::GetView('Home/Contact', $this->web_data);
+            } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $first_name = isset($_POST['first_name']) ? $_POST['first_name'] : '';
+                $last_name = isset($_POST['last_name']) ? $_POST['last_name'] : '';
+                $email = isset($_POST['email']) ? $_POST['email'] : '';
+                $message = isset($_POST['message']) ? $_POST['message'] : '';
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'first_name' => array('input' => $first_name, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_USER_NAME, 'length_control' => true, 'max_length' => USER_NAME_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_MAX_LIMIT_USER_NAME, 'preventxss' => true, 'length_limit' => USER_NAME_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_MAX_LIMIT_USER_NAME),
+                    'last_name' => array('input' => $last_name, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_USER_LAST_NAME, 'length_control' => true, 'max_length' => USER_NAME_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_MAX_LIMIT_USER_LAST_NAME, 'preventxss' => true, 'length_limit' => USER_NAME_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_MAX_LIMIT_USER_LAST_NAME),
+                    'email' => array('input' => $email, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_EMAIL, 'no_white_space' => true, 'error_message_no_white_space' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL, 'is_email' => true, 'error_message_is_email' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL, 'length_control' => true, 'max_length' => EMAIL_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL, 'preventxss' => true, 'length_limit' => EMAIL_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL),
+                    'message' => array('input' => $message, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_CONTACT_MESSAGE, 'length_control' => true, 'max_length' => CONTACT_MESSAGE_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_MAX_LIMIT_CONTACT_MESSAGE, 'preventxss' => true, 'length_limit' => CONTACT_MESSAGE_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_MAX_LIMIT_CONTACT_MESSAGE),
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'Contact')) {
+                        $captcha_timeout_from_database = $this->ActionModel->GetCaptchaTimeOut($_SERVER['REMOTE_ADDR']);
+                        $captcha_timeout_not_error = false;
+                        if ($captcha_timeout_from_database['result']) {
+                            if ($captcha_timeout_from_database['data']['date_captcha_timeout_expiry'] > date('Y-m-d H:i:s')) {
+                                $a = strtotime($captcha_timeout_from_database['data']['date_captcha_timeout_expiry']);
+                                $b = strtotime(date('Y-m-d H:i:s'));
+                                if (!empty($a) && !empty($b)) {
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_CAPTCHA_TIMEOUT_1 . ceil((int)(($a - $b) / 60)) . TR_NOTIFICATION_ERROR_CAPTCHA_TIMEOUT_2);
+                                } else {
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                }
+                                $this->input_control->Redirect(URL_ADMIN_LOGIN);
+                            }
+                            $captcha_timeout_not_error = true;
+                        } elseif ($this->ActionModel->CreateCaptchaTimeOut(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'captcha_error_count' => 0, 'captcha_total_error_count' => 0))['result']) {
+                            $captcha_timeout_not_error = true;
+                        }
+                        if (!empty($_POST['h-captcha-response'])) {
+                            $captcha_check_result = $this->action_control->CheckCaptcha($_POST['h-captcha-response']);
+                            if ($captcha_check_result['result']) {
+                                if ($this->ActionModel->CreateLogCaptcha(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'success' => $captcha_check_result['success'], 'credit' => $captcha_check_result['credit']))['result'] && $captcha_timeout_not_error) {
+                                    if ($captcha_timeout_from_database['result'] && $captcha_timeout_from_database['data']['captcha_error_count'] != 0) {
+                                        $this->ActionModel->UpdateCaptchaTimeOut(array('captcha_error_count' => 0, 'id' => $captcha_timeout_from_database['data']['id']));
+                                    }
+                                    if ($this->UserModel->CreateContact(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'first_name' => $checked_inputs['first_name'], 'last_name' => $checked_inputs['last_name'], 'email' => $checked_inputs['email'], 'message' => $checked_inputs['message']))['result']) {
+                                        $_SESSION[SESSION_CONTACT_NOT_NAME] = TR_NOTIFICATION_SUCCESS_CONTACT_SENT;
+                                        $this->action_control->SendMail(ADMIN_EMAIL, BRAND . ' Yeni Mesaj', 'Bir yeni mesajınız var.');
+                                        $this->input_control->Redirect(URL_CONTACT);
+                                    } else {
+                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                    }
+                                } else {
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+                                }
+                            } else {
+                                if ($captcha_timeout_from_database['result']) {
+                                    if ($captcha_timeout_from_database['data']['captcha_error_count'] == 0) {
+                                        $this->ActionModel->UpdateCaptchaTimeOut(array('captcha_error_count' => $captcha_timeout_from_database['data']['captcha_error_count'] + 1, 'captcha_total_error_count' => $captcha_timeout_from_database['data']['captcha_error_count'] + 1, 'id' => $captcha_timeout_from_database['data']['id']));
+                                    } elseif ($captcha_timeout_from_database['data']['captcha_error_count'] < 4) {
+                                        $this->ActionModel->UpdateCaptchaTimeOut(array('captcha_error_count' => $captcha_timeout_from_database['data']['captcha_error_count'] + 1, 'captcha_total_error_count' => $captcha_timeout_from_database['data']['captcha_error_count'] + 1, 'date_captcha_timeout_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_SHORT_TIMEOUT_CAPTCHA)), 'id' => $captcha_timeout_from_database['data']['id']));
+                                    } elseif ($captcha_timeout_from_database['data']['captcha_error_count'] >= 4) {
+                                        $this->ActionModel->UpdateCaptchaTimeOut(array('captcha_error_count' => $captcha_timeout_from_database['data']['captcha_error_count'] + 1, 'captcha_total_error_count' => $captcha_timeout_from_database['data']['captcha_error_count'] + 1, 'date_captcha_timeout_expiry' => date('Y-m-d H:i:s', time() + (EXPIRY_LONG_TIMEOUT_CAPTCHA)), 'id' => $captcha_timeout_from_database['data']['id']));
+                                    }
+                                }
+                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_CAPTCHA);
+                            }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_CAPTCHA);
+                        }
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                }
+                $_SESSION[SESSION_WEB_DATA_NAME] = array('first_name' => $first_name, 'last_name' => $last_name, 'email' => $email, 'message' => $message);
+                $this->input_control->Redirect(URL_CONTACT);
             }
             $this->input_control->Redirect();
         } catch (\Throwable $th) {
@@ -1801,8 +1896,10 @@ class HomeController extends Controller
                 $this->input_control->Redirect(URL_LOGIN);
             }
             if (!WEB_SHOPPING_PERMISSION) {
-                $this->notification_control->SetNotification('DANGER', WEB_SHOPPING_PERMISSION_FALSE);
-                $this->input_control->Redirect(URL_CART);
+                if ($_SERVER['REMOTE_ADDR'] != ADMIN_IP_ADDRESS) {
+                    $this->notification_control->SetNotification('DANGER', WEB_SHOPPING_PERMISSION_FALSE);
+                    $this->input_control->Redirect(URL_CART);
+                }
             }
             $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id,first_name,last_name,identity_number,email,phone_number,is_user_blocked', $this->web_data['authenticated_user']);
             if ($confirmed_user_from_db['result'] && !empty($this->web_data['order_cart_data']) && is_array($this->web_data['order_cart_data']) && !empty($this->web_data['order_cart_data_price']) && !empty($this->web_data['order_cart_data_total_price'])) {
@@ -2105,7 +2202,7 @@ class HomeController extends Controller
                         $this->input_control->Redirect(URL_ORDER_INITIALIZE);
                     }
                 } else {
-                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_ORDER_USER_BLOCKED);
+                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_USER_BLOCKED);
                     $this->input_control->Redirect(URL_CART);
                 }
             } else {

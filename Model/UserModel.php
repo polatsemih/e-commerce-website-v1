@@ -73,4 +73,8 @@ class UserModel extends Model
     {
         return $this->database->Update(TABLE_ADMIN, $inputs);
     }
+    function CreateContact(array $inputs)
+    {
+        return $this->database->Create(TABLE_CONTACT, $inputs); 
+    }
 }

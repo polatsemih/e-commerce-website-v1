@@ -4,16 +4,22 @@ class StartUp
     function __construct()
     {
         if (WEB_SHUTDOWN_PHASE) {
-            require_once 'View/Error/Shutdown.php';
-            exit(0);
+            if ($_SERVER['REMOTE_ADDR'] != ADMIN_IP_ADDRESS) {
+                require_once 'View/Error/Shutdown.php';
+                exit(0);
+            }
         }
         if (WEB_PREPARE_PHASE) {
-            require_once 'View/Error/Prepare.php';
-            exit(0);
+            if ($_SERVER['REMOTE_ADDR'] != ADMIN_IP_ADDRESS) {
+                require_once 'View/Error/Prepare.php';
+                exit(0);
+            }
         }
         if (WEB_MAINTENANCE_PHASE) {
-            require_once 'View/Error/Maintenance.php';
-            exit(0);
+            if ($_SERVER['REMOTE_ADDR'] != ADMIN_IP_ADDRESS) {
+                require_once 'View/Error/Maintenance.php';
+                exit(0);
+            }
         }
         if (!empty($_GET['url'])) {
             $checked_url = $this->CheckUrl($_GET['url']);

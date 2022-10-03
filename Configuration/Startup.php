@@ -3,6 +3,7 @@
 define('URL_GO_HOME', 'anasayfaya-don');
 define('URL_EXCEPTION', 'sorun');
 define('URL_SHUTDOWN', 'hata');
+define('URL_USER_BLOCKED', 'engel');
 // HomeController
 define('URL_ITEMS', 'urunler');
 define('URL_ITEM_DETAILS', 'urun');
@@ -72,6 +73,7 @@ define('URL_ADMIN_MENU', 'yonetici-menu');
 define('URL_ADMIN_LOGS', 'yonetici-istatistikler');
 define('URL_ADMIN_LOGS_PAGE', 'goruntulenen-sayfalar');
 define('URL_ADMIN_LOGS_USER', 'kullanicilar');
+define('URL_ADMIN_LOGS_MESSAGE', 'kullanici-mesajlari');
 define('URL_ADMIN_LOGS_ERROR', 'hatalar');
 define('URL_ADMIN_LOGS_LOGIN_ACCOUNT', 'hesaba-giris-denemeleri');
 define('URL_ADMIN_LOGS_LOGIN', 'giris-denemeleri');
@@ -84,7 +86,6 @@ define('URL_ADMIN_ITEM_DETAILS', 'yonetici-urun');
 define('URL_ADMIN_ITEM_UPDATE', 'yonetici-urun-guncelle');
 define('URL_ADMIN_ITEM_DELETE', 'yonetici-urun-sil');
 define('URL_ADMIN_ITEM_CREATE', 'yonetici-urun-ekle');
-define('URL_ADMIN_ORDERS', 'yonetici-siparisler');
 define('URL_ADMIN_USERS', 'yonetici-kullanicilar');
 define('URL_ADMIN_SEND_EMAIL', 'yonetici-email-gonder');
 define('URL_ADMIN_USER_DETAILS', 'yonetici-kullanici');
@@ -95,11 +96,21 @@ define('URL_ADMIN_PROFILE_PHOTO', 'resim-degistir');
 define('URL_ADMIN_PROFILE_UPDATE', 'yonetici-ismimi-guncelle');
 define('URL_ADMIN_PASSWORD_UPDATE', 'yonetici-sifremi-guncelle');
 define('URL_ADMIN_PROFILE_PHOTO_UPDATE', 'yonetici-resmimi-guncelle');
+define('URL_ADMIN_ORDERS', 'yonetici-siparisler');
+define('URL_ADMIN_ORDER_DETAILS', 'yonetici-siparis');
+define('URL_ADMIN_ORDER_ERRORS', 'yonetici-siparis-hatalari');
+define('URL_ADMIN_ORDER_CONVERSATION_ERROR', 'gorusme-hatalari');
+define('URL_ADMIN_ORDER_STATUS_ERROR', 'durum-hatalari');
+define('URL_ADMIN_ORDER_STATUS_CODES', 'durum-kodlari');
+define('URL_ADMIN_ORDER_MD_STATUS_CODES', 'md-durum-kodlari');
+define('URL_ADMIN_USER_BLOCK', 'yonetici-kullanici-engelle');
+define('URL_ADMIN_ITEM_COMMENT', 'yonetici-urun-yorumlar');
 define('URL_MAPS', array(
     // ErrorController
     array('url' => 'anasayfaya-don', 'controller' => 'ErrorController', 'action' => 'GoHome'),
     array('url' => 'sorun', 'controller' => 'ErrorController', 'action' => 'Exception'),
     array('url' => 'hata', 'controller' => 'ErrorController', 'action' => 'ShutDown'),
+    array('url' => 'engel', 'controller' => 'ErrorController', 'action' => 'UserBlocked'),
     // HomeController
     array('url_pattern' => 'urunler/?', 'controller' => 'HomeController', 'action' => 'Items'),
     array('url_pattern' => 'urun/?', 'controller' => 'HomeController', 'action' => 'ItemDetails'),
@@ -161,12 +172,16 @@ define('URL_MAPS', array(
     array('url' => 'yonetici-urun-guncelle', 'controller' => 'AdminController', 'action' => 'ItemUpdate'),
     array('url' => 'yonetici-urun-sil', 'controller' => 'AdminController', 'action' => 'ItemDelete'),
     array('url' => 'yonetici-urun-ekle', 'controller' => 'AdminController', 'action' => 'ItemCreate'),
-    array('url' => 'yonetici-siparisler', 'controller' => 'AdminController', 'action' => 'Orders'),
     array('url' => 'yonetici-kullanicilar', 'controller' => 'AdminController', 'action' => 'Users'),
     array('url' => 'yonetici-email-gonder', 'controller' => 'AdminController', 'action' => 'SendEmail'),
     array('url_pattern' => 'yonetici-kullanici/?', 'controller' => 'AdminController', 'action' => 'UserDetails'),
     array('url_pattern' => 'yonetici-profil/?', 'controller' => 'AdminController', 'action' => 'Profile'),
     array('url' => 'yonetici-ismimi-guncelle', 'controller' => 'AdminController', 'action' => 'ProfileInformationsUpdate'),
     array('url' => 'yonetici-sifremi-guncelle', 'controller' => 'AdminController', 'action' => 'ProfilePasswordUpdate'),
-    array('url' => 'yonetici-resmimi-guncelle', 'controller' => 'AdminController', 'action' => 'ProfilePhotoUpdate')
+    array('url' => 'yonetici-resmimi-guncelle', 'controller' => 'AdminController', 'action' => 'ProfilePhotoUpdate'),
+    array('url' => 'yonetici-siparisler', 'controller' => 'AdminController', 'action' => 'Orders'),
+    array('url_pattern' => 'yonetici-siparis/?', 'controller' => 'AdminController', 'action' => 'OrderDetails'),
+    array('url_pattern' => 'yonetici-siparis-hatalari/?', 'controller' => 'AdminController', 'action' => 'OrderErrors'),
+    array('url' => 'yonetici-kullanici-engelle', 'controller' => 'AdminController', 'action' => 'UserBlock'),
+    array('url' => 'yonetici-urun-yorumlar', 'controller' => 'AdminController', 'action' => 'ItemComments')
 ));

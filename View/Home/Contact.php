@@ -16,31 +16,50 @@
         <section class="action-section contact">
             <div class="action-container">
                 <h1 class="title">İletişim</h1>
+                <?php if (!empty($web_data['contact_notification'])) : ?>
+                    <span class="contact-not"><?php echo $web_data['contact_notification']; ?></span>
+                <?php endif; ?>
                 <form id="form-contact" action="<?php echo URL . URL_CONTACT; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
                     <?php if (!empty($web_data['form_token'])) : ?>
                         <input type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
                     <?php endif; ?>
                     <div class="form-row">
                         <div class="group">
-                            <input class="input-action" id="input-first-name" type="text" name="first_name" autofocus>
+                            <?php if (!empty($web_data['first_name'])) : ?>
+                                <input class="input-action" id="input-first-name" type="text" name="first_name" value="<?php echo $web_data['first_name']; ?>">
+                            <?php else : ?>
+                                <input class="input-action" id="input-first-name" type="text" name="first_name" autofocus>
+                            <?php endif; ?>
                             <span class="input-action-label">İsim</span>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="group">
-                            <input class="input-action" id="input-last-name" type="text" name="last_name">
+                            <?php if (!empty($web_data['last_name'])) : ?>
+                                <input class="input-action" id="input-last-name" type="text" name="last_name" value="<?php echo $web_data['last_name']; ?>">
+                            <?php else : ?>
+                                <input class="input-action" id="input-last-name" type="text" name="last_name">
+                            <?php endif; ?>
                             <span class="input-action-label">Soy İsim</span>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="group">
-                            <input class="input-action" id="input-email" type="email" name="email">
+                            <?php if (!empty($web_data['email'])) : ?>
+                                <input class="input-action" id="input-email" type="email" name="email" value="<?php echo $web_data['email']; ?>">
+                            <?php else : ?>
+                                <input class=" input-action" id="input-email" type="email" name="email">
+                            <?php endif; ?>
                             <span class="input-action-label">Email</span>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="group">
-                            <textarea class="input-textarea" id="input-message" name="message" placeholder="Mesaj"></textarea>
+                            <?php if (!empty($web_data['email'])) : ?>
+                                <textarea class="input-textarea" id="input-message" name="message" placeholder="Mesaj"><?php echo $web_data['email']; ?></textarea>
+                            <?php else : ?>
+                                <textarea class="input-textarea" id="input-message" name="message" placeholder="Mesaj"></textarea>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <div class="captcha-popup">

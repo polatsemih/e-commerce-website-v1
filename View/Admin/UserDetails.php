@@ -10,7 +10,22 @@
 <body class="noscroll">
     <?php require_once 'View/SharedAdmin/_admin_body.php'; ?>
     <section class="item-create-section container">
-        <h1 class="title mb">Kullanıcı Detayları</h1>
+        <div class="row">
+            <div class="left">
+                <h1 class="title mb">Kullanıcı Detayları</h1>
+            </div>
+            <?php if (!empty($web_data['user'])) : ?>
+                <div class="right">
+                    <form action="<?php echo URL . URL_ADMIN_USER_BLOCK; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                        <?php if (!empty($web_data['form_token'])) : ?>
+                            <input type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
+                        <?php endif; ?>
+                        <input type="hidden" name="id" value="<?php echo $web_data['user']['id']; ?>">
+                        <input class="btn-user-block" type="submit" name="submit_block_user" value="<?php echo $web_data['user']['is_user_blocked'] == 0 ? 'Engelle' : 'Engellemeyi Kaldır'; ?>" title="Kullanıcıyı engellemek, kullanıcının yorum yapmasını ve alışveriş yapmasını engeller.">
+                    </form>
+                </div>
+            <?php endif; ?>
+        </div>
         <?php if (!empty($web_data['user'])) : ?>
             <div class="row">
                 <div class="col-label">
