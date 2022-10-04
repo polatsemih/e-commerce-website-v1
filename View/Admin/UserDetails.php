@@ -16,13 +16,16 @@
             </div>
             <?php if (!empty($web_data['user'])) : ?>
                 <div class="right">
-                    <form action="<?php echo URL . URL_ADMIN_USER_BLOCK; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
-                        <?php if (!empty($web_data['form_token'])) : ?>
-                            <input type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
-                        <?php endif; ?>
-                        <input type="hidden" name="id" value="<?php echo $web_data['user']['id']; ?>">
-                        <input class="btn-user-block" type="submit" name="submit_block_user" value="<?php echo $web_data['user']['is_user_blocked'] == 0 ? 'Engelle' : 'Engellemeyi Kaldır'; ?>" title="Kullanıcıyı engellemek, kullanıcının yorum yapmasını ve alışveriş yapmasını engeller.">
-                    </form>
+                    <div class="row">
+                        <a class="btn-user-past-orders" href="<?php echo URL . URL_ADMIN_USER_PAST_ORDERS . '/' . $web_data['user']['id']; ?>" title="Kullanıcının Geçmiş Siparişleri">Geçmiş Siparişler</a>
+                        <form action="<?php echo URL . URL_ADMIN_USER_BLOCK; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                            <?php if (!empty($web_data['form_token'])) : ?>
+                                <input type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
+                            <?php endif; ?>
+                            <input type="hidden" name="id" value="<?php echo $web_data['user']['id']; ?>">
+                            <input class="btn-user-block" type="submit" name="submit_block_user" value="<?php echo $web_data['user']['is_user_blocked'] == 0 ? 'Engelle' : 'Engellemeyi Kaldır'; ?>" title="Kullanıcıyı engellemek, kullanıcının yorum yapmasını ve alışveriş yapmasını engeller.">
+                        </form>
+                    </div>
                 </div>
             <?php endif; ?>
         </div>
@@ -137,7 +140,11 @@
                     <label class="create-label">Profil Son Güncelleme Tarihi</label>
                 </div>
                 <div class="col-input">
-                    <span class="create-input span-input"><?php echo date('d/m/Y H:i:s', strtotime($web_data['user']['date_last_profile_update'])); ?></span>
+                    <?php if (!empty($web_data['user']['date_last_profile_update'])) : ?>
+                        <span class="create-input span-input"><?php echo date('d/m/Y H:i:s', strtotime($web_data['user']['date_last_profile_update'])); ?></span>
+                    <?php else : ?>
+                        <span class="create-input span-input">-</span>
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="row">
@@ -161,7 +168,11 @@
                     <label class="create-label">Son Hatalı Erişim</label>
                 </div>
                 <div class="col-input">
-                    <span class="create-input span-input"><?php echo date('d/m/Y H:i:s', strtotime($web_data['user']['date_last_fail_access_attempt'])); ?></span>
+                    <?php if (!empty($web_data['user']['date_last_fail_access_attempt'])) : ?>
+                        <span class="create-input span-input"><?php echo date('d/m/Y H:i:s', strtotime($web_data['user']['date_last_fail_access_attempt'])); ?></span>
+                    <?php else : ?>
+                        <span class="create-input span-input">-</span>
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="row">
@@ -188,7 +199,11 @@
                     <label class="create-label">Kayıt İptal Tarihi</label>
                 </div>
                 <div class="col-input">
-                    <span class="create-input span-input"><?php echo date('d/m/Y H:i:s', strtotime($web_data['user']['date_register_canceled'])); ?></span>
+                    <?php if (!empty($web_data['user']['date_register_canceled'])) : ?>
+                        <span class="create-input span-input"><?php echo date('d/m/Y H:i:s', strtotime($web_data['user']['date_register_canceled'])); ?></span>
+                    <?php else : ?>
+                        <span class="create-input span-input">-</span>
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="row">
@@ -218,7 +233,11 @@
                     <label class="create-label">Hesap Kaldırılma Tarihi</label>
                 </div>
                 <div class="col-input">
-                    <span class="create-input span-input"><?php echo date('d/m/Y H:i:s', strtotime($web_data['user']['date_user_deleted'])); ?></span>
+                    <?php if (!empty($web_data['user']['date_user_deleted'])) : ?>
+                        <span class="create-input span-input"><?php echo date('d/m/Y H:i:s', strtotime($web_data['user']['date_user_deleted'])); ?></span>
+                    <?php else : ?>
+                        <span class="create-input span-input">-</span>
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="row">
@@ -237,7 +256,11 @@
                     <label class="create-label">Hesap Bloklanma Tarihi</label>
                 </div>
                 <div class="col-input">
-                    <span class="create-input span-input"><?php echo date('d/m/Y H:i:s', strtotime($web_data['user']['date_user_blocked'])); ?></span>
+                    <?php if (!empty($web_data['user']['date_user_blocked'])) : ?>
+                        <span class="create-input span-input"><?php echo date('d/m/Y H:i:s', strtotime($web_data['user']['date_user_blocked'])); ?></span>
+                    <?php else : ?>
+                        <span class="create-input span-input">-</span>
+                    <?php endif; ?>
                 </div>
             </div>
         <?php else : ?>

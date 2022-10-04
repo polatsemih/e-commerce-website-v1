@@ -192,6 +192,14 @@ class Controller
                         }
                     }
                 }
+                $logViewOnceIp = $this->LogModel->GetLogViewDaily($_SERVER['REMOTE_ADDR']);
+                if ($logViewOnceIp['result']) {
+                    if (date('Y-m-d H:i:s', strtotime($logViewOnceIp['data']['date_viewed'] . ' +1 day')) < date('Y-m-d H:i:s')) {
+                        $this->LogModel->CreateLogViewDaily(array('user_ip' => $_SERVER['REMOTE_ADDR']));
+                    }
+                } else {
+                    $this->LogModel->CreateLogViewDaily(array('user_ip' => $_SERVER['REMOTE_ADDR']));
+                }
             }
         } catch (\Throwable $th) {
             require_once 'View/Error/Shutdown.php';

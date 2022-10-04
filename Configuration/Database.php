@@ -26,6 +26,7 @@ define('TABLE_LOG_LOGIN_EMAIL_FAIL', 'log_login_email_fail_cur2zkq6y0');
 define('TABLE_LOG_LOGIN', 'log_login_zjg76cmju2');
 define('TABLE_SQL_BACKUP', 'log_sql_kals6h5g4x');
 define('TABLE_LOG_VIEW_ALL', 'log_view_all_ax47ngui0p');
+define('TABLE_LOG_VIEW_DAILY_IP', 'log_view_daily_ip_fha7vnrk21');
 define('TABLE_LOG_VIEW_ONCE', 'log_view_once_bvmx7351rq');
 define('TABLE_ORDER_CONVERSATION_ERROR', 'order_conversation_error_ar13cvh782');
 define('TABLE_ORDER_INITIALIZE_BASKET', 'order_initialize_basket_ok2h6vf4am');

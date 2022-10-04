@@ -33,4 +33,12 @@ class LogModel extends Model
     {
         return $this->database->Create(TABLE_LOG_ERROR, $inputs);
     }
+    function GetLogViewDaily(string $user_ip)
+    {
+        return $this->database->Get(TABLE_LOG_VIEW_DAILY_IP, 'date_viewed', 'WHERE user_ip=? ORDER BY date_viewed DESC LIMIT 1', $user_ip, 'SINGULAR');
+    }
+    function CreateLogViewDaily(array $inputs)
+    {
+        return $this->database->Create(TABLE_LOG_VIEW_DAILY_IP, $inputs);
+    }
 }

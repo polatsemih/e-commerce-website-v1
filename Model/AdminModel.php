@@ -173,4 +173,36 @@ class AdminModel extends Model
     {
         return $this->database->Update(TABLE_USER, $inputs);
     }
+    function GetUserForPastOrders(string $user_id)
+    {
+        return $this->database->Get(TABLE_USER, 'first_name,last_name', 'WHERE id=?', $user_id, 'SINGULAR');
+    }
+    function GetOrderInitializeInformationsByUserId(string $user_id)
+    {
+        return $this->database->Get(TABLE_ORDER_INITIALIZE_INFORMATIONS, '*', 'WHERE user_id=? ORDER BY date_order_initialize_created DESC', $user_id, 'PLURAL');
+    }
+    function GetItemComments()
+    {
+        return $this->database->Get(TABLE_COMMENT, 'id,user_id,item_id,comment,is_comment_approved,date_comment_approved,date_comment_created,date_comment_last_updated,is_comment_deleted,date_comment_deleted', 'ORDER BY date_comment_created DESC', '', 'PLURAL');
+    }
+    function GetItemUrlForComment(string $item_id)
+    {
+        return $this->database->Get(TABLE_ITEM, 'item_url', 'WHERE id=? AND is_item_deleted=0', $item_id, 'SINGULAR');
+    }
+    function GetItemCommentReply(string $comment_id)
+    {
+        return $this->database->Get(TABLE_COMMENT_REPLY, 'id,user_id,comment_reply,is_comment_reply_approved,date_comment_reply_approved,date_comment_reply_created,date_comment_reply_last_updated,is_comment_reply_deleted,date_comment_reply_deleted', 'WHERE comment_id=? ORDER BY date_comment_reply_created DESC', $comment_id, 'PLURAL');
+    }
+    function GetItemForComment(string $item_url)
+    {
+        return $this->database->Get(TABLE_ITEM, 'id,item_name', 'WHERE item_url=?', $item_url, 'SINGULAR');
+    }
+    function GetItemCommentsByItemId(string $item_id)
+    {
+        return $this->database->Get(TABLE_COMMENT, 'id,user_id,item_id,comment,is_comment_approved,date_comment_approved,date_comment_created,date_comment_last_updated,is_comment_deleted,date_comment_deleted', 'WHERE item_id=? ORDER BY date_comment_created DESC', $item_id, 'PLURAL');
+    }
+    function GetCountViewOnceIpForIndex()
+    {
+        return $this->database->Get(TABLE_LOG_VIEW_DAILY_IP, 'COUNT(id)', '', '', 'SINGULAR');
+    }
 }

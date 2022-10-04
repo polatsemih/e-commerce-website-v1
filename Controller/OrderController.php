@@ -26,7 +26,7 @@ class OrderController extends ControllerOrder
                             if ($cookie_authentication_from_database['data']['date_cookie_authentication_cross_site_expiry'] > date('Y-m-d H:i:s') && $cookie_authentication_from_database['data']['is_cookie_authentication_cross_site_used'] == 0 && $this->ActionModel->UpdateCookieAuthenticationCrossSite(array('is_cookie_authentication_cross_site_used' => 1, 'id' => $cookie_authentication_from_database['data']['id']))['result']) {
                                 $cookie_authentication_token1 = hash_hmac('SHA512', $extracted_cookie_authentication_token1, $cookie_authentication_from_database['data']['cookie_authentication_cross_site_salt'], false);
                                 if (hash_equals($cookie_authentication_from_database['data']['cookie_authentication_cross_site_token1'], $cookie_authentication_token1)) {
-                                    $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id,email', $cookie_authentication_from_database['data']['user_id']);
+                                    $authenticated_user_from_database = $this->UserModel->GetUserByUserId('id,email,is_user_blocked', $cookie_authentication_from_database['data']['user_id']);
                                     if ($authenticated_user_from_database['result'] && $this->ActionModel->UpdateCookieAuthenticationCrossSite(array('is_cookie_authentication_cross_site_success' => 1, 'id' => $cookie_authentication_from_database['data']['id']))['result']) {
                                         $cookie_authentication_error = false;
                                         if ($authenticated_user_from_database['data']['is_user_blocked'] == 0) {

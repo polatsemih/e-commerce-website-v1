@@ -45,16 +45,16 @@
                                 Evet
                             <?php endif; ?>
                         </div>
-                        <div class="box box-1 center" id="user-hover" title="Kullanıcı Detayları İçin Tıklayın"><i class="fas fa-info"></i></div>
+                        <div class="box box-1 center show-user-hover" data-id="<?php echo $order_initialize_informations['id']; ?>" title="Kullanıcı Detayları İçin Tıklayın"><i class="fas fa-info"></i></div>
                         <div class="box box-3"><?php echo $order_initialize_informations['shipping_address'] . ' ' . $order_initialize_informations['shipping_city'] . '/' . $order_initialize_informations['shipping_country'] . ' ' . $order_initialize_informations['shipping_zip_code'] . ' ' . $order_initialize_informations['shipping_contact_name']; ?></div>
                         <div class="box box-1 center"><?php echo $order_initialize_informations['is_returned']; ?></div>
                         <div class="box box-1 center"><?php echo $order_initialize_informations['status']; ?></div>
                         <div class="box box-1 center"><?php echo date('d/m/Y H:i:s', strtotime($order_initialize_informations['date_order_initialize_created'])); ?></div>
                         <a class="box box-1 center" href="<?php echo URL . URL_ADMIN_ORDER_DETAILS . '/' . $order_initialize_informations['id']; ?>"><i class="fas fa-chevron-right"></i></a>
                     </div>
-                    <div class="user-hover-wrapper">
+                    <div class="user-hover-wrapper" id="user_hover_wrapper_<?php echo $order_initialize_informations['id']; ?>">
                         <div class="user-hover-container">
-                            <div id="user-hover-close" class="close"><i class="fas fa-times"></i></div>
+                            <div class="close remove-user-hover" data-id="<?php echo $order_initialize_informations['id']; ?>"><i class="fas fa-times"></i></div>
                             <div class="row-user">
                                 <div class="box-user th">Kullanıcı IP</div>
                                 <div class="box-user th">Kullanıcı İsim</div>
@@ -79,16 +79,21 @@
     </main>
     <?php require_once 'View/SharedAdmin/_admin_footer.php'; ?>
     <script>
-        const userHoverWrapper = document.querySelector('.user-hover-wrapper');
-        document.getElementById('user-hover-close').addEventListener('click', (e) => {
-            if (userHoverWrapper.classList.contains('active')) {
-                userHoverWrapper.classList.remove('active');
-            }
+        document.querySelectorAll('.show-user-hover').forEach(element => {
+            element.addEventListener('click', (e) => {
+                var hoverWrapper = document.getElementById('user_hover_wrapper_' + element.dataset.id);
+                if (!hoverWrapper.classList.contains('active')) {
+                    hoverWrapper.classList.add('active');
+                }
+            });
         });
-        document.getElementById('user-hover').addEventListener('click', (e) => {
-            if (!userHoverWrapper.classList.contains('active')) {
-                userHoverWrapper.classList.add('active');
-            }
+        document.querySelectorAll('.remove-user-hover').forEach(element => {
+            element.addEventListener('click', (e) => {
+                var hoverWrapper = document.getElementById('user_hover_wrapper_' + element.dataset.id);
+                if (hoverWrapper.classList.contains('active')) {
+                    hoverWrapper.classList.remove('active');
+                }
+            });
         });
     </script>
     <script>

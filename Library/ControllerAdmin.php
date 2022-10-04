@@ -59,6 +59,14 @@ class ControllerAdmin
         require_once 'View/' . $view . '.php';
         exit(0);
     }
+    function SetCSRFTokenjQ(string $csrf_form)
+    {
+        $csrf_token = $this->input_control->GenerateToken();
+        if ($csrf_token['result'] && $this->LogModel->CreateLogCSRF(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'csrf_token' => $csrf_token['data'], 'csrf_form' => $csrf_form, 'date_csrf_expiry' => date('Y-m-d H:i:s', time() + (CSRF_TOKEN_EXPIRY))))['result']) {
+            return array('result' => true, 'csrf_token' => $csrf_token['data']);
+        }
+        return array('result' => false);
+    }
     function SetCSRFToken(string $csrf_form)
     {
         $csrf_token = $this->input_control->GenerateToken();

@@ -14,24 +14,29 @@
             <div class="left">
                 <h1 class="title mb">Ürün Detayları</h1>
             </div>
-            <div class="right">
-                <form id="form-delete" action="<?php echo URL . URL_ADMIN_ITEM_DELETE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
-                    <?php if (!empty($web_data['form_token'])) : ?>
-                        <input type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
-                    <?php endif; ?>
-                    <input type="hidden" name="id" value="<?php echo $web_data['item']['id']; ?>">
-                    <input type="submit" id="btn-item-delete" class="button-item-delete" value="Ürünü Kaldır">
-                </form>
-                <div class="delete-popup hidden">
-                    <div class="popup-container">
-                        <span class="text">Ürünü Kaldırmak İstediğinizden Emin Misiniz?</span>
-                        <div class="delete-row">
-                            <button class="btn-delete-cancel">İPTAL</button>
-                            <button class="btn-delete-approve">SİL</button>
+            <?php if (!empty($web_data['item'])) : ?>
+                <div class="right">
+                    <div class="row">
+                        <a class="btn-user-past-orders" href="<?php echo URL . URL_ADMIN_ITEM_COMMENT . '/' . $web_data['item']['item_url']; ?>" title="Ürüne Yapılan Yorumlar">Yorumlar</a>
+                        <form id="form-delete" action="<?php echo URL . URL_ADMIN_ITEM_DELETE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                            <?php if (!empty($web_data['form_token'])) : ?>
+                                <input type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
+                            <?php endif; ?>
+                            <input type="hidden" name="id" value="<?php echo $web_data['item']['id']; ?>">
+                            <input type="submit" id="btn-item-delete" class="button-item-delete" value="Ürünü Kaldır">
+                        </form>
+                        <div class="delete-popup hidden">
+                            <div class="popup-container">
+                                <span class="text">Ürünü Kaldırmak İstediğinizden Emin Misiniz?</span>
+                                <div class="delete-row">
+                                    <button class="btn-delete-cancel">İPTAL</button>
+                                    <button class="btn-delete-approve">SİL</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            <?php endif; ?>
         </div>
         <?php if (!empty($web_data['item'])) : ?>
             <form id="form-create" action="<?php echo URL . URL_ADMIN_ITEM_UPDATE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate enctype="multipart/form-data">

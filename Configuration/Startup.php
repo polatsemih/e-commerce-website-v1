@@ -104,7 +104,9 @@ define('URL_ADMIN_ORDER_STATUS_ERROR', 'durum-hatalari');
 define('URL_ADMIN_ORDER_STATUS_CODES', 'durum-kodlari');
 define('URL_ADMIN_ORDER_MD_STATUS_CODES', 'md-durum-kodlari');
 define('URL_ADMIN_USER_BLOCK', 'yonetici-kullanici-engelle');
+define('URL_ADMIN_COMMENT', 'yonetici-yorumlar');
 define('URL_ADMIN_ITEM_COMMENT', 'yonetici-urun-yorumlar');
+define('URL_ADMIN_USER_PAST_ORDERS', 'yonetici-kullanici-gecmis-siparisler');
 define('URL_MAPS', array(
     // ErrorController
     array('url' => 'anasayfaya-don', 'controller' => 'ErrorController', 'action' => 'GoHome'),
@@ -183,5 +185,7 @@ define('URL_MAPS', array(
     array('url_pattern' => 'yonetici-siparis/?', 'controller' => 'AdminController', 'action' => 'OrderDetails'),
     array('url_pattern' => 'yonetici-siparis-hatalari/?', 'controller' => 'AdminController', 'action' => 'OrderErrors'),
     array('url' => 'yonetici-kullanici-engelle', 'controller' => 'AdminController', 'action' => 'UserBlock'),
-    array('url' => 'yonetici-urun-yorumlar', 'controller' => 'AdminController', 'action' => 'ItemComments')
+    array('url' => 'yonetici-yorumlar', 'controller' => 'AdminController', 'action' => 'Comments'),
+    array('url_pattern' => 'yonetici-urun-yorumlar/?', 'controller' => 'AdminController', 'action' => 'ItemComments'),
+    array('url_pattern' => 'yonetici-kullanici-gecmis-siparisler/?', 'controller' => 'AdminController', 'action' => 'UserPastOrders'),
 ));

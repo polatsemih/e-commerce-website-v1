@@ -24,7 +24,7 @@
         <span class="nav-title">ÜRÜN AYARLARI</span>
         <li><a class="nav-link" href="<?php echo URL . URL_ADMIN_ITEMS; ?>">Ürünler</a></li>
         <li><a class="nav-link" href="<?php echo URL . URL_ADMIN_ITEM_CREATE; ?>">Ürün Ekle</a></li>
-        <li><a class="nav-link" href="<?php echo URL . URL_ADMIN_ITEM_COMMENT; ?>">Yorumlar</a></li>
+        <li><a class="nav-link" href="<?php echo URL . URL_ADMIN_COMMENT; ?>">Yorumlar</a></li>
         <span class="nav-title">SİPARİŞ AYARLARI</span>
         <li><a class="nav-link" href="<?php echo URL . URL_ADMIN_ORDERS; ?>">Siparişler</a></li>
         <li><a class="nav-link" href="<?php echo URL . URL_ADMIN_ORDER_ERRORS . '/' . URL_ADMIN_ORDER_CONVERSATION_ERROR; ?>">Sipariş Hataları</a></li>

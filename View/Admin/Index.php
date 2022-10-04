@@ -10,8 +10,9 @@
 <body class="noscroll">
     <?php require_once 'View/SharedAdmin/_admin_body.php'; ?>
     <main>
-        <section class="admin-section container">
-            
+        <section class="index-section container">
+            <h1 class="title">Yönetici Paneli</h1>
+            <?php print_r($web_data['view_count']); ?>
         </section>
     </main>
     <?php require_once 'View/SharedAdmin/_admin_footer.php'; ?>

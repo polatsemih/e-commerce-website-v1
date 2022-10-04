@@ -84,6 +84,10 @@ class AdminController extends ControllerAdmin
         try {
             if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $this->input_control->CheckUrl();
+                $view_count = $this->AdminModel->GetCountViewOnceIpForIndex();
+                if ($view_count['result']) {
+                    $this->web_data['view_count'] = $view_count['data'];
+                }
                 parent::GetView('Admin/Index', $this->web_data);
             }
             $this->input_control->Redirect(URL_EXCEPTION);
@@ -993,16 +997,31 @@ class AdminController extends ControllerAdmin
             }
         }
     }
-    function ItemComments()
+    function ItemComments(string $item_url)
     {
         try {
             if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $this->input_control->CheckUrl();
-                $item_comments = $this->AdminModel->GetItemComments();
-                if ($item_comments['result']) {
-                    $this->web_data['item_comments'] = $item_comments['data'];
+                $item = $this->AdminModel->GetItemForComment($item_url);
+                if ($item['result']) {
+                    $item_comments = $this->AdminModel->GetItemCommentsByItemId($item['data']['id']);
+                    if ($item_comments['result']) {
+                        foreach ($item_comments['data'] as $key => $item_comment) {
+                            $item_url = $this->AdminModel->GetItemUrlForComment($item_comment['item_id']);
+                            if ($item_url['result']) {
+                                $item_comments['data'][$key]['item_url'] = $item_url['data']['item_url'];
+                                $item_comment_reply = $this->AdminModel->GetItemCommentReply($item_comment['id']);
+                                if ($item_comment_reply['result']) {
+                                    $item_comments['data'][$key]['comment_reply'] = $item_comment_reply['data'];
+                                }
+                            } else {
+                                unset($item_comments['data'][$key]);
+                            }
+                        }
+                        $this->web_data['item_comments'] = $item_comments['data'];
+                    }
                 }
-                parent::GetView('Admin/ItemComments', $this->web_data);
+                parent::GetView('Admin/Comments', $this->web_data);
             }
             $this->input_control->Redirect(URL_ADMIN_INDEX);
         } catch (\Throwable $th) {
@@ -1013,6 +1032,255 @@ class AdminController extends ControllerAdmin
             }
         }
     }
+    function Comments()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl();
+                $item_comments = $this->AdminModel->GetItemComments();
+                if ($item_comments['result']) {
+                    foreach ($item_comments['data'] as $key => $item_comment) {
+                        $item_url = $this->AdminModel->GetItemUrlForComment($item_comment['item_id']);
+                        if ($item_url['result']) {
+                            $item_comments['data'][$key]['item_url'] = $item_url['data']['item_url'];
+                            $item_comment_reply = $this->AdminModel->GetItemCommentReply($item_comment['id']);
+                            if ($item_comment_reply['result']) {
+                                $item_comments['data'][$key]['comment_reply'] = $item_comment_reply['data'];
+                            }
+                        } else {
+                            unset($item_comments['data'][$key]);
+                        }
+                    }
+                    $this->web_data['item_comments'] = $item_comments['data'];
+                }
+                parent::GetView('Admin/Comments', $this->web_data);
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function ItemComments | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    // function AdminCommentDelete()
+    // {
+    //     try {
+    //         $response = array();
+    //         $response['reset'] = true;
+    //         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    //             $checked_inputs = $this->input_control->CheckPostedInputs(array(
+    //                 'comment_id' => array('input' => isset($_POST['comment_id']) ? $_POST['comment_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
+    //                 'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+    //             ));
+    //             if (empty($checked_inputs['error_message'])) {
+    //                 if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'AdminItemComments')) {
+    //                     parent::GetModel('CommentModel');
+    //                     $comment_has_reply = $this->CommentModel->CommentHasReply($checked_inputs['comment_id']);
+    //                     if ($comment_has_reply['result']) {
+    //                         foreach ($comment_has_reply['data'] as $comment_reply) {
+    //                             $this->CommentModel->UpdateCommentReply(array('is_comment_reply_deleted' => 1, 'date_comment_reply_deleted' => date('Y-m-d H:i:s'), 'id' => $comment_reply['id']));
+    //                         }
+    //                     }
+    //                     if ($this->CommentModel->UpdateComment(array('is_comment_deleted' => 1, 'date_comment_deleted' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_id']))['result']) {
+    //                         $result_set_csrf_token = parent::SetCSRFTokenjQ('AdminItemComments');
+    //                         if ($result_set_csrf_token['result']) {
+    //                             $response['reset'] = false;
+    //                             $response['form_token'] = $result_set_csrf_token['csrf_token'];
+    //                             $response['notification'] = $this->notification_control->SetNotificationForjQ('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_DELETE);
+    //                             $response['comment_id'] = $checked_inputs['comment_id'];
+    //                         } else {
+    //                             echo '{"shutdown":"shutdown"}';
+    //                             exit(0);
+    //                         }
+    //                     } else {
+    //                         $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+    //                     }
+    //                 }
+    //             } else {
+    //                 $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+    //             }
+    //         }
+    //         $jsoned_response = json_encode($response);
+    //         if (!empty($jsoned_response)) {
+    //             echo $jsoned_response;
+    //             exit(0);
+    //         }
+    //     } catch (\Throwable $th) {
+    //         if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function AdminCommentDelete | ' . $th))['result']) {
+    //             echo '{"exception":"exception"}';
+    //             exit(0);
+    //         } else {
+    //             echo '{"shutdown":"shutdown"}';
+    //             exit(0);
+    //         }
+    //     }
+    // }
+    // function AdminCommentReplyDelete()
+    // {
+    //     try {
+    //         $response = array();
+    //         $response['reset'] = true;
+    //         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    //             $checked_inputs = $this->input_control->CheckPostedInputs(array(
+    //                 'comment_reply_id' => array('input' => isset($_POST['comment_reply_id']) ? $_POST['comment_reply_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
+    //                 'comment_id' => array('input' => isset($_POST['comment_id']) ? $_POST['comment_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
+    //                 'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+    //             ));
+    //             if (empty($checked_inputs['error_message'])) {
+    //                 if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'AdminItemComments')) {
+    //                     parent::GetModel('CommentModel');
+    //                     if ($this->CommentModel->UpdateCommentReply(array('is_comment_reply_deleted' => 1, 'date_comment_reply_deleted' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_reply_id']))['result']) {
+    //                         $result_set_csrf_token = parent::SetCSRFTokenjQ('AdminItemComments');
+    //                         if ($result_set_csrf_token['result']) {
+    //                             $response['reset'] = false;
+    //                             $response['form_token'] = $result_set_csrf_token['csrf_token'];
+    //                             $response['notification'] = $this->notification_control->SetNotificationForjQ('SUCCESS', TR_NOTIFICATION_SUCCESS_COMMENT_DELETE);
+    //                             $response['comment'] = array('comment_reply_id' => $checked_inputs['comment_reply_id'], 'comment_id' => $checked_inputs['comment_id']);
+    //                         } else {
+    //                             echo '{"shutdown":"shutdown"}';
+    //                             exit(0);
+    //                         }
+    //                     } else {
+    //                         $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+    //                     }
+    //                 }
+    //             } else {
+    //                 $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+    //             }
+    //         }
+    //         $jsoned_response = json_encode($response);
+    //         if (!empty($jsoned_response)) {
+    //             echo $jsoned_response;
+    //             exit(0);
+    //         }
+    //     } catch (\Throwable $th) {
+    //         if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function AdminCommentReplyDelete | ' . $th))['result']) {
+    //             echo '{"exception":"exception"}';
+    //             exit(0);
+    //         } else {
+    //             echo '{"shutdown":"shutdown"}';
+    //             exit(0);
+    //         }
+    //     }
+    // }
+    // function AdminCommentApprove()
+    // {
+    //     try {
+    //         $response = array();
+    //         $response['reset'] = true;
+    //         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    //             $is_comment_approved = isset($_POST['is_comment_approved']) ? 0 : 1;
+    //             $checked_inputs = $this->input_control->CheckPostedInputs(array(
+    //                 'comment_id' => array('input' => isset($_POST['comment_id']) ? $_POST['comment_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
+    //                 'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+    //             ));
+    //             if (empty($checked_inputs['error_message'])) {
+    //                 if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'AdminItemComments')) {
+    //                     parent::GetModel('CommentModel');
+    //                     if ($is_comment_approved == 1) {
+    //                         $result_approve_comment = $this->CommentModel->UpdateComment(array('is_comment_approved' => 1, 'date_comment_approved' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_id']))['result'];
+    //                     } else {
+    //                         $result_approve_comment = $this->CommentModel->UpdateComment(array('is_comment_approved' => 0, 'date_comment_approved' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_id']))['result'];
+    //                     }
+    //                     if ($result_approve_comment) {
+    //                         $result_set_csrf_token = parent::SetCSRFTokenjQ('AdminItemComments');
+    //                         if ($result_set_csrf_token['result']) {
+    //                             $response['reset'] = false;
+    //                             $response['form_token'] = $result_set_csrf_token['csrf_token'];
+    //                             if ($is_comment_approved == 1) {
+    //                                 $response['notification'] = $this->notification_control->SetNotificationForjQ('WARNING', TR_NOTIFICATION_SUCCESS_COMMENT_APPROVED);
+    //                                 $response['is_approved'] = 1;
+    //                             } else {
+    //                                 $response['notification'] = $this->notification_control->SetNotificationForjQ('WARNING', TR_NOTIFICATION_SUCCESS_COMMENT_DISAPPROVED);
+    //                                 $response['is_approved'] = 0;
+    //                             }
+    //                         } else {
+    //                             echo '{"shutdown":"shutdown"}';
+    //                             exit(0);
+    //                         }
+    //                     } else {
+    //                         $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+    //                     }
+    //                 }
+    //             } else {
+    //                 $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+    //             }
+    //         }
+    //         $jsoned_response = json_encode($response);
+    //         if (!empty($jsoned_response)) {
+    //             echo $jsoned_response;
+    //             exit(0);
+    //         }
+    //     } catch (\Throwable $th) {
+    //         if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function AdminCommentApprove | ' . $th))['result']) {
+    //             echo '{"exception":"exception"}';
+    //             exit(0);
+    //         } else {
+    //             echo '{"shutdown":"shutdown"}';
+    //             exit(0);
+    //         }
+    //     }
+    // }
+    // function AdminCommentReplyApprove()
+    // {
+    //     try {
+    //         $response = array();
+    //         $response['reset'] = true;
+    //         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    //             $is_comment_reply_approved = isset($_POST['is_comment_reply_approved']) ? 0 : 1;
+    //             $checked_inputs = $this->input_control->CheckPostedInputs(array(
+    //                 'comment_reply_id' => array('input' => isset($_POST['comment_reply_id']) ? $_POST['comment_reply_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
+    //                 'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+    //             ));
+    //             if (empty($checked_inputs['error_message'])) {
+    //                 if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'AdminItemComments')) {
+    //                     parent::GetModel('CommentModel');
+    //                     if ($is_comment_reply_approved == 1) {
+    //                         $result_approve_comment_reply = $this->CommentModel->UpdateCommentReply(array('is_comment_reply_approved' => 1, 'date_comment_reply_approved' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_reply_id']))['result'];
+    //                     } else {
+    //                         $result_approve_comment_reply = $this->CommentModel->UpdateCommentReply(array('is_comment_reply_approved' => 0, 'date_comment_reply_approved' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['comment_reply_id']))['result'];
+    //                     }
+    //                     if ($result_approve_comment_reply) {
+    //                         $result_set_csrf_token = parent::SetCSRFTokenjQ('AdminItemComments');
+    //                         if ($result_set_csrf_token['result']) {
+    //                             $response['reset'] = false;
+    //                             $response['form_token'] = $result_set_csrf_token['csrf_token'];
+    //                             if ($is_comment_reply_approved == 1) {
+    //                                 $response['notification'] = $this->notification_control->SetNotificationForjQ('WARNING', TR_NOTIFICATION_SUCCESS_COMMENT_APPROVED);
+    //                                 $response['is_comment_reply_approved'] = 1;
+    //                             } else {
+    //                                 $response['notification'] = $this->notification_control->SetNotificationForjQ('WARNING', TR_NOTIFICATION_SUCCESS_COMMENT_DISAPPROVED);
+    //                                 $response['is_comment_reply_approved'] = 0;
+    //                             }
+    //                         } else {
+    //                             echo '{"shutdown":"shutdown"}';
+    //                             exit(0);
+    //                         }
+    //                     } else {
+    //                         $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
+    //                     }
+    //                 }
+    //             } else {
+    //                 $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+    //             }
+    //         }
+    //         $jsoned_response = json_encode($response);
+    //         if (!empty($jsoned_response)) {
+    //             echo $jsoned_response;
+    //             exit(0);
+    //         }
+    //     } catch (\Throwable $th) {
+    //         if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function AdminCommentReplyApprove | ' . $th))['result']) {
+    //             echo '{"exception":"exception"}';
+    //             exit(0);
+    //         } else {
+    //             echo '{"shutdown":"shutdown"}';
+    //             exit(0);
+    //         }
+    //     }
+    // }
     function Orders()
     {
         try {
@@ -1219,6 +1487,30 @@ class AdminController extends ControllerAdmin
             $this->input_control->Redirect(URL_ADMIN_INDEX);
         } catch (\Throwable $th) {
             if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function UserDetails | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function UserPastOrders(string $user_id)
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl();
+                $user = $this->AdminModel->GetUserForPastOrders($user_id);
+                if ($user['result']) {
+                    $user_order_initialize_informations = $this->AdminModel->GetOrderInitializeInformationsByUserId($user_id);
+                    if ($user_order_initialize_informations['result']) {
+                        $this->web_data['user_order_initialize_informations'] = $user_order_initialize_informations['data'];
+                        $this->web_data['user'] = $user['data'];
+                    }
+                }
+                parent::GetView('Admin/UserPastOrders', $this->web_data);
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function UserPastOrders | ' . $th))['result']) {
                 $this->input_control->Redirect(URL_EXCEPTION);
             } else {
                 $this->input_control->Redirect(URL_SHUTDOWN);
