@@ -725,6 +725,13 @@ main {
     margin-right: 2rem;
 }
 
+.index-section {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+}
+
+
+
 .item-section {
     padding-top: 5rem;
     padding-bottom: 5rem;
@@ -1412,6 +1419,22 @@ main {
 
 .btn-user-block:hover {
     background-color: var(--hover-danger);
+    cursor: pointer;
+}
+
+.btn-user-past-orders {
+    padding: 1rem;
+    border-radius: 1rem;
+    color: var(--color-primary-light);
+    background-color: var(--warning);
+    border: none;
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
+    margin-right: 2rem;
+}
+
+.btn-user-past-orders:hover {
+    background-color: var(--hover-warning);
     cursor: pointer;
 }
 
@@ -2884,6 +2907,154 @@ main {
     align-items: center;
     text-align: center;
 }
+
+.comment-section {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+}
+
+.comment-section .title {
+    font-size: 2rem;
+    color: var(--color-primary-dark);
+    margin-bottom: 2rem;
+}
+
+.comment-section .box {
+    padding: 1rem;
+    background-color: var(--color-primary-light);
+    border-width: 1px;
+    border-style: solid;
+    border-color: #cacaca;
+    font-size: 1.3rem;
+}
+
+.comment-section .box-1 {
+    width: 8%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.comment-section .box-2 {
+    width: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.comment-section .box-3 {
+    width: 20%;
+}
+
+.comment-section .box-11 {
+    width: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.comment-section .box-22 {
+    width: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.comment-section .box-33 {
+    width: 30%;
+}
+
+.comment-section .th {
+    color: var(--color-secondary-theme);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.comment-section .fa-info {
+    font-size: 1.6rem;
+    color: var(--color-primary-dark);
+}
+
+.comment-section .info-link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.comment-section .fa-chevron-right {
+    font-size: 1.6rem;
+    color: var(--success);
+}
+
+.comment-section .no-comment-reply {
+    display: block;
+    font-size: 1.5rem;
+    color: var(--danger);
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    text-align: center;
+}
+
+.comment-section .show-comment-reply:hover {
+    cursor: pointer;
+}
+
+.comment-section .hover-wrapper {
+    z-index: 98880;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000000b3;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.comment-section .hover-wrapper.active {
+    display: flex !important;
+}
+
+.comment-section .hover-wrapper .hover-container {
+    width: 80vw;
+    background-color: var(--color-primary-light);
+    box-shadow: var(--box-shadow-primary);
+    padding: 1rem;
+    position: relative;
+}
+
+.comment-section .hover-wrapper .hover-container .close {
+    position: absolute;
+    right: -2rem;
+    top: -2rem;
+    padding: 1rem;
+    border-radius: 50%;
+    background-color: #cacaca;
+    cursor: pointer;
+}
+
+.comment-section .hover-wrapper .hover-container .close .fa-times {
+    font-size: 2rem;
+    color: var(--color-primary-dark);
+}
+
+.no-comment-found {
+    font-size: 2rem;
+    color: var(--danger);
+    display: block;
+    text-align: center;
+}
+
+
 
 
 :root {
