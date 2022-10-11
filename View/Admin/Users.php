@@ -104,30 +104,31 @@
                         Detaylar
                     </span>
                 </div>
-                <?php foreach ($web_data['users'] as $user) ?>
-                <div class="row">
-                    <span class="table-td l">
-                        <?php echo $user['first_name'] . ' ' . $user['last_name']; ?>
-                    </span>
-                    <span class="table-td m">
-                        <?php echo $user['email']; ?>
-                    </span>
-                    <span class="table-td s">
-                        <div class="checkbox-wrapper">
-                            <input type="checkbox" class="checkbox" <?php echo $user['email_confirmed'] == 1 ? ' checked' : ''; ?> disabled>
-                            <span class="checkmark"></span>
-                        </div>
-                    </span>
-                    <span class="table-td s">
-                        <div class="checkbox-wrapper">
-                            <input type="checkbox" class="checkbox" <?php echo $user['is_user_shopped'] == 1 ? ' checked' : ''; ?> disabled>
-                            <span class="checkmark"></span>
-                        </div>
-                    </span>
-                    <span class="table-td s">
-                        <a class="btn-user-success" href="<?php echo URL . URL_ADMIN_USER_DETAILS . '/' . $user['id']; ?>">Detaylar</a>
-                    </span>
-                </div>
+                <?php foreach ($web_data['users'] as $user) : ?>
+                    <div class="row">
+                        <span class="table-td l">
+                            <?php echo $user['first_name'] . ' ' . $user['last_name']; ?>
+                        </span>
+                        <span class="table-td m">
+                            <?php echo $user['email']; ?>
+                        </span>
+                        <span class="table-td s">
+                            <div class="checkbox-wrapper">
+                                <input type="checkbox" class="checkbox" <?php echo $user['email_confirmed'] == 1 ? ' checked' : ''; ?> disabled>
+                                <span class="checkmark"></span>
+                            </div>
+                        </span>
+                        <span class="table-td s">
+                            <div class="checkbox-wrapper">
+                                <input type="checkbox" class="checkbox" <?php echo $user['is_user_shopped'] == 1 ? ' checked' : ''; ?> disabled>
+                                <span class="checkmark"></span>
+                            </div>
+                        </span>
+                        <span class="table-td s">
+                            <a class="btn-user-success" href="<?php echo URL . URL_ADMIN_USER_DETAILS . '/' . $user['id']; ?>">Detaylar</a>
+                        </span>
+                    </div>
+                <?php endforeach; ?>
             <?php else : ?>
                 <span class="user-not-found">Kayıtlı Kullanıcı Bulunamadı</span>
             <?php endif; ?>

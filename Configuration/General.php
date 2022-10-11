@@ -7,6 +7,25 @@ define('BRAND', 'Blanck Basic');
 define('PURE_URL', 'https://blanckbasic.com');
 define('URL', 'https://blanckbasic.com/');
 define('META_TAG_AUTHOR', 'Semih Polat');
+define('DOMAIN', 'blanckbasic.com');
+define('COMPONY_FULL_NAME', '1. Mah. 2. Cad. 3. Bina Kat:2 No:12 34000 Bebek/İstanbul adresinde mukim Blanck Basic A.Ş.');
+
+
+
+define('IL_SAMPLE', 'İstanbul');
+define('ILCE_SAMPLE', 'Bebek');
+define('MAHALLE_SAMPLE', 'Çiçek Mahallesi');
+define('SOKAK_SAMPLE', 'Çiçek Caddesi, Çiçek Sokak');
+define('APARTMAN_SAMPLE', '12');
+define('DAIRE_SAMPLE', '5');
+define('ZIP_SAMPLE', '34000');
+
+
+
+
+define('JQUERY_PATH', 'https://code.jquery.com/jquery-3.6.1.min.js');
+define('ADMIN_SHIPPING_EMAIL', 'utkurabiyem@gmail.com');
+define('DAY_ITEM_RETURN', '30');
 
 
 

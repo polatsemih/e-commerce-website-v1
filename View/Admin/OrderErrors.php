@@ -108,7 +108,7 @@
                                 <div class="box-td two"><?php echo $order_status_errors['mdStatus']; ?></div>
                                 <div class="box-td two"><?php echo $order_status_errors['error_code']; ?></div>
                                 <div class="box-td two"><?php echo $order_status_errors['error_message']; ?></div>
-                                <div class="box-td two"><?php echo $order_status_errors['error_group']; ?></div>
+                                <div class="box-td two break-word"><?php echo $order_status_errors['error_group']; ?></div>
                                 <div class="box-td two"><?php echo date('d/m/Y H:i:s', strtotime($order_status_errors['date_error_occred'])); ?></div>
                             </div>
                         <?php endforeach; ?>

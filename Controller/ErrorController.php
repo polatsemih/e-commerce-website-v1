@@ -7,18 +7,38 @@ class ErrorController extends Controller
     }
     function GoHome()
     {
-        parent::GetView('Error/GoHome');
+        try {
+            parent::GetView('Error/GoHome');
+        } catch (\Throwable $th) {
+            $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class ErrorController function GoHome | ' . $th));
+            $this->input_control->Redirect(URL_SHUTDOWN);
+        }
     }
     function Exception()
     {
-        parent::GetView('Error/Exception');
+        try {
+            parent::GetView('Error/Exception');
+        } catch (\Throwable $th) {
+            $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class ErrorController function Exception | ' . $th));
+            $this->input_control->Redirect(URL_SHUTDOWN);
+        }
     }
     function ShutDown()
     {
-        parent::GetView('Error/Shutdown');
+        try {
+            parent::GetView('Error/Shutdown');
+        } catch (\Throwable $th) {
+            $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class ErrorController function ShutDown | ' . $th));
+            $this->input_control->Redirect(URL_SHUTDOWN);
+        }
     }
     function UserBlocked()
     {
-        parent::GetView('Error/Blocked');
+        try {
+            parent::GetView('Error/Blocked');
+        } catch (\Throwable $th) {
+            $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class ErrorController function UserBlocked | ' . $th));
+            $this->input_control->Redirect(URL_SHUTDOWN);
+        }
     }
 }

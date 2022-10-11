@@ -17,6 +17,7 @@
             <?php if (!empty($web_data['user'])) : ?>
                 <div class="right">
                     <div class="row">
+                        <a class="btn-user-past-orders" href="<?php echo URL . URL_ADMIN_USER_COMMENT . '/' . $web_data['user']['id']; ?>" title="Ürüne Yapılan Yorumlar">Yorumlar</a>
                         <a class="btn-user-past-orders" href="<?php echo URL . URL_ADMIN_USER_PAST_ORDERS . '/' . $web_data['user']['id']; ?>" title="Kullanıcının Geçmiş Siparişleri">Geçmiş Siparişler</a>
                         <form action="<?php echo URL . URL_ADMIN_USER_BLOCK; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
                             <?php if (!empty($web_data['form_token'])) : ?>

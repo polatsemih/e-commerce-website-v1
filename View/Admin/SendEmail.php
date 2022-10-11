@@ -16,7 +16,7 @@
                 <?php if (!empty($web_data['form_token'])) : ?>
                     <input type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
                 <?php endif; ?>
-                <div class="row">
+                <div id="manuel-email-id" class="row">
                     <div class="col-label">
                         <label class="create-label" for="user_email">Kime</label>
                     </div>
@@ -26,24 +26,25 @@
                 </div>
                 <div id="ready-messages" class="row">
                     <div class="col-label">
-                        <label class="create-label" for="user_email">Mesaj</label>
+                        <label class="create-label">Mesaj</label>
                     </div>
                     <div class="col-input">
                         <div id="sendemail-select" class="email-type">
                             <select class="email-select" name="email_ready_message">
+                                <option id="details-option-0" value="0"></option>
                                 <option id="details-option-1" value="1"></option>
                                 <option id="details-option-2" value="2"></option>
                                 <option id="details-option-3" value="3"></option>
                                 <option id="details-option-4" value="4"></option>
                                 <option id="details-option-5" value="5"></option>
                             </select>
-                            <span id="select-text" class="select-text">Mesaj Seçiniz</span>
+                            <span id="select-text" class="select-text">Hazır Mesaj Seçin</span>
                             <span class="select-triangle"><i class="fas fa-angle-down"></i></span>
                             <div id="details-select" class="details-select">
-                                <span class="option" data-option="1" data-url="Sipariş Kargoya Verildi">Sipariş Kargoya Verildi</span>
+                                <span class="option" data-option="1" data-url="Sipariş Onaylandı ve Kargoya Verildi">Sipariş Onaylandı ve Kargoya Verildi</span>
                                 <span class="option" data-option="2" data-url="Sipariş Teslim Edildi">Sipariş Teslim Edildi</span>
                                 <span class="option" data-option="3" data-url="Sipariş İptal Edildi">Sipariş İptal Edildi</span>
-                                <span class="option" data-option="4" data-url="İade Edilen Sipariş Kargoya Verildi">İade Edilen Sipariş Kargoya Verildi</span>
+                                <span class="option" data-option="4" data-url="İade Edilen Sipariş Onaylandı ve Kargoya Verildi">İade Edilen Sipariş Onaylandı ve Kargoya Verildi</span>
                                 <span class="option" data-option="5" data-url="İade Edilen Sipariş Teslim Edildi">İade Edilen Sipariş Teslim Edildi</span>
                             </div>
                         </div>
@@ -51,10 +52,18 @@
                 </div>
                 <div id="manuel-messages-id" class="row">
                     <div class="col-label">
-                        <label class="create-label textarea" for="user_email">Mesaj</label>
+                        <label class="create-label textarea" for="email_manuel_message">Mesaj</label>
                     </div>
                     <div class="col-input">
                         <textarea class="create-textarea" id="email_manuel_message" name="email_manuel_message"></textarea>
+                    </div>
+                </div>
+                <div id="order-id-wrapper" class="row">
+                    <div class="col-label">
+                        <label class="create-label" for="order_id">Sipariş Numarası</label>
+                    </div>
+                    <div class="col-input">
+                        <input class="create-input" id="order_id" type="text" name="order_id" autofocus>
                     </div>
                 </div>
                 <div id="shipping-number-wrapper" class="row">
@@ -89,16 +98,30 @@
             document.getElementById('details-select').classList.toggle('active');
         });
         const shippingNumberWrapper = document.getElementById('shipping-number-wrapper');
+        const orderIdWrapper = document.getElementById('order-id-wrapper');
         document.querySelectorAll('.email-type .details-select .option').forEach(detailsSelectOption => {
             detailsSelectOption.addEventListener('click', (e) => {
                 e.preventDefault();
                 document.getElementById('details-option-' + detailsSelectOption.dataset.option).selected = true;
                 document.getElementById('select-text').innerHTML = detailsSelectOption.dataset.url;
-                if (detailsSelectOption.dataset.option == 1 || detailsSelectOption.dataset.option == 4) {
+                if (detailsSelectOption.dataset.option == 2 || detailsSelectOption.dataset.option == 3 || detailsSelectOption.dataset.option == 5) {
+                    if (!orderIdWrapper.classList.contains('active')) {
+                        orderIdWrapper.classList.add('active');
+                    }
+                    if (shippingNumberWrapper.classList.contains('active')) {
+                        shippingNumberWrapper.classList.remove('active');
+                    }
+                } else if (detailsSelectOption.dataset.option == 1 || detailsSelectOption.dataset.option == 4) {
                     if (!shippingNumberWrapper.classList.contains('active')) {
                         shippingNumberWrapper.classList.add('active');
                     }
+                    if (!orderIdWrapper.classList.contains('active')) {
+                        orderIdWrapper.classList.add('active');
+                    }
                 } else {
+                    if (orderIdWrapper.classList.contains('active')) {
+                        orderIdWrapper.classList.remove('active');
+                    }
                     if (shippingNumberWrapper.classList.contains('active')) {
                         shippingNumberWrapper.classList.remove('active');
                     }
@@ -109,17 +132,42 @@
         const manuelBall = document.querySelector('.manuel-ball');
         const readyMessages = document.getElementById('ready-messages');
         const manuelMessagesId = document.getElementById('manuel-messages-id');
+        const manuelEmailId = document.getElementById('manuel-email-id');
         document.getElementById('manuel_checkbox').addEventListener('change', (e) => {
             e.preventDefault();
             if (readyMessages.classList.contains('hidden')) {
                 manuelInnerText.innerHTML = 'Manuel Mesaj Kapalı';
                 readyMessages.classList.remove('hidden');
                 manuelMessagesId.classList.remove('active');
+                if (manuelEmailId.classList.contains('active')) {
+                    manuelEmailId.classList.remove('active');
+                }
             } else {
                 manuelInnerText.innerHTML = 'Manuel Mesaj Açık';
                 readyMessages.classList.add('hidden');
                 manuelMessagesId.classList.add('active');
+                if (!manuelEmailId.classList.contains('active')) {
+                    manuelEmailId.classList.add('active');
+                }
             }
+            if (orderIdWrapper.classList.contains('active')) {
+                orderIdWrapper.classList.remove('active');
+            }
+            if (shippingNumberWrapper.classList.contains('active')) {
+                shippingNumberWrapper.classList.remove('active');
+            }
+            document.getElementById('details-option-0').selected = true;
+            document.getElementById('select-text').innerHTML = 'Hazır Mesaj Seçin';
+        });
+        document.querySelector('.btn-email-send').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (loaderWrapper.classList.contains('hidden')) {
+                loaderWrapper.classList.remove('hidden');
+            }
+            if (!bodyElement.classList.contains('noscroll')) {
+                bodyElement.classList.add('noscroll');
+            }
+            document.getElementById('form-email-create').submit();
         });
     </script>
     <script>

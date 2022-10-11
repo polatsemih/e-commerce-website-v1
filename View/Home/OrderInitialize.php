@@ -56,6 +56,27 @@
                         </form>
                     </div>
                 </div>
+            <?php elseif (!empty($_SESSION[SESSION_COMPLETE_PROFILE_PHONE])) : ?>
+                <div id="popup-wrapper" class="name-wrapper">
+                    <div class="popup-container">
+                        <h4 class="title">Telefon Numaranız</h4>
+                        <form class="form-name" id="form-update-phone" action="<?php echo URL . URL_PHONE_UPDATE; ?>" method="POST" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" novalidate>
+                            <?php if (!empty($web_data['form_token'])) : ?>
+                                <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
+                            <?php endif; ?>
+                            <div class="form-row">
+                                <span class="label">Telefon Numarası</span>
+                                <span class="label-phone">(+90)</span>
+                                <input class="input input-phone" id="user-phone" type="tel" name="user_phone_number" maxlength="10" placeholder="Telefon Numaranızı Girin" autofocus>
+                            </div>
+                            <div class="row-space">
+                                <div class="right">
+                                    <input class="btn-success" id="btn-phone-update" type="submit" value="Devam Et" title="Siparişe Devam Et">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             <?php elseif (!empty($_SESSION[SESSION_COMPLETE_ADDRESS])) : ?>
                 <div id="popup-wrapper" class="create-address-wrapper<?php echo !empty($web_data['address']) ? '' : ' disable'; ?>">
                     <div class="popup-container">
@@ -69,65 +90,97 @@
                             <?php if (!empty($web_data['form_token'])) : ?>
                                 <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
                             <?php endif; ?>
-                            <div class="form-row">
-                                <span class="label">Ülke</span>
-                                <input class="input" type="text" value="Türkiye" readonly>
+                            <div class="form-row-addr">
+                                <span class="label-addr">Ülke</span>
+                                <input class="input-addr" type="text" value="Türkiye" readonly>
+                                <span class="info">
+                                    <i class="fas fa-info icon"></i>
+                                    Örn. Türkiye
+                                </span>
                             </div>
-                            <div class="form-row">
-                                <span class="label">İl</span>
+                            <div class="form-row-addr">
+                                <span class="label-addr">İl</span>
                                 <?php if (!empty($web_data['city'])) : ?>
-                                    <input class="input" id="address-autofocus" type="text" name="city" value="<?php echo $web_data['city']; ?>">
+                                    <input class="input-addr" id="address-autofocus" type="text" name="city" value="<?php echo $web_data['city']; ?>">
                                 <?php else : ?>
-                                    <input class="input" id="address-autofocus" type="text" name="city">
+                                    <input class="input-addr" id="address-autofocus" type="text" name="city">
                                 <?php endif; ?>
+                                <span class="info">
+                                    <i class="fas fa-info icon"></i>
+                                    Örn. <?php echo IL_SAMPLE; ?>
+                                </span>
                             </div>
-                            <div class="form-row">
-                                <span class="label">İlçe</span>
+                            <div class="form-row-addr">
+                                <span class="label-addr">İlçe</span>
                                 <?php if (!empty($web_data['county'])) : ?>
-                                    <input class="input" type="text" name="county" value="<?php echo $web_data['county']; ?>">
+                                    <input class="input-addr" type="text" name="county" value="<?php echo $web_data['county']; ?>">
                                 <?php else : ?>
-                                    <input class="input" type="text" name="county">
+                                    <input class="input-addr" type="text" name="county">
                                 <?php endif; ?>
+                                <span class="info">
+                                    <i class="fas fa-info icon"></i>
+                                    Örn. <?php echo ILCE_SAMPLE; ?>
+                                </span>
                             </div>
-                            <div class="form-row">
-                                <span class="label">Mahalle</span>
+                            <div class="form-row-addr">
+                                <span class="label-addr">Mahalle</span>
                                 <?php if (!empty($web_data['neighborhood'])) : ?>
-                                    <input class="input" type="text" name="neighborhood" value="<?php echo $web_data['neighborhood']; ?>">
+                                    <input class="input-addr" type="text" name="neighborhood" value="<?php echo $web_data['neighborhood']; ?>">
                                 <?php else : ?>
-                                    <input class="input" type="text" name="neighborhood">
+                                    <input class="input-addr" type="text" name="neighborhood">
                                 <?php endif; ?>
+                                <span class="info">
+                                    <i class="fas fa-info icon"></i>
+                                    Örn. <?php echo MAHALLE_SAMPLE; ?>
+                                </span>
                             </div>
-                            <div class="form-row">
-                                <span class="label">Cadde/ Sokak</span>
+                            <div class="form-row-addr">
+                                <span class="label-addr">Cadde/ Sokak</span>
                                 <?php if (!empty($web_data['street'])) : ?>
-                                    <input class="input" type="text" name="street" value="<?php echo $web_data['street']; ?>">
+                                    <input class="input-addr" type="text" name="street" value="<?php echo $web_data['street']; ?>">
                                 <?php else : ?>
-                                    <input class="input" type="text" name="street">
+                                    <input class="input-addr" type="text" name="street">
                                 <?php endif; ?>
+                                <span class="info">
+                                    <i class="fas fa-info icon"></i>
+                                    Örn. <?php echo SOKAK_SAMPLE; ?>
+                                </span>
                             </div>
-                            <div class="form-row">
-                                <span class="label label-spec">Apartman Numarası</span>
+                            <div class="form-row-addr">
+                                <span class="label-addr label-spec">Apartman Numarası</span>
                                 <?php if (!empty($web_data['building_no'])) : ?>
-                                    <input class="input" type="text" name="building_no" value="<?php echo $web_data['building_no']; ?>">
+                                    <input class="input-addr" type="text" name="building_no" value="<?php echo $web_data['building_no']; ?>">
                                 <?php else : ?>
-                                    <input class="input" type="text" name="building_no">
+                                    <input class="input-addr" type="text" name="building_no">
                                 <?php endif; ?>
+                                <span class="info">
+                                    <i class="fas fa-info icon"></i>
+                                    Örn. <?php echo APARTMAN_SAMPLE; ?>
+                                </span>
                             </div>
-                            <div class="form-row">
-                                <span class="label">Daire Numarası</span>
+                            <div class="form-row-addr">
+                                <span class="label-addr">Daire Numarası</span>
                                 <?php if (!empty($web_data['apartment_no'])) : ?>
-                                    <input class="input" type="text" name="apartment_no" value="<?php echo $web_data['apartment_no']; ?>">
+                                    <input class="input-addr" type="text" name="apartment_no" value="<?php echo $web_data['apartment_no']; ?>">
                                 <?php else : ?>
-                                    <input class="input" type="text" name="apartment_no">
+                                    <input class="input-addr" type="text" name="apartment_no">
                                 <?php endif; ?>
+                                <span class="info">
+                                    <i class="fas fa-info icon"></i>
+                                    Örn. <?php echo DAIRE_SAMPLE; ?>
+                                </span>
                             </div>
-                            <div class="form-row">
-                                <span class="label">ZİP Numarası</span>
+                            <div class="form-row-addr">
+                                <span class="label-addr label-spec">ZİP Numarası (Posta Kodu)</span>
                                 <?php if (!empty($web_data['zip_no'])) : ?>
-                                    <input class="input" type="text" name="zip_no" value="<?php echo $web_data['zip_no']; ?>">
+                                    <input class="input-addr" type="text" name="zip_no" value="<?php echo $web_data['zip_no']; ?>">
                                 <?php else : ?>
-                                    <input class="input" type="text" name="zip_no">
+                                    <input class="input-addr" type="text" name="zip_no">
                                 <?php endif; ?>
+                                <span class="info">
+                                    <i class="fas fa-info icon"></i>
+                                    Örn. <?php echo ZIP_SAMPLE; ?>
+                                </span>
                             </div>
                             <div class="row-space">
                                 <div class="right">
@@ -150,37 +203,69 @@
                                 <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
                             <?php endif; ?>
                             <input id="update-id" class="input" type="hidden" name="id">
-                            <div class="form-row">
-                                <span class="label">Ülke</span>
-                                <input class="input" type="text" value="Türkiye" readonly>
+                            <div class="form-row-addr">
+                                <span class="label-addr">Ülke</span>
+                                <input class="input-addr" type="text" value="Türkiye" readonly>
+                                <span class="info">
+                                    <i class="fas fa-info icon"></i>
+                                    Örn. Türkiye
+                                </span>
                             </div>
-                            <div class="form-row">
-                                <span class="label">İl</span>
-                                <input id="update-city" class="input" type="text" name="city">
+                            <div class="form-row-addr">
+                                <span class="label-addr">İl</span>
+                                <input id="update-city" class="input-addr" type="text" name="city">
+                                <span class="info">
+                                    <i class="fas fa-info icon"></i>
+                                    Örn. <?php echo IL_SAMPLE; ?>
+                                </span>
                             </div>
-                            <div class="form-row">
-                                <span class="label">İlçe</span>
-                                <input id="update-county" class="input" type="text" name="county">
+                            <div class="form-row-addr">
+                                <span class="label-addr">İlçe</span>
+                                <input id="update-county" class="input-addr" type="text" name="county">
+                                <span class="info">
+                                    <i class="fas fa-info icon"></i>
+                                    Örn. <?php echo ILCE_SAMPLE; ?>
+                                </span>
                             </div>
-                            <div class="form-row">
-                                <span class="label">Mahalle</span>
-                                <input id="update-neighborhood" class="input" type="text" name="neighborhood">
+                            <div class="form-row-addr">
+                                <span class="label-addr">Mahalle</span>
+                                <input id="update-neighborhood" class="input-addr" type="text" name="neighborhood">
+                                <span class="info">
+                                    <i class="fas fa-info icon"></i>
+                                    Örn. <?php echo MAHALLE_SAMPLE; ?>
+                                </span>
                             </div>
-                            <div class="form-row">
-                                <span class="label">Cadde/ Sokak</span>
-                                <input id="update-street" class="input" type="text" name="street">
+                            <div class="form-row-addr">
+                                <span class="label-addr">Cadde/ Sokak</span>
+                                <input id="update-street" class="input-addr" type="text" name="street">
+                                <span class="info">
+                                    <i class="fas fa-info icon"></i>
+                                    Örn. <?php echo SOKAK_SAMPLE; ?>
+                                </span>
                             </div>
-                            <div class="form-row">
-                                <span class="label label-spec">Apartman Numarası</span>
-                                <input id="update-building_no" class="input" type="text" name="building_no">
+                            <div class="form-row-addr">
+                                <span class="label-addr label-spec">Apartman Numarası</span>
+                                <input id="update-building_no" class="input-addr" type="text" name="building_no">
+                                <span class="info">
+                                    <i class="fas fa-info icon"></i>
+                                    Örn. <?php echo APARTMAN_SAMPLE; ?>
+                                </span>
                             </div>
-                            <div class="form-row">
-                                <span class="label">Daire Numarası</span>
-                                <input id="update-apartment_no" class="input" type="text" name="apartment_no">
+                            <div class="form-row-addr">
+                                <span class="label-addr">Daire Numarası</span>
+                                <input id="update-apartment_no" class="input-addr" type="text" name="apartment_no">
+                                <span class="info">
+                                    <i class="fas fa-info icon"></i>
+                                    Örn. <?php echo DAIRE_SAMPLE; ?>
+                                </span>
                             </div>
-                            <div class="form-row">
-                                <span class="label">ZİP Numarası</span>
-                                <input id="update-zip_no" class="input" type="text" name="zip_no">
+                            <div class="form-row-addr">
+                                <span class="label-addr label-spec">ZİP Numarası (Posta Kodu)</span>
+                                <input id="update-zip_no" class="input-addr" type="text" name="zip_no">
+                                <span class="info">
+                                    <i class="fas fa-info icon"></i>
+                                    Örn. <?php echo ZIP_SAMPLE; ?>
+                                </span>
                             </div>
                             <div class="row-space">
                                 <div class="right">
@@ -288,7 +373,6 @@
                                             <span class="checkmark selected"></span>
                                             <span class="checkmark-text">3D Güvenli Ödeme Etkin</span>
                                         </div>
-                                        <span class="installment-info-text">Taksit seçenekleri kart numarasını girdikten sonra görüntülenecektir.</span>
                                     </div>
                                     <div class="right checkout-logo">
                                         <svg viewBox="0 0 210 31" version="1.1" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink">
@@ -414,7 +498,7 @@
         </section>
     </main>
     <?php require_once 'View/SharedHome/_home_footer.php'; ?>
-    <?php if (!empty($_SESSION[SESSION_COMPLETE_PROFILE_NAME]) || !empty($_SESSION[SESSION_COMPLETE_PROFILE_IDENTITY]) || !empty($_SESSION[SESSION_COMPLETE_ADDRESS])) : ?>
+    <?php if (!empty($_SESSION[SESSION_COMPLETE_PROFILE_NAME]) || !empty($_SESSION[SESSION_COMPLETE_PROFILE_IDENTITY]) || !empty($_SESSION[SESSION_COMPLETE_PROFILE_PHONE]) || !empty($_SESSION[SESSION_COMPLETE_ADDRESS])) : ?>
         <script>
             window.onload = function() {
                 if (!loaderWrapper.classList.contains('hidden')) {
@@ -527,8 +611,7 @@
                 });
             });
         </script>
-    <?php endif; ?>
-    <?php if (!empty($web_data['ready_to_buy'])) : ?>
+    <?php elseif (!empty($web_data['ready_to_buy'])) : ?>
         <script>
             const term2 = document.querySelector('.term2');
             document.getElementById('btn-order-term').addEventListener('click', (e) => {
@@ -683,8 +766,7 @@
                         $('#form-user-update').submit();
                     }
                 });
-            <?php endif; ?>
-            <?php if (!empty($_SESSION[SESSION_COMPLETE_ADDRESS])) : ?>
+            <?php elseif (!empty($_SESSION[SESSION_COMPLETE_PROFILE_IDENTITY])) : ?>
                 const userIdentity = $('#user-identity');
                 $('#btn-identity-update').click(function(e) {
                     e.preventDefault();
@@ -707,8 +789,53 @@
                         $('#form-update-identity').submit();
                     }
                 });
-            <?php endif; ?>
-            <?php if (!empty($web_data['ready_to_buy'])) : ?>
+            <?php elseif (!empty($_SESSION[SESSION_COMPLETE_PROFILE_PHONE])) : ?>
+                const userPhone = $('#user-phone');
+                $('#btn-phone-update').click(function(e) {
+                    e.preventDefault();
+                    if (userPhone.val() == '') {
+                        userPhone.focus();
+                        setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_EMPTY_PHONE; ?></span></div>');
+                    } else if ($.trim(userPhone.val()).indexOf(' ') >= 0) {
+                        userPhone.focus();
+                        setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_NOT_VALID_PHONE; ?></span></div>');
+                    } else if ($.trim(userPhone.val()).length != <?php echo PHONE_LIMIT; ?>) {
+                        userPhone.focus();
+                        setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_NOT_VALID_PHONE; ?></span></div>');
+                    } else {
+                        if ($('.loader-wrapper').hasClass('hidden')) {
+                            $('.loader-wrapper').removeClass('hidden');
+                        }
+                        if (!$('body').hasClass('noscroll')) {
+                            $('body').addClass('noscroll');
+                        }
+                        $('#form-update-phone').submit();
+                    }
+                });
+            <?php elseif (!empty($_SESSION[SESSION_COMPLETE_ADDRESS])) : ?>
+                const userIdentity = $('#user-identity');
+                $('#btn-identity-update').click(function(e) {
+                    e.preventDefault();
+                    if (userIdentity.val() == '') {
+                        userIdentity.focus();
+                        setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_EMPTY_IDENTITY_NUMBER; ?></span></div>');
+                    } else if ($.trim(userIdentity.val()).indexOf(' ') >= 0) {
+                        userIdentity.focus();
+                        setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_NOT_VALID_IDENTITY_NUMBER; ?></span></div>');
+                    } else if ($.trim(userIdentity.val()).length != <?php echo IDENTITY_NUMBER_LIMIT; ?>) {
+                        userIdentity.focus();
+                        setClientNotification('<div class="notification danger"><span class="text"><?php echo TR_NOTIFICATION_ERROR_NOT_VALID_IDENTITY_NUMBER; ?></span></div>');
+                    } else {
+                        if ($('.loader-wrapper').hasClass('hidden')) {
+                            $('.loader-wrapper').removeClass('hidden');
+                        }
+                        if (!$('body').hasClass('noscroll')) {
+                            $('body').addClass('noscroll');
+                        }
+                        $('#form-update-identity').submit();
+                    }
+                });
+            <?php elseif (!empty($web_data['ready_to_buy'])) : ?>
                 const cartName = $('#cart-name');
                 const cartNumber = $('#cart-number');
                 const cartExpiryMonth = $('#cart-expiry-month');
@@ -768,82 +895,6 @@
                             $('body').addClass('noscroll');
                         }
                         $('#form-order-complete').submit();
-                    }
-                });
-                var bin = 0;
-                var binable = true;
-                var checkbin = false;
-                cartNumber.on('input', function(e) {
-                    if ($.trim(cartNumber.val()).length < 6) {
-                        if ($('#creadit-wrapper-last').length == 1) {
-                            $('#creadit-wrapper-last').remove();
-                        }
-                        binable = true;
-                    } else {
-                        if (binable) {
-                            binable = false;
-                            bin = cartNumber.val().substring(0, 6);
-                            checkbin = true;
-                        } else {
-                            if (bin != cartNumber.val().substring(0, 6)) {
-                                bin = cartNumber.val().substring(0, 6);
-                                checkbin = true;
-                            } else {
-                                checkbin = false;
-                            }
-                        }
-                    }
-                    if ($.trim(cartNumber.val()).length >= 6 && checkbin) {
-                        request = $.ajax({
-                            url: '<?php echo URL . URL_INSTALLMENT; ?>',
-                            type: 'POST',
-                            data: 'cart_number=' + bin
-                        });
-                        request.done(function(response) {
-                            if ($('#creadit-wrapper-last').length == 1) {
-                                $('#creadit-wrapper-last').remove();
-                            }
-                            response = jQuery.parseJSON(response);
-                            let v0 = $("<div></div>").addClass('credit-wrapper').attr('id', 'creadit-wrapper-last');
-                            if (response.hasOwnProperty('shutdown')) {
-                                window.location.href = '<?php echo URL . URL_SHUTDOWN; ?>';
-                            } else if (response.hasOwnProperty('exception')) {
-                                window.location.href = '<?php echo URL . URL_EXCEPTION; ?>';
-                            } else if (response.hasOwnProperty('reset') && response['reset'] == false) {
-                                let t0 = $("<div></div>").addClass('installment-header');
-                                v0.append(t0);
-                                let t11 = $("<span></span>").addClass('cell').text('Taksiti Seç');
-                                let t1 = $("<span></span>").addClass('cell').text('Taksit başına düşen tutar');
-                                let t2 = $("<span></span>").addClass('cell').text('Toplam taksitli tutar');
-                                let t3 = $("<span></span>").addClass('cell').text('Taksit sayısı');
-                                t0.append(t11);
-                                t0.append(t1);
-                                t0.append(t2);
-                                t0.append(t3);
-                                let counter = 0;
-                                $.each(response['installment'], function(key, installment) {
-                                    counter += 1;
-                                    let v00 = $("<div></div>").addClass('installment-container');
-                                    v0.append(v00);
-                                    let v11 = $("<label></label>").addClass('installment-text').attr('for', 'installment-checkbox-' + counter);
-                                    let v13 = $("<input></input>").addClass('checkbox installment-checkbox').attr('type', 'radio').attr('id', 'installment-checkbox-' + counter).attr('name', 'installment_number').attr('value', installment['installment_number']);
-                                    v11.append(v13);
-                                    let v14 = $("<span></span>").addClass('checkmark');
-                                    v11.append(v14);
-                                    let v1 = $("<span></span>").addClass('installment-text').text(installment['installment_price'] + ' ₺');
-                                    let v2 = $("<span></span>").addClass('installment-text').text(installment['installment_total_price'] + ' ₺');
-                                    let v3 = $("<span></span>").addClass('installment-text').text(installment['installment_number']);
-                                    v00.append(v11);
-                                    v00.append(v1);
-                                    v00.append(v2);
-                                    v00.append(v3);
-                                });
-                            } else {
-                                let v11 = $("<span></span>").addClass('installment-text-danger').text('Taksit mevcut değil.');
-                                v0.append(v11);
-                            }
-                            $('#installment-wrapper').append(v0);
-                        });
                     }
                 });
             <?php endif; ?>

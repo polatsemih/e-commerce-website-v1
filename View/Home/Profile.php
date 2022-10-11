@@ -118,65 +118,97 @@
                                     <?php if (!empty($web_data['form_token'])) : ?>
                                         <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
                                     <?php endif; ?>
-                                    <div class="form-row">
+                                    <div class="form-row-addr">
                                         <span class="label">Ülke</span>
                                         <input class="input" type="text" value="Türkiye" readonly>
+                                        <span class="info">
+                                            <i class="fas fa-info icon"></i>
+                                            Örn. Türkiye
+                                        </span>
                                     </div>
-                                    <div class="form-row">
+                                    <div class="form-row-addr">
                                         <span class="label">İl</span>
                                         <?php if (!empty($web_data['city'])) : ?>
                                             <input class="input" id="address-autofocus" type="text" name="city" value="<?php echo $web_data['city']; ?>">
                                         <?php else : ?>
                                             <input class="input" id="address-autofocus" type="text" name="city">
                                         <?php endif; ?>
+                                        <span class="info">
+                                            <i class="fas fa-info icon"></i>
+                                            Örn. <?php echo IL_SAMPLE; ?>
+                                        </span>
                                     </div>
-                                    <div class="form-row">
+                                    <div class="form-row-addr">
                                         <span class="label">İlçe</span>
                                         <?php if (!empty($web_data['county'])) : ?>
                                             <input class="input" type="text" name="county" value="<?php echo $web_data['county']; ?>">
                                         <?php else : ?>
                                             <input class="input" type="text" name="county">
                                         <?php endif; ?>
+                                        <span class="info">
+                                            <i class="fas fa-info icon"></i>
+                                            Örn. <?php echo ILCE_SAMPLE; ?>
+                                        </span>
                                     </div>
-                                    <div class="form-row">
+                                    <div class="form-row-addr">
                                         <span class="label">Mahalle</span>
                                         <?php if (!empty($web_data['neighborhood'])) : ?>
                                             <input class="input" type="text" name="neighborhood" value="<?php echo $web_data['neighborhood']; ?>">
                                         <?php else : ?>
                                             <input class="input" type="text" name="neighborhood">
                                         <?php endif; ?>
+                                        <span class="info">
+                                            <i class="fas fa-info icon"></i>
+                                            Örn. <?php echo MAHALLE_SAMPLE; ?>
+                                        </span>
                                     </div>
-                                    <div class="form-row">
+                                    <div class="form-row-addr">
                                         <span class="label">Cadde/ Sokak</span>
                                         <?php if (!empty($web_data['street'])) : ?>
                                             <input class="input" type="text" name="street" value="<?php echo $web_data['street']; ?>">
                                         <?php else : ?>
                                             <input class="input" type="text" name="street">
                                         <?php endif; ?>
+                                        <span class="info">
+                                            <i class="fas fa-info icon"></i>
+                                            Örn. <?php echo SOKAK_SAMPLE; ?>
+                                        </span>
                                     </div>
-                                    <div class="form-row">
+                                    <div class="form-row-addr">
                                         <span class="label label-spec">Apartman Numarası</span>
                                         <?php if (!empty($web_data['building_no'])) : ?>
                                             <input class="input" type="text" name="building_no" value="<?php echo $web_data['building_no']; ?>">
                                         <?php else : ?>
                                             <input class="input" type="text" name="building_no">
                                         <?php endif; ?>
+                                        <span class="info">
+                                            <i class="fas fa-info icon"></i>
+                                            Örn. <?php echo APARTMAN_SAMPLE; ?>
+                                        </span>
                                     </div>
-                                    <div class="form-row">
+                                    <div class="form-row-addr">
                                         <span class="label">Daire Numarası</span>
                                         <?php if (!empty($web_data['apartment_no'])) : ?>
                                             <input class="input" type="text" name="apartment_no" value="<?php echo $web_data['apartment_no']; ?>">
                                         <?php else : ?>
                                             <input class="input" type="text" name="apartment_no">
                                         <?php endif; ?>
+                                        <span class="info">
+                                            <i class="fas fa-info icon"></i>
+                                            Örn. <?php echo DAIRE_SAMPLE; ?>
+                                        </span>
                                     </div>
-                                    <div class="form-row">
-                                        <span class="label">ZİP Numarası</span>
+                                    <div class="form-row-addr" title="İl Kodunu, arama motorunda il, ilçe, mahalle zip kodu formatında aratarak öğrenebilirisiniz">
+                                        <span class="label label-spec">ZİP Numarası (Posta Kodu)</span>
                                         <?php if (!empty($web_data['zip_no'])) : ?>
                                             <input class="input" type="text" name="zip_no" value="<?php echo $web_data['zip_no']; ?>">
                                         <?php else : ?>
                                             <input class="input" type="text" name="zip_no">
                                         <?php endif; ?>
+                                        <span class="info">
+                                            <i class="fas fa-info icon"></i>
+                                            Örn. <?php echo ZIP_SAMPLE; ?>
+                                        </span>
                                     </div>
                                     <div class="row-space">
                                         <div class="right">
@@ -199,37 +231,69 @@
                                         <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
                                     <?php endif; ?>
                                     <input id="update-id" class="input" type="hidden" name="id">
-                                    <div class="form-row">
+                                    <div class="form-row-addr">
                                         <span class="label">Ülke</span>
                                         <input class="input" type="text" value="Türkiye" readonly>
+                                        <span class="info">
+                                            <i class="fas fa-info icon"></i>
+                                            Örn. Türkiye
+                                        </span>
                                     </div>
-                                    <div class="form-row">
+                                    <div class="form-row-addr">
                                         <span class="label">İl</span>
                                         <input id="update-city" class="input" type="text" name="city">
+                                        <span class="info">
+                                            <i class="fas fa-info icon"></i>
+                                            Örn. <?php echo IL_SAMPLE; ?>
+                                        </span>
                                     </div>
-                                    <div class="form-row">
+                                    <div class="form-row-addr">
                                         <span class="label">İlçe</span>
                                         <input id="update-county" class="input" type="text" name="county">
+                                        <span class="info">
+                                            <i class="fas fa-info icon"></i>
+                                            Örn. <?php echo ILCE_SAMPLE; ?>
+                                        </span>
                                     </div>
-                                    <div class="form-row">
+                                    <div class="form-row-addr">
                                         <span class="label">Mahalle</span>
                                         <input id="update-neighborhood" class="input" type="text" name="neighborhood">
+                                        <span class="info">
+                                            <i class="fas fa-info icon"></i>
+                                            Örn. <?php echo MAHALLE_SAMPLE; ?>
+                                        </span>
                                     </div>
-                                    <div class="form-row">
+                                    <div class="form-row-addr">
                                         <span class="label">Cadde/ Sokak</span>
                                         <input id="update-street" class="input" type="text" name="street">
+                                        <span class="info">
+                                            <i class="fas fa-info icon"></i>
+                                            Örn. <?php echo SOKAK_SAMPLE; ?>
+                                        </span>
                                     </div>
-                                    <div class="form-row">
+                                    <div class="form-row-addr">
                                         <span class="label label-spec">Apartman Numarası</span>
                                         <input id="update-building_no" class="input" type="text" name="building_no">
+                                        <span class="info">
+                                            <i class="fas fa-info icon"></i>
+                                            Örn. <?php echo APARTMAN_SAMPLE; ?>
+                                        </span>
                                     </div>
-                                    <div class="form-row">
+                                    <div class="form-row-addr">
                                         <span class="label">Daire Numarası</span>
                                         <input id="update-apartment_no" class="input" type="text" name="apartment_no">
+                                        <span class="info">
+                                            <i class="fas fa-info icon"></i>
+                                            Örn. <?php echo DAIRE_SAMPLE; ?>
+                                        </span>
                                     </div>
-                                    <div class="form-row">
-                                        <span class="label">ZİP Numarası</span>
+                                    <div class="form-row-addr">
+                                        <span class="label label-spec">ZİP Numarası (Posta Kodu)</span>
                                         <input id="update-zip_no" class="input" type="text" name="zip_no">
+                                        <span class="info">
+                                            <i class="fas fa-info icon"></i>
+                                            Örn. <?php echo ZIP_SAMPLE; ?>
+                                        </span>
                                     </div>
                                     <div class="row-space">
                                         <div class="right">
@@ -386,18 +450,20 @@
                                         <span class="box box-m"><?php echo $order['order_informations']['shipping_contact_name']; ?></span>
                                         <span class="box box-l-2"><?php echo $order['order_informations']['shipping_address'] . ' ' . $order['order_informations']['shipping_city'] . '/' . $order['order_informations']['shipping_country'] . ' ZIP: ' . $order['order_informations']['shipping_zip_code']; ?></span>
                                         <span class="box box-xs"><?php echo $order['order_informations']['paid_price']; ?> ₺</span>
-                                        <?php if ($order['order_informations']['status'] == 0) : ?>
-                                            <span class="box box-xs">İptal Edildi</span>
-                                        <?php elseif ($order['order_informations']['status'] == 1) : ?>
-                                            <span class="box box-xs">Onay Bekliyor...</span>
+                                        <?php if ($order['order_informations']['status'] == 1) : ?>
+                                            <span class="box box-xs">Onay Bekliyor</span>
                                         <?php elseif ($order['order_informations']['status'] == 2) : ?>
-                                            <span class="box box-xs">Onaylandı. Kargoya Verilecek...</span>
+                                            <span class="box box-xs">Onaylandı. Kargoya Verilecek</span>
                                         <?php elseif ($order['order_informations']['status'] == 3) : ?>
-                                            <span class="box box-xs">Kargoda</span>
+                                            <span class="box box-xs">Onaylandı ve Kargoya Verildi</span>
                                         <?php elseif ($order['order_informations']['status'] == 4) : ?>
                                             <span class="box box-xs">Teslim Edildi</span>
                                         <?php elseif ($order['order_informations']['status'] == 5) : ?>
-                                            <span class="box box-xs">İade Edildi</span>
+                                            <span class="box box-xs">İptal Edildi</span>
+                                        <?php elseif ($order['order_informations']['status'] == 6) : ?>
+                                            <span class="box box-xs">İade Edilen Sipariş Onaylandı ve Kargoya Verildi</span>
+                                        <?php elseif ($order['order_informations']['status'] == 7) : ?>
+                                            <span class="box box-xs">İade Edilen Sipariş Teslim Edildi</span>
                                         <?php endif; ?>
                                         <span class="box-details extend-order-details-<?php echo $i; ?>"><i class="fas fa-chevron-right"></i></span>
                                     </div>
@@ -444,23 +510,25 @@
                                                     <span class="box box-m"><?php echo $order['order_informations']['shipping_contact_name']; ?></span>
                                                     <span class="box box-l"><?php echo $order['order_informations']['shipping_address'] . ' ' . $order['order_informations']['shipping_city'] . '/' . $order['order_informations']['shipping_country'] . ' ZIP: ' . $order['order_informations']['shipping_zip_code']; ?></span>
                                                     <span class="box box-xs-2"><?php echo $order['order_informations']['paid_price']; ?> ₺</span>
-                                                    <?php if ($order['order_informations']['status'] == 0) : ?>
-                                                        <span class="box box-xs-2">İptal Edildi</span>
-                                                    <?php elseif ($order['order_informations']['status'] == 1) : ?>
-                                                        <span class="box box-xs-2">Onay Bekliyor...</span>
+                                                    <?php if ($order['order_informations']['status'] == 1) : ?>
+                                                        <span class="box box-xs-2">Onay Bekliyor</span>
                                                     <?php elseif ($order['order_informations']['status'] == 2) : ?>
-                                                        <span class="box box-xs-2">Onaylandı. Kargoya Verilecek...</span>
+                                                        <span class="box box-xs-2">Onaylandı. Kargoya Verilecek</span>
                                                     <?php elseif ($order['order_informations']['status'] == 3) : ?>
-                                                        <span class="box box-xs-2">Kargoda</span>
+                                                        <span class="box box-xs-2">Onaylandı ve Kargoya Verildi</span>
                                                     <?php elseif ($order['order_informations']['status'] == 4) : ?>
                                                         <span class="box box-xs-2">Teslim Edildi</span>
                                                     <?php elseif ($order['order_informations']['status'] == 5) : ?>
-                                                        <span class="box box-xs-2">İade Edildi</span>
+                                                        <span class="box box-xs-2">İptal Edildi</span>
+                                                    <?php elseif ($order['order_informations']['status'] == 6) : ?>
+                                                        <span class="box box-xs-2">İade Edilen Sipariş Onaylandı ve Kargoya Verildi</span>
+                                                    <?php elseif ($order['order_informations']['status'] == 7) : ?>
+                                                        <span class="box box-xs-2">İade Edilen Sipariş Teslim Edildi</span>
                                                     <?php endif; ?>
                                                 </div>
                                                 <div class="basket-bot">
                                                     <div class="right">
-                                                        
+
                                                     </div>
                                                 </div>
                                             </div>

@@ -173,7 +173,7 @@
             </div>
             <div class="row">
                 <div class="col-label">
-                    <label class="create-label" for="item_washing_style">Yıkma Stili</label>
+                    <label class="create-label" for="item_washing_style">Yıkama Stili</label>
                 </div>
                 <div class="col-input">
                     <?php if (!empty($web_data['item_washing_style'])) : ?>

@@ -13,6 +13,12 @@
         <section class="comment-section container">
             <?php if (!empty($web_data['item_comments'])) : ?>
                 <h1 class="title">Yorumlar (<?php echo count($web_data['item_comments']); ?>)</h1>
+                <?php if (!empty($web_data['item_name'])) : ?>
+                    <span class="title-theme"><?php echo $web_data['item_name']; ?></span>
+                <?php endif; ?>
+                <?php if (!empty($web_data['user_name'])) : ?>
+                    <span class="title-theme"><?php echo $web_data['user_name']; ?></span>
+                <?php endif; ?>
                 <div class="row">
                     <div class="box box-1 th">Kullanıcı</div>
                     <div class="box box-1 th">Ürün</div>

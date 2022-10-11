@@ -8,4 +8,4 @@
 </footer>
 </div>
 <script src="<?php echo URL; ?>assets/js/admin.js"></script>
-<script src="<?php echo URL; ?>assets/js/jQuery.js"></script>
+<script src="<?php echo JQUERY_PATH; ?>"></script>

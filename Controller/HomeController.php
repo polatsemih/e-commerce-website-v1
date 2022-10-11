@@ -1057,7 +1057,7 @@ class HomeController extends Controller
                         if ($orders['result']) {
                             $user_orders = array();
                             foreach ($orders['data'] as $key => $order) {
-                                if ($order['status'] != 6) {
+                                if ($order['status'] > 0 && $order['status'] < 8) {
                                     $formatted_paid_price = $this->input_control->FormatPrice($order['paid_price']);
                                     $a = date('d/m/Y H:i:s', strtotime($order['date_order_initialize_created']));
                                     if ($formatted_paid_price['result'] && !empty($a)) {
@@ -1664,7 +1664,9 @@ class HomeController extends Controller
                                 $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_NEW_PHONE_NUMBER);
                             } else {
                                 if ($this->UserModel->UpdateUser(array('phone_number' => $checked_inputs['user_phone_number'], 'date_last_profile_update' => date('Y-m-d H:i:s'), 'id' => $confirmed_user_from_db['data']['id']))['result']) {
-                                    $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_PROFILE_PHONE_NUMBER_UPDATE);
+                                    if (empty($_SESSION[SESSION_COMPLETE_PROFILE_PHONE])) {
+                                        $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_PROFILE_PHONE_NUMBER_UPDATE);
+                                    }
                                 } else {
                                     $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
                                 }
@@ -1676,7 +1678,12 @@ class HomeController extends Controller
                 } else {
                     $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
-                $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_PHONE);
+                if (!empty($_SESSION[SESSION_COMPLETE_PROFILE_PHONE])) {
+                    $this->session_control->KillSession(SESSION_COMPLETE_PROFILE_PHONE);
+                    $this->input_control->Redirect(URL_ORDER_INITIALIZE);
+                } else {
+                    $this->input_control->Redirect(URL_PROFILE . '/' . URL_PROFILE_PHONE);
+                }
             }
             parent::KillAuthentication('HomeController ProfilePhoneUpdate');
             $this->input_control->Redirect();
@@ -1918,6 +1925,12 @@ class HomeController extends Controller
                             $this->web_data['form_token'] = parent::SetCSRFToken('Profile');
                             $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
                             parent::GetView('Home/OrderInitialize', $this->web_data);
+                        } elseif (empty($confirmed_user_from_db['data']['phone_number'])) {
+                            $_SESSION[SESSION_COMPLETE_PROFILE_PHONE] = true;
+                            parent::LogView('Home-OrderInitialize-Phone');
+                            $this->web_data['form_token'] = parent::SetCSRFToken('Profile');
+                            $this->web_data['genders'] = parent::GetGenders('gender_name,gender_url');
+                            parent::GetView('Home/OrderInitialize', $this->web_data);
                         } elseif (empty($_SESSION[SESSION_SELECTED_ADDRESS_ID])) {
                             $_SESSION[SESSION_COMPLETE_ADDRESS] = true;
                             $not_from_create_address = true;
@@ -1975,39 +1988,40 @@ class HomeController extends Controller
                                         }
                                         $conversation_id = $this->input_control->GenerateToken();
                                         if (!empty($user_address) && $conversation_id['result']) {
-                                            $is_installment_not_valid = true;
-                                            if (isset($_POST['installment_number'])) {
-                                                $conversation_installment_id = $this->input_control->GenerateToken();
-                                                if ($conversation_installment_id['result']) {
-                                                    require_once(IYZIPAY_FOLDER_NAME . '/samples/config.php');
-                                                    $request = new \Iyzipay\Request\RetrieveInstallmentInfoRequest();
-                                                    $request->setLocale(\Iyzipay\Model\Locale::TR);
-                                                    $request->setConversationId($conversation_installment_id['data']);
-                                                    $request->setBinNumber(substr($checked_inputs['cart_number'], 0, 6));
-                                                    $request->setPrice($this->web_data['order_cart_data_total_price']);
-                                                    $installmentInfo = \Iyzipay\Model\InstallmentInfo::retrieve($request, Config::options());
-                                                    if ($installmentInfo->getStatus() == 'success') {
-                                                        if ($installmentInfo->getConversationId() == $conversation_installment_id['data']) {
-                                                            foreach ($installmentInfo->getInstallmentDetails() as $installment_details) {
-                                                                foreach ($installment_details->getInstallmentPrices() as $installment_prices) {
-                                                                    if ($this->input_control->SlashAndXSSForId($installment_prices->getInstallmentNumber()) != 1 && $this->input_control->SlashAndXSSForId($installment_prices->getInstallmentNumber()) == $_POST['installment_number']) {
-                                                                        $is_installment_not_valid = false;
-                                                                        $installment = $this->input_control->SlashAndXSSForId($installment_prices->getInstallmentNumber());
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            if ($is_installment_not_valid) {
-                                                $installment = 1;
-                                            }
+                                            // $is_installment_not_valid = true;
+                                            // if (isset($_POST['installment_number'])) {
+                                            //     $conversation_installment_id = $this->input_control->GenerateToken();
+                                            //     if ($conversation_installment_id['result']) {
+                                            //         require_once(IYZIPAY_FOLDER_NAME . '/samples/config.php');
+                                            //         $request = new \Iyzipay\Request\RetrieveInstallmentInfoRequest();
+                                            //         $request->setLocale(\Iyzipay\Model\Locale::TR);
+                                            //         $request->setConversationId($conversation_installment_id['data']);
+                                            //         $request->setBinNumber(substr($checked_inputs['cart_number'], 0, 6));
+                                            //         $request->setPrice($this->web_data['order_cart_data_total_price']);
+                                            //         $installmentInfo = \Iyzipay\Model\InstallmentInfo::retrieve($request, Config::options());
+                                            //         if ($installmentInfo->getStatus() == 'success') {
+                                            //             if ($installmentInfo->getConversationId() == $conversation_installment_id['data']) {
+                                            //                 foreach ($installmentInfo->getInstallmentDetails() as $installment_details) {
+                                            //                     foreach ($installment_details->getInstallmentPrices() as $installment_prices) {
+                                            //                         if ($this->input_control->SlashAndXSSForId($installment_prices->getInstallmentNumber()) != 1 && $this->input_control->SlashAndXSSForId($installment_prices->getInstallmentNumber()) == $_POST['installment_number']) {
+                                            //                             $is_installment_not_valid = false;
+                                            //                             $installment = $this->input_control->SlashAndXSSForId($installment_prices->getInstallmentNumber());
+                                            //                         }
+                                            //                     }
+                                            //                 }
+                                            //             }
+                                            //         }
+                                            //     }
+                                            // }
+                                            // if ($is_installment_not_valid) {
+                                            //     $installment = 1;
+                                            // }
+                                            // 'installment' => $installment,
                                             $result_create_order = $this->ItemModel->CreateOrderInitializeInformations(array(
                                                 'conversation_id' => $conversation_id['data'],
                                                 'price' => $this->web_data['order_cart_data_price'],
                                                 'paid_price' => $this->web_data['order_cart_data_total_price'],
-                                                'installment' => $installment,
+                                                'installment' => 1,
                                                 'register_card' => 0,
                                                 'user_ip' => $_SERVER['REMOTE_ADDR'],
                                                 'user_id' => $confirmed_user_from_db['data']['id'],
@@ -2015,6 +2029,7 @@ class HomeController extends Controller
                                                 'user_last_name' => $confirmed_user_from_db['data']['last_name'],
                                                 'user_email' => $confirmed_user_from_db['data']['email'],
                                                 'user_identity_number' => $confirmed_user_from_db['data']['identity_number'],
+                                                'user_phone_number' => $confirmed_user_from_db['data']['phone_number'],
                                                 'user_address' => $user_address['address_county'] . $this->input_control->PreventXSS(', ') . $user_address['address_neighborhood'] . $this->input_control->PreventXSS(', ') . $user_address['address_street'] . $this->input_control->PreventXSS(', No: ') . $user_address['address_building_no'] . $this->input_control->PreventXSS('/') . $user_address['address_apartment_no'],
                                                 'user_city' => $user_address['address_city'],
                                                 'user_country' => $user_address['address_country'],
@@ -2029,7 +2044,7 @@ class HomeController extends Controller
                                                 'billing_country' => $user_address['address_country'],
                                                 'billing_address' => $user_address['address_county'] . $this->input_control->PreventXSS(', ') . $user_address['address_neighborhood'] . $this->input_control->PreventXSS(', ') . $user_address['address_street'] . $this->input_control->PreventXSS(', No: ') . $user_address['address_building_no'] . $this->input_control->PreventXSS('/') . $user_address['address_apartment_no'],
                                                 'billing_zip_code' => $user_address['address_zip_no'],
-                                                'status' => 6
+                                                'status' => 8
                                             ));
                                             if ($result_create_order['result']) {
                                                 require_once(IYZIPAY_FOLDER_NAME . '/samples/config.php');

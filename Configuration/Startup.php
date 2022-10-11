@@ -41,8 +41,9 @@ define('URL_PROFILE_PHOTO_UPDATE', 'resmimi-guncelle');
 define('URL_PROFILE_DELETE', 'hesabimi-sil');
 define('URL_ORDER_ADDRESS', 'adres-sec');
 define('URL_ORDER_INITIALIZE', 'siparis-ver');
-define('URL_INSTALLMENT', 'taksit-sorgula');
+// define('URL_INSTALLMENT', 'taksit-sorgula');
 define('URL_ORDER_PAYMENT', 'siparis-sonuc');
+define('URL_ORDER_FAILURE', 'siparis-basarisiz');
 define('URL_CONTACT', 'iletisim');
 // ActionController
 define('URL_LOGIN', 'giris');
@@ -107,6 +108,8 @@ define('URL_ADMIN_USER_BLOCK', 'yonetici-kullanici-engelle');
 define('URL_ADMIN_COMMENT', 'yonetici-yorumlar');
 define('URL_ADMIN_ITEM_COMMENT', 'yonetici-urun-yorumlar');
 define('URL_ADMIN_USER_PAST_ORDERS', 'yonetici-kullanici-gecmis-siparisler');
+define('URL_ADMIN_USER_COMMENT', 'yonetici-kullanici-yorumlari');
+define('URL_ADMIN_ORDER_STATUS_CHANGE', 'yonetici-siparis-guncelle');
 define('URL_MAPS', array(
     // ErrorController
     array('url' => 'anasayfaya-don', 'controller' => 'ErrorController', 'action' => 'GoHome'),
@@ -139,8 +142,9 @@ define('URL_MAPS', array(
     array('url' => 'hesabimi-sil', 'controller' => 'HomeController', 'action' => 'ProfileDelete'),
     array('url' => 'adres-sec', 'controller' => 'HomeController', 'action' => 'OrderAddressPost'),
     array('url' => 'siparis-ver', 'controller' => 'HomeController', 'action' => 'OrderInitialize'),
-    array('url' => 'taksit-sorgula', 'controller' => 'AccountController', 'action' => 'OrderInstallment'),
+    // array('url' => 'taksit-sorgula', 'controller' => 'AccountController', 'action' => 'OrderInstallment'),
     array('url' => 'siparis-sonuc', 'controller' => 'OrderController', 'action' => 'OrderPayment'),
+    array('url' => 'siparis-basarisiz', 'controller' => 'OrderController', 'action' => 'OrderFailure'),
     array('url' => 'iletisim', 'controller' => 'HomeController', 'action' => 'Contact'),
     // ActionController
     array('url' => 'giris', 'controller' => 'ActionController', 'action' => 'Login'),
@@ -185,7 +189,9 @@ define('URL_MAPS', array(
     array('url_pattern' => 'yonetici-siparis/?', 'controller' => 'AdminController', 'action' => 'OrderDetails'),
     array('url_pattern' => 'yonetici-siparis-hatalari/?', 'controller' => 'AdminController', 'action' => 'OrderErrors'),
     array('url' => 'yonetici-kullanici-engelle', 'controller' => 'AdminController', 'action' => 'UserBlock'),
+    array('url_pattern' => 'yonetici-kullanici-yorumlari/?', 'controller' => 'AdminController', 'action' => 'UserComments'),
     array('url' => 'yonetici-yorumlar', 'controller' => 'AdminController', 'action' => 'Comments'),
     array('url_pattern' => 'yonetici-urun-yorumlar/?', 'controller' => 'AdminController', 'action' => 'ItemComments'),
     array('url_pattern' => 'yonetici-kullanici-gecmis-siparisler/?', 'controller' => 'AdminController', 'action' => 'UserPastOrders'),
+    array('url' => 'yonetici-siparis-guncelle', 'controller' => 'AdminController', 'action' => 'OrderStatusChange')
 ));

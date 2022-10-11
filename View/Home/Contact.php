@@ -15,7 +15,7 @@
     <main>
         <section class="action-section contact">
             <div class="action-container">
-                <h1 class="title">İletişim</h1>
+                <h1 class="title">İletişim, Dilek, Şikayet veya Öneri</h1>
                 <?php if (!empty($web_data['contact_notification'])) : ?>
                     <span class="contact-not"><?php echo $web_data['contact_notification']; ?></span>
                 <?php endif; ?>

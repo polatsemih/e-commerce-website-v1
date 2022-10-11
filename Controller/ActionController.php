@@ -177,6 +177,8 @@ class ActionController extends Controller
                     if (!empty($checked_redirect_location)) {
                         $_SESSION[SESSION_REDIRECT_LOCATION_NAME] = $checked_redirect_location;
                     }
+                } elseif (empty($_GET['yonlendir']) && !empty($_SESSION[SESSION_REDIRECT_LOCATION_NAME])) {
+                    $this->session_control->KillSession(SESSION_REDIRECT_LOCATION_NAME);
                 }
                 $this->web_data['form_token'] = parent::SetCSRFToken('Login');
                 parent::GetView('Action/Login', $this->web_data);

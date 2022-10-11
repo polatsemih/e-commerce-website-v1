@@ -219,3 +219,11 @@ define('TR_NOTIFICATION_ADMIN_SUCCESS_USER_BLOCK', 'Kullanıcı başarıyla enge
 define('TR_NOTIFICATION_ADMIN_ERROR_USER_BLOCK', 'Kullanıcı engelleme başarısız');
 define('TR_NOTIFICATION_ADMIN_SUCCESS_USER_BLOCK_REMOVE', 'Kullanıcı engeli başarıyla kaldırıldı');
 define('TR_NOTIFICATION_ADMIN_ERROR_USER_BLOCK_REMOVE', 'Kullanıcı engeli kaldırma başarısız');
+define('TR_NOTIFICATION_ADMIN_ERROR_ORDER_STATUS_UPDATE', 'Sipariş durumu değiştirilirken bir hata oldu');
+define('TR_NOTIFICATION_ADMIN_SUCCESS_ORDER_STATUS_UPDATE', 'Sipariş durumu başarıyla değiştirildi');
+define('TR_NOTIFICATION_ADMIN_ERROR_SEND_EMAIL', 'Kullanıcıya email gönderilirken bir hata oldu');
+define('TR_NOTIFICATION_ADMIN_SUCCESS_SEND_EMAIL_1', 'Kullanıcıya');
+define('TR_NOTIFICATION_ADMIN_SUCCESS_SEND_EMAIL_2', 'emaili gönderildi');
+define('TR_NOTIFICATION_ADMIN_ERROR_ORDER_STATUS_UPDATE_2', 'Sipariş durumu değiştirildi. Ama kargo yöneticisine email gönderilemedi');
+define('TR_NOTIFICATION_ADMIN_ERROR_SEND_MAIL_STATUS', 'Emaili göndermeden önce siparişin durumunu değiştirmelisiniz');
+define('TR_NOTIFICATION_ERROR_NOT_VALID_SEND_MAIL_MESSAGE', 'Email mesajı 65535 karakterden fazla olamaz');

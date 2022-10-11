@@ -13,9 +13,9 @@
         <section class="order-section container">
             <h1 class="title">Siparişler</h1>
             <div class="row">
-                <div class="box box-1 center th">Conversation ID</div>
-                <div class="box box-1 center th">Fiyat</div>
-                <div class="box box-1 center th" title="Ödenen İndirimli Fiyat">Ödenen Fiyat</div>
+                <div class="box box-1 center th">ID</div>
+                <div class="box box-1 center th">Fiyat (₺)</div>
+                <div class="box box-1 center th" title="Ödenen İndirimli Fiyat">Ödenen Fiyat (₺)</div>
                 <div class="box box-1 center th">Taksit</div>
                 <div class="box box-1 center th">Kart Kayıt</div>
                 <div class="box box-1 center th">Kullanıcı</div>
@@ -31,12 +31,12 @@
                         <div class="box box-1 hovered-id-container">
                             <i class="fas fa-info"></i>
                             <span class="hovered-id">
-                                <?php echo $order_initialize_informations['conversation_id']; ?>
+                                <?php echo $order_initialize_informations['id']; ?>
                                 <span class="hovered-id-triangle"></span>
                             </span>
                         </div>
-                        <div class="box box-1 center"><?php echo $order_initialize_informations['price']; ?> ₺</div>
-                        <div class="box box-1 center"><?php echo $order_initialize_informations['paid_price']; ?> ₺</div>
+                        <div class="box box-1 center"><?php echo $order_initialize_informations['price']; ?></div>
+                        <div class="box box-1 center"><?php echo $order_initialize_informations['paid_price']; ?></div>
                         <div class="box box-1 center"><?php echo $order_initialize_informations['installment']; ?></div>
                         <div class="box box-1 center">
                             <?php if ($order_initialize_informations['register_card'] == 0) : ?>

@@ -194,7 +194,7 @@ class Controller
                 }
                 $logViewOnceIp = $this->LogModel->GetLogViewDaily($_SERVER['REMOTE_ADDR']);
                 if ($logViewOnceIp['result']) {
-                    if (date('Y-m-d H:i:s', strtotime($logViewOnceIp['data']['date_viewed'] . ' +1 day')) < date('Y-m-d H:i:s')) {
+                    if (date('Y-m-d', strtotime($logViewOnceIp['data']['date_viewed'])) < date('Y-m-d')) {
                         $this->LogModel->CreateLogViewDaily(array('user_ip' => $_SERVER['REMOTE_ADDR']));
                     }
                 } else {

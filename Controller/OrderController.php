@@ -33,11 +33,11 @@ class OrderController extends ControllerOrder
                                             $conversation_id = $this->input_control->GenerateToken();
                                             $last_conversation_id = $this->ItemModel->GetOrderInitializeLastConversationId(array($_SERVER['REMOTE_ADDR'], $authenticated_user_from_database['data']['id']));
                                             if ($conversation_id['result'] && $last_conversation_id['result']) {
-                                                if (!empty($_POST['mdStatus']) && !empty($_POST['status']) && !empty($_POST['conversationId'])) {
+                                                if (isset($_POST['mdStatus']) && isset($_POST['status']) && isset($_POST['conversationId'])) {
                                                     if ($_POST['mdStatus'] == 1 && $_POST['status'] == 'success') {
                                                         if ($last_conversation_id['data']['conversation_id'] == $_POST['conversationId']) {
-                                                            if (!empty($_POST['paymentId'])) {
-                                                                if (!empty($_POST['conversationData'])) {
+                                                            if (isset($_POST['paymentId'])) {
+                                                                if (isset($_POST['conversationData'])) {
                                                                     $result_order_verify_created = $this->ItemModel->CreateOrderVerify(array(
                                                                         'conversation_id_initialize_request' => $last_conversation_id['data']['conversation_id'],
                                                                         'conversation_id_payment_request' => $conversation_id['data'],
@@ -57,7 +57,7 @@ class OrderController extends ControllerOrder
                                                                     $request->setLocale(\Iyzipay\Model\Locale::TR);
                                                                     $request->setConversationId($conversation_id['data']);
                                                                     $request->setPaymentId($_POST['paymentId']);
-                                                                    if (!empty($_POST['conversationData'])) {
+                                                                    if (isset($_POST['conversationData'])) {
                                                                         $request->setConversationData($_POST['conversationData']);
                                                                     }
                                                                     $threedsPayment = \Iyzipay\Model\ThreedsPayment::create($request, Config::options());
@@ -72,10 +72,6 @@ class OrderController extends ControllerOrder
                                                                                 'paid_price' => $this->input_control->SlashAndXSSForId($threedsPayment->getPaidPrice()),
                                                                                 'currency' => $this->input_control->SlashAndXSSForId($threedsPayment->getCurrency()),
                                                                                 'installment' => $this->input_control->SlashAndXSSForId($threedsPayment->getInstallment()),
-                                                                                'bin_number' => $this->input_control->SlashAndXSSForId($threedsPayment->getBinNumber()),
-                                                                                'card_association' => $this->input_control->SlashAndXSSForId($threedsPayment->getCardAssociation()),
-                                                                                'card_family' => $this->input_control->SlashAndXSSForId($threedsPayment->getCardFamily()),
-                                                                                'card_type' => $this->input_control->SlashAndXSSForId($threedsPayment->getCardType()),
                                                                                 'iyzi_commission_fee' => $this->input_control->SlashAndXSSForId($threedsPayment->getIyziCommissionFee()),
                                                                                 'iyzi_commission_rate_amount' => $this->input_control->SlashAndXSSForId($threedsPayment->getIyziCommissionRateAmount()),
                                                                                 'merchant_commission_rate' => $this->input_control->SlashAndXSSForId($threedsPayment->getMerchantCommissionRate()),
@@ -164,8 +160,7 @@ class OrderController extends ControllerOrder
                                                                                 'user_ip' => $_SERVER['REMOTE_ADDR'],
                                                                                 'function_type' => 'Payment'
                                                                             ));
-                                                                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
-                                                                            $this->input_control->Redirect(URL_CART);
+                                                                            $this->input_control->Redirect(URL_ORDER_FAILURE);
                                                                         }
                                                                     } else {
                                                                         $this->ItemModel->CreateOrderStatusError(array(
@@ -180,19 +175,16 @@ class OrderController extends ControllerOrder
                                                                             'user_ip' => $_SERVER['REMOTE_ADDR'],
                                                                             'function_type' => 'Payment'
                                                                         ));
-                                                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
-                                                                        $this->input_control->Redirect(URL_CART);
+                                                                        $this->input_control->Redirect(URL_ORDER_FAILURE);
                                                                     }
                                                                 } else {
-                                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
-                                                                    $this->input_control->Redirect(URL_CART);
+                                                                    $this->input_control->Redirect(URL_ORDER_FAILURE);
                                                                 }
                                                             } else {
-                                                                $this->action_control->SendMail(ADMIN_EMAIL, BRAND . 'Order Verify Error', 'Order verify missing payment id. Conversation Request ID : ' . $last_conversation_id['data']['conversation_id']);
+                                                                $this->action_control->SendMail(ADMIN_EMAIL, BRAND . ' Order Verify Error', 'Order verify missing payment id. Conversation Request ID : ' . $last_conversation_id['data']['conversation_id']);
                                                                 $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class OrderController function OrderVerify | Missing Payment ID, Conversation Request ID : ' . $last_conversation_id['data']['conversation_id']));
                                                                 $this->ActionModel->CreateLogEmailSent(array('user_id' => $authenticated_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'email_type' => 'Order Verify Missing PaymentId'));
-                                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
-                                                                $this->input_control->Redirect(URL_CART);
+                                                                $this->input_control->Redirect(URL_ORDER_FAILURE);
                                                             }
                                                         } else {
                                                             $this->ItemModel->CreateOrderConversationError(array(
@@ -202,8 +194,7 @@ class OrderController extends ControllerOrder
                                                                 'user_ip' => $_SERVER['REMOTE_ADDR'],
                                                                 'function_type' => 'Verify'
                                                             ));
-                                                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
-                                                            $this->input_control->Redirect(URL_CART);
+                                                            $this->input_control->Redirect(URL_ORDER_FAILURE);
                                                         }
                                                     } else {
                                                         $this->ItemModel->CreateOrderStatusError(array(
@@ -215,39 +206,33 @@ class OrderController extends ControllerOrder
                                                             'user_ip' => $_SERVER['REMOTE_ADDR'],
                                                             'function_type' => 'Verify'
                                                         ));
-                                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
-                                                        $this->input_control->Redirect(URL_CART);
+                                                        $this->input_control->Redirect(URL_ORDER_FAILURE);
                                                     }
                                                 } else {
-                                                    $this->action_control->SendMail(ADMIN_EMAIL, BRAND . 'Order Verify Error', 'Order verify missing post datas. Conversation Request ID : ' . $last_conversation_id['data']['conversation_id']);
+                                                    $this->action_control->SendMail(ADMIN_EMAIL, BRAND . ' Order Verify Error', 'Order verify missing post datas. Conversation Request ID : ' . $last_conversation_id['data']['conversation_id']);
                                                     $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class OrderController function OrderVerify | Missing Post Datas, Conversation Request ID : ' . $last_conversation_id['data']['conversation_id']));
                                                     $this->ActionModel->CreateLogEmailSent(array('user_id' => $authenticated_user_from_database['data']['id'], 'user_ip' => $_SERVER['REMOTE_ADDR'], 'email_type' => 'Order Verify Missing Post Datas'));
-                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
-                                                    $this->input_control->Redirect(URL_CART);
+                                                    $this->input_control->Redirect(URL_ORDER_FAILURE);
                                                 }
                                             } else {
-                                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
-                                                $this->input_control->Redirect(URL_CART);
+                                                $this->input_control->Redirect(URL_ORDER_FAILURE);
                                             }
                                         } else {
-                                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_USER_BLOCKED);
-                                            $this->input_control->Redirect(URL_CART);
+                                            $this->input_control->Redirect(URL_ORDER_FAILURE);
                                         }
                                     }
                                 }
                             }
                             if ($cookie_authentication_error && $this->ActionModel->UpdateCookieAuthenticationCrossSite(array('is_cookie_authentication_cross_site_killed' => 1, 'date_cookie_authentication_cross_site_killed' => date('Y-m-d H:i:s'), 'cookie_authentication_cross_site_killed_function' => 'OrderController OrderPayment', 'id' => $cookie_authentication_from_database['data']['id']))['result']) {
                                 $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_CROSS_SITE_NAME);
-                                $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
-                                $this->input_control->Redirect(URL_CART);
+                                $this->input_control->Redirect(URL_ORDER_FAILURE);
                             }
                         }
                     }
                 }
                 if ($cookie_authentication_error) {
                     $this->cookie_control->EmptyCookie(COOKIE_AUTHENTICATION_CROSS_SITE_NAME);
-                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_DATABASE);
-                    $this->input_control->Redirect(URL_CART);
+                    $this->input_control->Redirect(URL_ORDER_FAILURE);
                 }
             }
             $this->input_control->Redirect(URL_GO_HOME);
@@ -257,6 +242,15 @@ class OrderController extends ControllerOrder
             } else {
                 $this->input_control->Redirect(URL_SHUTDOWN);
             }
+        }
+    }
+    function OrderFailure()
+    {
+        try {
+            parent::GetView('Error/OrderFailure');
+        } catch (\Throwable $th) {
+            $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class ErrorController function OrderFailure | ' . $th));
+            $this->input_control->Redirect(URL_SHUTDOWN);
         }
     }
 }

@@ -135,7 +135,7 @@ class AdminModel extends Model
     }
     function GetOrderInitializeInformations()
     {
-        return $this->database->Get(TABLE_ORDER_INITIALIZE_INFORMATIONS, '*', 'ORDER BY date_order_initialize_created DESC', '', 'PLURAL');
+        return $this->database->Get(TABLE_ORDER_INITIALIZE_INFORMATIONS, '*', 'WHERE NOT status=8 ORDER BY date_order_initialize_created DESC', '', 'PLURAL');
     }
     function GetOrderInitializeBasket(string $order_initialize_information_id)
     {
@@ -187,7 +187,7 @@ class AdminModel extends Model
     }
     function GetItemUrlForComment(string $item_id)
     {
-        return $this->database->Get(TABLE_ITEM, 'item_url', 'WHERE id=? AND is_item_deleted=0', $item_id, 'SINGULAR');
+        return $this->database->Get(TABLE_ITEM, 'item_name,item_url', 'WHERE id=? AND is_item_deleted=0', $item_id, 'SINGULAR');
     }
     function GetItemCommentReply(string $comment_id)
     {
@@ -201,8 +201,40 @@ class AdminModel extends Model
     {
         return $this->database->Get(TABLE_COMMENT, 'id,user_id,item_id,comment,is_comment_approved,date_comment_approved,date_comment_created,date_comment_last_updated,is_comment_deleted,date_comment_deleted', 'WHERE item_id=? ORDER BY date_comment_created DESC', $item_id, 'PLURAL');
     }
-    function GetCountViewOnceIpForIndex()
+    function GetCountViewOnceIpForIndex(int $past_day)
     {
-        return $this->database->Get(TABLE_LOG_VIEW_DAILY_IP, 'COUNT(id)', '', '', 'SINGULAR');
+        return $this->database->Get(TABLE_LOG_VIEW_DAILY_IP, 'COUNT(id)', 'WHERE date_viewed = CURDATE() - ' . $past_day, '', 'SINGULAR');
+    }
+    function GetUserComment(string $user_id)
+    {
+        return $this->database->Get(TABLE_COMMENT, 'id,user_id,item_id,comment,is_comment_approved,date_comment_approved,date_comment_created,date_comment_last_updated,is_comment_deleted,date_comment_deleted', 'WHERE user_id=? ORDER BY date_comment_created DESC', $user_id, 'PLURAL');
+    }
+    function GetUserName(string $user_id)
+    {
+        return $this->database->Get(TABLE_USER, 'first_name,last_name', 'WHERE id=?', $user_id, 'SINGULAR');
+    }
+    function GetOrderInitializeInformationById(string $id)
+    {
+        return $this->database->Get(TABLE_ORDER_INITIALIZE_INFORMATIONS, '*', 'WHERE id=?', $id, 'SINGULAR');
+    }
+    function UpdateOrderInitializeInformations(array $inputs)
+    {
+        return $this->database->Update(TABLE_ORDER_INITIALIZE_INFORMATIONS, $inputs);
+    }
+    function GetOrderInitializeInformationForSendEmail(string $id)
+    {
+        return $this->database->Get(TABLE_ORDER_INITIALIZE_INFORMATIONS, 'user_id,user_email,user_identity_number,user_phone_number,shipping_contact_name,shipping_city,shipping_country,shipping_address,shipping_zip_code,status', 'WHERE id=?', $id, 'SINGULAR');
+    }
+    function GetOrderInitializeBasketForSendEmail(string $order_initialize_information_id)
+    {
+        return $this->database->Get(TABLE_ORDER_INITIALIZE_BASKET, 'item_name,item_size_name,item_quantity', 'WHERE order_initialize_information_id=?', $order_initialize_information_id, 'PLURAL');
+    }
+    function CreateLogEmailOrderAdmin(array $inputs)
+    {
+        return $this->database->Create(TABLE_LOG_EMAIL_ORDER, $inputs);
+    }
+    function GetUserForSendMail(string $user_email)
+    {
+        return $this->database->Get(TABLE_USER, 'first_name,last_name', 'WHERE email=?', $user_email, 'SINGULAR');
     }
 }

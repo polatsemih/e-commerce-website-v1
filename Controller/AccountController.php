@@ -756,109 +756,180 @@ class AccountController extends Controller
             }
         }
     }
-    function OrderInstallment()
-    {
-        try {
-            $response = array();
-            $response['reset'] = true;
-            if (WEB_SHOPPING_PERMISSION) {
-                if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-                    $checked_inputs = $this->input_control->CheckPostedInputs(array(
-                        'cart_number' => array('input' => isset($_POST['cart_number']) ? substr($_POST['cart_number'], 0, 6) : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'no_white_space' => true, 'error_message_no_white_space' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'length_control' => true, 'min_length' => 6, 'error_message_min_length' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'max_length' => 6, 'error_message_max_length' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT)
-                    ));
-                    if (empty($checked_inputs['error_message'])) {
-                        $conversation_id = $this->input_control->GenerateToken();
-                        if ($conversation_id['result'] && !empty($this->web_data['order_cart_data_total_price'])) {
-                            require_once(IYZIPAY_FOLDER_NAME . '/samples/config.php');
-                            $request = new \Iyzipay\Request\RetrieveInstallmentInfoRequest();
-                            $request->setLocale(\Iyzipay\Model\Locale::TR);
-                            $request->setConversationId($conversation_id['data']);
-                            $request->setBinNumber($checked_inputs['cart_number']);
-                            $request->setPrice($this->web_data['order_cart_data_total_price']);
-                            $installmentInfo = \Iyzipay\Model\InstallmentInfo::retrieve($request, Config::options());
-                            if ($installmentInfo->getStatus() == 'success') {
-                                if ($installmentInfo->getConversationId() == $conversation_id['data']) {
-                                    $response['installment'] = array();
-                                    $is_installment_not_one = false;
-                                    foreach ($installmentInfo->getInstallmentDetails() as $installment_details) {
-                                        $this->ItemModel->CreateOrderInstallment(array(
-                                            'conversation_id_request' => $conversation_id['data'],
-                                            'conversation_id_response' => $this->input_control->SlashAndXSSForId($installmentInfo->getConversationId()),
-                                            'bin_number' => $this->input_control->SlashAndXSSForId($installment_details->getBinNumber()),
-                                            'price' => $this->input_control->SlashAndXSSForId($installment_details->getPrice()),
-                                            'card_type' => $this->input_control->SlashAndXSSForId($installment_details->getCardType()),
-                                            'card_association' => $this->input_control->SlashAndXSSForId($installment_details->getCardAssociation()),
-                                            'card_family_name' => $this->input_control->SlashAndXSSForId($installment_details->getCardFamilyName()),
-                                            'force_3ds' => $this->input_control->SlashAndXSSForId($installment_details->getForce3ds()),
-                                            'bank_code' => $this->input_control->SlashAndXSSForId($installment_details->getBankCode()),
-                                            'bank_name' => $this->input_control->SlashAndXSSForId($installment_details->getBankName()),
-                                            'user_id' => $this->web_data['authenticated_user'],
-                                            'user_ip' => $_SERVER['REMOTE_ADDR']
-                                        ));
-                                        foreach ($installment_details->getInstallmentPrices() as $installment_prices) {
-                                            $this->ItemModel->CreateOrderInstallmentPrices(array(
-                                                'conversation_id_request' => $conversation_id['data'],
-                                                'conversation_id_response' => $this->input_control->SlashAndXSSForId($installmentInfo->getConversationId()),
-                                                'installment_price' => $this->input_control->SlashAndXSSForId($installment_prices->getInstallmentPrice()),
-                                                'installment_total_price' => $this->input_control->SlashAndXSSForId($installment_prices->getTotalPrice()),
-                                                'installment_number' => $this->input_control->SlashAndXSSForId($installment_prices->getInstallmentNumber()),
-                                            ));
-                                            if ($this->input_control->SlashAndXSSForId($installment_prices->getInstallmentNumber()) != 1) {
-                                                $is_installment_not_one = true;
-                                                $response['installment'][] = array(
-                                                    'installment_price' => $this->input_control->SlashAndXSSForId($installment_prices->getInstallmentPrice()),
-                                                    'installment_total_price' => $this->input_control->SlashAndXSSForId($installment_prices->getTotalPrice()),
-                                                    'installment_number' => $this->input_control->SlashAndXSSForId($installment_prices->getInstallmentNumber())
-                                                );
-                                            }
-                                        }
-                                    }
-                                    if ($is_installment_not_one && !empty($response['installment'])) {
-                                        $response['reset'] = false;
-                                    }
-                                } else {
-                                    $this->ItemModel->CreateOrderConversationError(array(
-                                        'conversation_id_request' => $conversation_id['data'],
-                                        'conversation_id_response' => $this->input_control->SlashAndXSSForId($installmentInfo->getConversationId()),
-                                        'system_time' => $this->input_control->SlashAndXSSForId($installmentInfo->getSystemTime()),
-                                        'user_id' => $this->web_data['authenticated_user'],
-                                        'user_ip' => $_SERVER['REMOTE_ADDR'],
-                                        'function_type' => 'Installment'
-                                    ));
-                                }
-                            } else {
-                                $this->ItemModel->CreateOrderStatusError(array(
-                                    'conversation_id_request' => $conversation_id['data'],
-                                    'conversation_id_response' => $this->input_control->SlashAndXSSForId($installmentInfo->getConversationId()),
-                                    'status' => $this->input_control->SlashAndXSSForId($installmentInfo->getStatus()),
-                                    'error_code' => $this->input_control->SlashAndXSSForId($installmentInfo->getErrorCode()),
-                                    'error_message' => $this->input_control->SlashAndXSSForId($installmentInfo->getErrorMessage()),
-                                    'error_group' => $this->input_control->SlashAndXSSForId($installmentInfo->getErrorGroup()),
-                                    'system_time' => $this->input_control->SlashAndXSSForId($installmentInfo->getSystemTime()),
-                                    'user_id' => $this->web_data['authenticated_user'],
-                                    'user_ip' => $_SERVER['REMOTE_ADDR'],
-                                    'function_type' => 'Installment'
-                                ));
-                            }
-                        }
-                    }
-                } else {
-                    parent::KillAuthentication('AccountController OrderInstallment');
-                }
-            }
-            $jsoned_response = json_encode($response);
-            if (!empty($jsoned_response)) {
-                echo $jsoned_response;
-                exit(0);
-            }
-        } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function OrderInstallment | ' . $th))['result']) {
-                echo '{"exception":"exception"}';
-                exit(0);
-            } else {
-                echo '{"shutdown":"shutdown"}';
-                exit(0);
-            }
-        }
-    }
+    // function OrderInstallment()
+    // {
+    //     try {
+    //         $response = array();
+    //         $response['reset'] = true;
+    //         if (WEB_SHOPPING_PERMISSION) {
+    //             if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    //                 $checked_inputs = $this->input_control->CheckPostedInputs(array(
+    //                     'cart_number' => array('input' => isset($_POST['cart_number']) ? substr($_POST['cart_number'], 0, 6) : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'no_white_space' => true, 'error_message_no_white_space' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'length_control' => true, 'min_length' => 6, 'error_message_min_length' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'max_length' => 6, 'error_message_max_length' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT)
+    //                 ));
+    //                 if (empty($checked_inputs['error_message'])) {
+    //                     $conversation_id = $this->input_control->GenerateToken();
+    //                     if ($conversation_id['result'] && !empty($this->web_data['order_cart_data_total_price'])) {
+    //                         require_once(IYZIPAY_FOLDER_NAME . '/samples/config.php');
+    //                         $request = new \Iyzipay\Request\RetrieveInstallmentInfoRequest();
+    //                         $request->setLocale(\Iyzipay\Model\Locale::TR);
+    //                         $request->setConversationId($conversation_id['data']);
+    //                         $request->setBinNumber($checked_inputs['cart_number']);
+    //                         $request->setPrice($this->web_data['order_cart_data_total_price']);
+    //                         $installmentInfo = \Iyzipay\Model\InstallmentInfo::retrieve($request, Config::options());
+    //                         if ($installmentInfo->getStatus() == 'success') {
+    //                             if ($installmentInfo->getConversationId() == $conversation_id['data']) {
+    //                                 $response['installment'] = array();
+    //                                 $is_installment_not_one = false;
+    //                                 foreach ($installmentInfo->getInstallmentDetails() as $installment_details) {
+    //                                     $this->ItemModel->CreateOrderInstallment(array(
+    //                                         'conversation_id_request' => $conversation_id['data'],
+    //                                         'conversation_id_response' => $this->input_control->SlashAndXSSForId($installmentInfo->getConversationId()),
+    //                                         'price' => $this->input_control->SlashAndXSSForId($installment_details->getPrice()),
+    //                                         'force_3ds' => $this->input_control->SlashAndXSSForId($installment_details->getForce3ds()),
+    //                                         'user_id' => $this->web_data['authenticated_user'],
+    //                                         'user_ip' => $_SERVER['REMOTE_ADDR']
+    //                                     ));
+    //                                     foreach ($installment_details->getInstallmentPrices() as $installment_prices) {
+    //                                         $this->ItemModel->CreateOrderInstallmentPrices(array(
+    //                                             'conversation_id_request' => $conversation_id['data'],
+    //                                             'conversation_id_response' => $this->input_control->SlashAndXSSForId($installmentInfo->getConversationId()),
+    //                                             'installment_price' => $this->input_control->SlashAndXSSForId($installment_prices->getInstallmentPrice()),
+    //                                             'installment_total_price' => $this->input_control->SlashAndXSSForId($installment_prices->getTotalPrice()),
+    //                                             'installment_number' => $this->input_control->SlashAndXSSForId($installment_prices->getInstallmentNumber()),
+    //                                         ));
+    //                                         if ($this->input_control->SlashAndXSSForId($installment_prices->getInstallmentNumber()) != 1) {
+    //                                             $is_installment_not_one = true;
+    //                                             $response['installment'][] = array(
+    //                                                 'installment_price' => $this->input_control->SlashAndXSSForId($installment_prices->getInstallmentPrice()),
+    //                                                 'installment_total_price' => $this->input_control->SlashAndXSSForId($installment_prices->getTotalPrice()),
+    //                                                 'installment_number' => $this->input_control->SlashAndXSSForId($installment_prices->getInstallmentNumber())
+    //                                             );
+    //                                         }
+    //                                     }
+    //                                 }
+    //                                 if ($is_installment_not_one && !empty($response['installment'])) {
+    //                                     $response['reset'] = false;
+    //                                 }
+    //                             } else {
+    //                                 $this->ItemModel->CreateOrderConversationError(array(
+    //                                     'conversation_id_request' => $conversation_id['data'],
+    //                                     'conversation_id_response' => $this->input_control->SlashAndXSSForId($installmentInfo->getConversationId()),
+    //                                     'system_time' => $this->input_control->SlashAndXSSForId($installmentInfo->getSystemTime()),
+    //                                     'user_id' => $this->web_data['authenticated_user'],
+    //                                     'user_ip' => $_SERVER['REMOTE_ADDR'],
+    //                                     'function_type' => 'Installment'
+    //                                 ));
+    //                             }
+    //                         } else {
+    //                             $this->ItemModel->CreateOrderStatusError(array(
+    //                                 'conversation_id_request' => $conversation_id['data'],
+    //                                 'conversation_id_response' => $this->input_control->SlashAndXSSForId($installmentInfo->getConversationId()),
+    //                                 'status' => $this->input_control->SlashAndXSSForId($installmentInfo->getStatus()),
+    //                                 'error_code' => $this->input_control->SlashAndXSSForId($installmentInfo->getErrorCode()),
+    //                                 'error_message' => $this->input_control->SlashAndXSSForId($installmentInfo->getErrorMessage()),
+    //                                 'error_group' => $this->input_control->SlashAndXSSForId($installmentInfo->getErrorGroup()),
+    //                                 'system_time' => $this->input_control->SlashAndXSSForId($installmentInfo->getSystemTime()),
+    //                                 'user_id' => $this->web_data['authenticated_user'],
+    //                                 'user_ip' => $_SERVER['REMOTE_ADDR'],
+    //                                 'function_type' => 'Installment'
+    //                             ));
+    //                         }
+    //                     }
+    //                 }
+    //             } else {
+    //                 parent::KillAuthentication('AccountController OrderInstallment');
+    //             }
+    //         }
+    //         $jsoned_response = json_encode($response);
+    //         if (!empty($jsoned_response)) {
+    //             echo $jsoned_response;
+    //             exit(0);
+    //         }
+    //     } catch (\Throwable $th) {
+    //         if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function OrderInstallment | ' . $th))['result']) {
+    //             echo '{"exception":"exception"}';
+    //             exit(0);
+    //         } else {
+    //             echo '{"shutdown":"shutdown"}';
+    //             exit(0);
+    //         }
+    //     }
+    // }
+    // OrderInitialize.php
+    // var bin = 0;
+    // var binable = true;
+    // var checkbin = false;
+    // cartNumber.on('input', function(e) {
+    //     if ($.trim(cartNumber.val()).length < 6) {
+    //         if ($('#creadit-wrapper-last').length == 1) {
+    //             $('#creadit-wrapper-last').remove();
+    //         }
+    //         binable = true;
+    //     } else {
+    //         if (binable) {
+    //             binable = false;
+    //             bin = cartNumber.val().substring(0, 6);
+    //             checkbin = true;
+    //         } else {
+    //             if (bin != cartNumber.val().substring(0, 6)) {
+    //                 bin = cartNumber.val().substring(0, 6);
+    //                 checkbin = true;
+    //             } else {
+    //                 checkbin = false;
+    //             }
+    //         }
+    //     }
+    //     if ($.trim(cartNumber.val()).length >= 6 && checkbin) {
+    //         request = $.ajax({
+    //             url: '// echo URL . URL_INSTALLMENT;',
+    //             type: 'POST',
+    //             data: 'cart_number=' + bin
+    //         });
+    //         request.done(function(response) {
+    //             if ($('#creadit-wrapper-last').length == 1) {
+    //                 $('#creadit-wrapper-last').remove();
+    //             }
+    //             response = jQuery.parseJSON(response);
+    //             let v0 = $("<div></div>").addClass('credit-wrapper').attr('id', 'creadit-wrapper-last');
+    //             if (response.hasOwnProperty('shutdown')) {
+    //                 window.location.href = '// echo URL . URL_SHUTDOWN;';
+    //             } else if (response.hasOwnProperty('exception')) {
+    //                 window.location.href = '// echo URL . URL_EXCEPTION;';
+    //             } else if (response.hasOwnProperty('reset') && response['reset'] == false) {
+    //                 let t0 = $("<div></div>").addClass('installment-header');
+    //                 v0.append(t0);
+    //                 let t11 = $("<span></span>").addClass('cell').text('Taksiti Seç');
+    //                 let t1 = $("<span></span>").addClass('cell').text('Taksit başına düşen tutar');
+    //                 let t2 = $("<span></span>").addClass('cell').text('Toplam taksitli tutar');
+    //                 let t3 = $("<span></span>").addClass('cell').text('Taksit sayısı');
+    //                 t0.append(t11);
+    //                 t0.append(t1);
+    //                 t0.append(t2);
+    //                 t0.append(t3);
+    //                 let counter = 0;
+    //                 $.each(response['installment'], function(key, installment) {
+    //                     counter += 1;
+    //                     let v00 = $("<div></div>").addClass('installment-container');
+    //                     v0.append(v00);
+    //                     let v11 = $("<label></label>").addClass('installment-text').attr('for', 'installment-checkbox-' + counter);
+    //                     let v13 = $("<input></input>").addClass('checkbox installment-checkbox').attr('type', 'radio').attr('id', 'installment-checkbox-' + counter).attr('name', 'installment_number').attr('value', installment['installment_number']);
+    //                     v11.append(v13);
+    //                     let v14 = $("<span></span>").addClass('checkmark');
+    //                     v11.append(v14);
+    //                     let v1 = $("<span></span>").addClass('installment-text').text(installment['installment_price'] + ' ₺');
+    //                     let v2 = $("<span></span>").addClass('installment-text').text(installment['installment_total_price'] + ' ₺');
+    //                     let v3 = $("<span></span>").addClass('installment-text').text(installment['installment_number']);
+    //                     v00.append(v11);
+    //                     v00.append(v1);
+    //                     v00.append(v2);
+    //                     v00.append(v3);
+    //                 });
+    //             } else {
+    //                 let v11 = $("<span></span>").addClass('installment-text-danger').text('Taksit mevcut değil.');
+    //                 v0.append(v11);
+    //             }
+    //             $('#installment-wrapper').append(v0);
+    //         });
+    //     }
+    // });
 }

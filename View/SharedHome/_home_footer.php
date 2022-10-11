@@ -12,7 +12,7 @@
         </div>
         <div class="col">
             <div class="quick-pages-container">
-                <span class="quick-page-span"><a class="quick-page-link" href="<?php echo URL . URL_CONTACT; ?>">İletişim</a></span>
+                <span class="quick-page-span"><a class="quick-page-link" href="<?php echo URL . URL_CONTACT; ?>">İletişim, Dilek, Şikayet veya Öneri</a></span>
                 <span class="quick-page-span"><a class="quick-page-link" href="<?php echo URL . URL_AGREEMENTS . '/' . URL_AGREEMENT_TERMS; ?>">Kullanım Şartları</a></span>
                 <span class="quick-page-span"><a class="quick-page-link" href="<?php echo URL . URL_AGREEMENTS . '/' . URL_AGREEMENT_PRIVACY; ?>">Gizlilik Sözleşmesi</a></span>
                 <span class="quick-page-span"><a class="quick-page-link" href="<?php echo URL . URL_AGREEMENTS . '/' . URL_AGREEMENT_RETURN_POLICY; ?>">İade Politikası</a></span>
@@ -125,4 +125,4 @@
     </div>
 </footer>
 <script src="<?php echo URL; ?>assets/js/home.js"></script>
-<script src="<?php echo URL; ?>assets/js/jQuery.js"></script>
+<script src="<?php echo JQUERY_PATH; ?>"></script>

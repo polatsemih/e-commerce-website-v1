@@ -192,7 +192,7 @@
     </style>
 </head>
 
-<body>
+<body class="noscroll">
     <div class="notification-client"></div>
     <?php require_once 'View/SharedHome/_home_body.php'; ?>
     <main>

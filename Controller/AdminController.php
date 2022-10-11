@@ -83,10 +83,54 @@ class AdminController extends ControllerAdmin
     {
         try {
             if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-                $this->input_control->CheckUrl();
-                $view_count = $this->AdminModel->GetCountViewOnceIpForIndex();
-                if ($view_count['result']) {
-                    $this->web_data['view_count'] = $view_count['data'];
+                $this->input_control->CheckUrl(array('filtrele'));
+                if (isset($_GET['filtrele'])) {
+                    $get_input = $this->input_control->CheckPositiveGETInput($_GET['filtrele']);
+                    if (isset($get_input) && ($get_input == 1 || $get_input == 2 || $get_input == 3 || $get_input == 4)) {
+                        $this->web_data['selected_filter'] = $get_input;
+                    } else {
+                        $this->input_control->CheckUrl();
+                    }
+                }
+                if (!empty($get_input)) {
+                    if ($get_input == 1) {
+                        $past_day = 30;
+                    } elseif ($get_input == 2) {
+                        $past_day = 90;
+                    } elseif ($get_input == 3) {
+                        $past_day = 180;
+                    } elseif ($get_input == 4) {
+                        $past_day = 365;
+                    }
+                }
+                if (empty($past_day)) {
+                    $past_day = 7;
+                }
+                $view_count_arr = array();
+                $row_number_arr = array();
+                $min = 0;
+                $max = 0;
+                $distance = 0;
+                for ($i = $past_day; $i >= 0; $i--) {
+                    $view_count = $this->AdminModel->GetCountViewOnceIpForIndex($i);
+                    if ($view_count['result']) {
+                        $view_count_arr[$i] = $view_count['data']['COUNT(id)'];
+                        if ($view_count['data']['COUNT(id)'] > $max) {
+                            $max = $view_count['data']['COUNT(id)'];
+                        } elseif ($view_count['data']['COUNT(id)'] < $min) {
+                            $min = $view_count['data']['COUNT(id)'];
+                        }
+                    }
+                }
+                if (!empty($view_count_arr)) {
+                    $this->web_data['view_count'] = $view_count_arr;
+                    $row_number_arr[] = $min;
+                    for ($j = 0; $j < 10; $j++) {
+                        $distance += $min + ceil((($max - $min) / 10));
+                        $row_number_arr[] = $distance;
+                    }
+                    $this->web_data['row_distance'] = $row_number_arr;
+                    $this->web_data['max'] = $row_number_arr[count($row_number_arr) - 1];
                 }
                 parent::GetView('Admin/Index', $this->web_data);
             }
@@ -183,17 +227,6 @@ class AdminController extends ControllerAdmin
                     }
                 }
                 $date_get_matched_error = true;
-                if (isset($_GET['eklenme-tarihi'])) {
-                    $date_from_get_form = $this->input_control->CheckPositiveGETInput($_GET['eklenme-tarihi']);
-                    if (isset($date_from_get_form) && $date_from_get_form == 1 && $date_get_matched_error) {
-                        $date_get_matched_error = false;
-                        $this->web_data['selected_date'] = $date_from_get_form;
-                        $url_for_selected_filters_date = 'eklenme-tarihi=' . $date_from_get_form . '&';
-                        $item_conditions .= ' ORDER BY date_item_created ASC';
-                    } else {
-                        $this->input_control->CheckUrl(array('cinsiyet', 'limit', 'ara', 'sayfa', 'anasayfada', 'satista', 'isim-azalan', 'isim-artan', 'fiyat-azalan', 'fiyat-artan', 'indirimli-fiyat-azalan', 'indirimli-fiyat-artan', 'adet-azalan', 'adet-artan'));
-                    }
-                }
                 if (isset($_GET['isim-azalan'])) {
                     $date_from_get_form = $this->input_control->CheckPositiveGETInput($_GET['isim-azalan']);
                     if (isset($date_from_get_form) && $date_from_get_form == 1 && $date_get_matched_error) {
@@ -280,6 +313,17 @@ class AdminController extends ControllerAdmin
                         $item_conditions .= ' ORDER BY item_total_quantity ASC';
                     } else {
                         $this->input_control->CheckUrl(array('cinsiyet', 'limit', 'ara', 'sayfa', 'anasayfada', 'satista', 'eklenme-tarihi'));
+                    }
+                }
+                if (isset($_GET['eklenme-tarihi'])) {
+                    $date_from_get_form = $this->input_control->CheckPositiveGETInput($_GET['eklenme-tarihi']);
+                    if (isset($date_from_get_form) && $date_from_get_form == 1 && $date_get_matched_error) {
+                        $date_get_matched_error = false;
+                        $this->web_data['selected_date'] = $date_from_get_form;
+                        $url_for_selected_filters_date = 'eklenme-tarihi=' . $date_from_get_form . '&';
+                        $item_conditions .= ' ORDER BY date_item_created ASC';
+                    } else {
+                        $this->input_control->CheckUrl(array('cinsiyet', 'limit', 'ara', 'sayfa', 'anasayfada', 'satista', 'isim-azalan', 'isim-artan', 'fiyat-azalan', 'fiyat-artan', 'indirimli-fiyat-azalan', 'indirimli-fiyat-artan', 'adet-azalan', 'adet-artan'));
                     }
                 }
                 if ($date_get_matched_error) {
@@ -1004,21 +1048,20 @@ class AdminController extends ControllerAdmin
                 $this->input_control->CheckUrl();
                 $item = $this->AdminModel->GetItemForComment($item_url);
                 if ($item['result']) {
-                    $item_comments = $this->AdminModel->GetItemCommentsByItemId($item['data']['id']);
-                    if ($item_comments['result']) {
-                        foreach ($item_comments['data'] as $key => $item_comment) {
-                            $item_url = $this->AdminModel->GetItemUrlForComment($item_comment['item_id']);
-                            if ($item_url['result']) {
+                    $item_url = $this->AdminModel->GetItemUrlForComment($item['data']['id']);
+                    if ($item_url['result']) {
+                        $this->web_data['item_name'] = $item_url['data']['item_name'];
+                        $item_comments = $this->AdminModel->GetItemCommentsByItemId($item['data']['id']);
+                        if ($item_comments['result']) {
+                            foreach ($item_comments['data'] as $key => $item_comment) {
                                 $item_comments['data'][$key]['item_url'] = $item_url['data']['item_url'];
                                 $item_comment_reply = $this->AdminModel->GetItemCommentReply($item_comment['id']);
                                 if ($item_comment_reply['result']) {
                                     $item_comments['data'][$key]['comment_reply'] = $item_comment_reply['data'];
                                 }
-                            } else {
-                                unset($item_comments['data'][$key]);
                             }
+                            $this->web_data['item_comments'] = $item_comments['data'];
                         }
-                        $this->web_data['item_comments'] = $item_comments['data'];
                     }
                 }
                 parent::GetView('Admin/Comments', $this->web_data);
@@ -1306,21 +1349,77 @@ class AdminController extends ControllerAdmin
         try {
             if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $this->input_control->CheckUrl();
-                $order_initialize_basket = $this->AdminModel->GetOrderInitializeBasket($order_initialize_information_id);
-                $order_payment = $this->AdminModel->GetOrderPayment($order_initialize_information_id);
-                if ($order_initialize_basket['result'] && $order_payment['result']) {
-                    $this->web_data['order_initialize_basket'] = $order_initialize_basket['data'];
-                    $this->web_data['order_payment'] = $order_payment['data'];
-                    $order_payment_item_transaction = $this->AdminModel->GetOrderPaymentItemTransaction($order_payment['data']['payment_id']);
-                    if ($order_payment_item_transaction['result']) {
-                        $this->web_data['order_payment_item_transaction'] = $order_payment_item_transaction['data'];
+                $order_initialize_information = $this->AdminModel->GetOrderInitializeInformationById($order_initialize_information_id);
+                if ($order_initialize_information['result']) {
+                    $order_initialize_basket = $this->AdminModel->GetOrderInitializeBasket($order_initialize_information_id);
+                    $order_payment = $this->AdminModel->GetOrderPayment($order_initialize_information_id);
+                    if ($order_initialize_basket['result'] && $order_payment['result']) {
+                        $this->web_data['order_initialize_information'] = $order_initialize_information['data'];
+                        $this->web_data['order_status'] = $order_initialize_information['data']['status'];
+                        $this->web_data['order_status_id'] = $order_initialize_information_id;
+                        $this->web_data['order_initialize_basket'] = $order_initialize_basket['data'];
+                        $this->web_data['order_payment'] = $order_payment['data'];
+                        $order_payment_item_transaction = $this->AdminModel->GetOrderPaymentItemTransaction($order_payment['data']['payment_id']);
+                        if ($order_payment_item_transaction['result']) {
+                            $this->web_data['order_payment_item_transaction'] = $order_payment_item_transaction['data'];
+                        }
                     }
                 }
+                $this->web_data['form_token'] = parent::SetCSRFToken('OrderStatusChange');
                 parent::GetView('Admin/OrderDetails', $this->web_data);
             }
             $this->input_control->Redirect(URL_ADMIN_INDEX);
         } catch (\Throwable $th) {
             if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function OrderDetails | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function OrderStatusChange()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'order_status' => array('input' => isset($_POST['order_status']) ? $_POST['order_status'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'length_control' => true, 'max_length' => 1, 'error_message_max_length' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'length_limit' => 1, 'error_message_length_limit' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT),
+                    'order_status_id' => array('input' => isset($_POST['order_status_id']) ? $_POST['order_status_id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'length_control' => true, 'max_length' => 250, 'error_message_max_length' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true, 'length_limit' => 250, 'error_message_length_limit' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT),
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'OrderStatusChange')) {
+                        if (($checked_inputs['order_status'] == 1 || $checked_inputs['order_status'] == 2 || $checked_inputs['order_status'] == 3 || $checked_inputs['order_status'] == 4 || $checked_inputs['order_status'] == 5 || $checked_inputs['order_status'] == 6 || $checked_inputs['order_status'] == 7) && $this->AdminModel->UpdateOrderInitializeInformations(array('status' => $checked_inputs['order_status'], 'status_change_date' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['order_status_id']))['result']) {
+                            if ($checked_inputs['order_status'] == 2) {
+                                $order_init = $this->AdminModel->GetOrderInitializeInformationForSendEmail($checked_inputs['order_status_id']);
+                                $order_basket = $this->AdminModel->GetOrderInitializeBasketForSendEmail($checked_inputs['order_status_id']);
+                                if ($order_init['result'] && $order_basket['result']) {
+                                    $admin_mail_basket = '';
+                                    foreach ($order_basket['data'] as $order_basket_item) {
+                                        $admin_mail_basket .= '<div class="confirm-wrapper"><div class="confirm-container"><span class="confirm">' . $order_basket_item['item_name'] . '</span><span class="confirm">' . $order_basket_item['item_size_name'] . '</span><span class="confirm">x' . $order_basket_item['item_quantity'] . ' Adet</span></div></div>';
+                                    }
+                                    if (!empty($admin_mail_basket) && $this->action_control->SendMail(ADMIN_SHIPPING_EMAIL, BRAND . ' Yeni Sipariş', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>Yeni Sipariş | ' . BRAND . '</title><style>* {margin: 0px;padding: 0px;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}body {font-family: sans-serif;background-color: #ffffff;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;border-bottom-width: 1px;border-bottom-style: solid;border-bottom-color: #ffffff;}.title {font-size: 40px;letter-spacing: 5px;color: #ffffff;margin-bottom: 20px;}.text-1 {font-size: 16px;line-height: 1.4;color: #ffffff;letter-spacing: 1px;}.main {background-color: #000000;}.confirm-wrapper {width: 95%;margin-left: auto;margin-right: auto;padding-top: 20px;background-color: #000000;}.confirm-container {background-color: #ffffff;}.confirm {display: inline-block;width: 32%;text-align: center;font-size: 12px;color: #000000;padding-top: 10px;padding-bottom: 10px;vertical-align: middle;}.text-2 {font-size: 15px;line-height: 1.4;color: #ffffff;padding-top: 20px;margin-top: 20px;margin-bottom: 10px;padding-left: 10px;padding-right: 10px;border-top-width: 1px;border-top-style: solid;border-top-color: #ffffff;}.text-3 {font-size: 15px;line-height: 1.4;color: #ffffff;padding-left: 10px;padding-right: 10px;margin-bottom: 10px;}.text-4 {font-size: 15px;line-height: 1.4;color: #ffffff;padding-left: 10px;padding-right: 10px;padding-bottom: 20px;}.footer {background-color: #f3f3f398;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.footer-text {font-size: 13px;line-height: 1.4;color: #000000;margin-bottom: 20px;}.footer-url {font-size: 12px;color: #000000;margin-right: 10px;}.footer-date {font-size: 12px;color: #000000;margin-left: 10px;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}.confirm {padding-top: 20px;padding-bottom: 20px;}}</style></head><body><div class="container"><div class="header"><h1 class="title">BB</h1><p class="text-1">' . BRAND . ' Yeni Siparişiniz Var</p></div><div class="main">' . $admin_mail_basket . '<p class="text-2">Alıcı İsmi: ' . $this->input_control->DecodePreventXSS($order_init['data']['shipping_contact_name']) . '</p><p class="text-3">Teslimat Adresi: ' . $this->input_control->DecodePreventXSS($order_init['data']['shipping_address']) . ' ' . $this->input_control->DecodePreventXSS($order_init['data']['shipping_city']) . '/' . $this->input_control->DecodePreventXSS($order_init['data']['shipping_country']) . ' Zip Kodu: ' . $this->input_control->DecodePreventXSS($order_init['data']['shipping_zip_code']) . '</p><p class="text-3">Alıcı T.C.: ' . $order_init['data']['user_identity_number'] . '</p><p class="text-4">Alıcı Telefon Numarası: ' . $order_init['data']['user_phone_number'] . '</p></div><footer class="footer"><p class="footer-text">Bu mesaj bilgilendirme amacıyla gönderilmiştir.</p><a class="footer-url" href="' . PURE_URL . '">' . PURE_URL . '</a><span class="footer-date">' . date('d/m/Y H:i:s') . '</span></footer></div></body></html>') && $this->AdminModel->CreateLogEmailOrderAdmin(array('email_to' => ADMIN_SHIPPING_EMAIL, 'email_message' => 'Kargo Yöneticiye Kargo Bilgileri Gönderildi',))['result']) {
+                                        $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_ADMIN_SUCCESS_ORDER_STATUS_UPDATE);
+                                    } else {
+                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ORDER_STATUS_UPDATE_2);
+                                    }
+                                } else {
+                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ORDER_STATUS_UPDATE_2);
+                                }
+                            } else {
+                                $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_ADMIN_SUCCESS_ORDER_STATUS_UPDATE);
+                            }
+                        } else {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_ORDER_STATUS_UPDATE);
+                        }
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                }
+                $this->input_control->Redirect(URL_ADMIN_ORDER_DETAILS . '/' . $checked_inputs['order_status_id']);
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function OrderStatusChange | ' . $th))['result']) {
                 $this->input_control->Redirect(URL_EXCEPTION);
             } else {
                 $this->input_control->Redirect(URL_SHUTDOWN);
@@ -1378,6 +1477,228 @@ class AdminController extends ControllerAdmin
             $this->input_control->Redirect(URL_ADMIN_INDEX);
         } catch (\Throwable $th) {
             if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function OrderErrors | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
+    function SendEmail()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl();
+                $this->web_data['form_token'] = parent::SetCSRFToken('AdminSendEmail');
+                parent::GetView('Admin/SendEmail', $this->web_data);
+            } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'AdminSendEmail')) {
+                        $send_email_error = true;
+                        if (!empty($_POST['email_ready_message'])) {
+                            switch ($_POST['email_ready_message']) {
+                                case '1':
+                                    if (!empty($_POST['shipping_number']) && !empty($_POST['order_id'])) {
+                                        $checked_shipping_number = $this->input_control->IsString($_POST['shipping_number']);
+                                        $checked_order_id = $this->input_control->IsString($_POST['order_id']);
+                                        if (!is_null($checked_shipping_number) && !is_null($checked_order_id)) {
+                                            $order_init = $this->AdminModel->GetOrderInitializeInformationForSendEmail($this->input_control->PreventXSSForId($checked_order_id));
+                                            $order_basket = $this->AdminModel->GetOrderInitializeBasketForSendEmail($this->input_control->PreventXSSForId($checked_order_id));
+                                            $shipping_number = $this->input_control->PreventXSSForId($checked_shipping_number);
+                                            if ($order_init['result'] && $order_basket['result'] && !empty($shipping_number)) {
+                                                if ($order_init['data']['status'] == 3) {
+                                                    $mail_item_names = '';
+                                                    $counter = 1;
+                                                    foreach ($order_basket['data'] as $order_basket_item) {
+                                                        $mail_item_names .= $order_basket_item['item_name'] . ', ';
+                                                        $counter++;
+                                                    }
+                                                    if (!empty($mail_item_names)) {
+                                                        if ($counter == 1) {
+                                                            $mail_item_count_text = 'siparişiniz';
+                                                        } else {
+                                                            $mail_item_count_text = 'siparişleriniz';
+                                                        }
+                                                        if ($this->action_control->SendMail($this->input_control->DecodePreventXSS($order_init['data']['user_email']), BRAND . ' Sipariş Bilgilendirme', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>Sipariş Bilgilendirme | ' . BRAND . '</title><style>* {margin: 0px;padding: 0px;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}body {font-family: sans-serif;background-color: #ffffff;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;border-bottom-width: 1px;border-bottom-style: solid;border-bottom-color: #ffffff;}.title {font-size: 40px;letter-spacing: 5px;color: #ffffff;margin-bottom: 20px;}.text-1 {font-size: 16px;line-height: 1.4;color: #ffffff;letter-spacing: 1px;}.main {background-color: #000000;}.text-4 {text-align: center;font-size: 15px;line-height: 1.4;color: #ffffff;padding-top: 20px;margin-bottom: 10px;padding-left: 10px;padding-right: 10px;}.text-2 {text-align: center;font-size: 15px;line-height: 1.4;color: #ffffff;padding-top: 20px;margin-top: 20px;margin-bottom: 10px;padding-left: 10px;padding-right: 10px;border-top-width: 1px;border-top-style: solid;border-top-color: #ffffff;}.text-3 {text-align: center;font-size: 13px;line-height: 1.4;color: #ffffff;padding-left: 10px;padding-right: 10px;padding-bottom: 20px;}.footer {background-color: #f3f3f398;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.footer-text {font-size: 13px;line-height: 1.4;color: #000000;margin-bottom: 20px;}.footer-url {font-size: 12px;color: #000000;margin-right: 10px;}.footer-date {font-size: 12px;color: #000000;margin-left: 10px;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}.confirm {padding-top: 20px;padding-bottom: 20px;}}</style></head><body><div class="container"><div class="header"><h1 class="title">BB</h1><p class="text-1">' . BRAND . ' Sipariş Bilgilendirme</p></div><div class="main"><p class="text-4">Sayın ' . $this->input_control->DecodePreventXSS($order_init['data']['shipping_contact_name']) . '</p><p class="text-2"> ' . rtrim($mail_item_names, ', ') . ' isimli ' . $mail_item_count_text . ' kargoya verilmiştir.</p><p class="text-3">Kargo Takip Numaranız: ' . $shipping_number . ' </p></div><footer class="footer"><p class="footer-text">Bu mesaj bilgilendirme amacıyla gönderilmiştir.</p><a class="footer-url" href="' . PURE_URL . '">' . PURE_URL . '</a><span class="footer-date">' . date('d/m/Y H:i:s') . '</span></footer></div></body></html>') && $this->AdminModel->CreateLogEmailOrderAdmin(array('email_to' => $order_init['data']['user_email'], 'email_message' => 'Sipariş Kargoya Verildi', 'email_shipping_number' => $shipping_number))['result']) {
+                                                            $send_email_error = false;
+                                                            $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_ADMIN_SUCCESS_SEND_EMAIL_1 . ' "KARGOYA VERİLDİ" ' . TR_NOTIFICATION_ADMIN_SUCCESS_SEND_EMAIL_2);
+                                                        }
+                                                    }
+                                                } else {
+                                                    $send_email_error = false;
+                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_SEND_MAIL_STATUS);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    break;
+                                case '2':
+                                    if (!empty($_POST['order_id'])) {
+                                        $checked_order_id = $this->input_control->IsString($_POST['order_id']);
+                                        if (!is_null($checked_order_id)) {
+                                            $order_init = $this->AdminModel->GetOrderInitializeInformationForSendEmail($this->input_control->PreventXSSForId($checked_order_id));
+                                            $order_basket = $this->AdminModel->GetOrderInitializeBasketForSendEmail($this->input_control->PreventXSSForId($checked_order_id));
+                                            if ($order_init['result'] && $order_basket['result']) {
+                                                if ($order_init['data']['status'] == 4) {
+                                                    $mail_item_names = '';
+                                                    $counter = 1;
+                                                    foreach ($order_basket['data'] as $order_basket_item) {
+                                                        $mail_item_names .= $order_basket_item['item_name'] . ', ';
+                                                        $counter++;
+                                                    }
+                                                    if (!empty($mail_item_names)) {
+                                                        if ($counter == 1) {
+                                                            $mail_item_count_text = 'siparişiniz';
+                                                        } else {
+                                                            $mail_item_count_text = 'siparişleriniz';
+                                                        }
+                                                        if ($this->action_control->SendMail($this->input_control->DecodePreventXSS($order_init['data']['user_email']), BRAND . ' Sipariş Bilgilendirme', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>Sipariş Bilgilendirme | ' . BRAND . '</title><style>* {margin: 0px;padding: 0px;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}body {font-family: sans-serif;background-color: #ffffff;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;border-bottom-width: 1px;border-bottom-style: solid;border-bottom-color: #ffffff;}.title {font-size: 40px;letter-spacing: 5px;color: #ffffff;margin-bottom: 20px;}.text-1 {font-size: 16px;line-height: 1.4;color: #ffffff;letter-spacing: 1px;}.main {background-color: #000000;}.text-4 {text-align: center;font-size: 15px;line-height: 1.4;color: #ffffff;padding-top: 20px;margin-bottom: 10px;padding-left: 10px;padding-right: 10px;}.text-2 {text-align: center;font-size: 15px;line-height: 1.4;color: #ffffff;padding-top: 20px;padding-bottom: 20px;margin-top: 20px;margin-bottom: 10px;padding-left: 10px;padding-right: 10px;border-top-width: 1px;border-top-style: solid;border-top-color: #ffffff;}.footer {background-color: #f3f3f398;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.footer-text {font-size: 13px;line-height: 1.4;color: #000000;margin-bottom: 20px;}.footer-url {font-size: 12px;color: #000000;margin-right: 10px;}.footer-date {font-size: 12px;color: #000000;margin-left: 10px;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}}</style></head><body><div class="container"><div class="header"><h1 class="title">BB</h1><p class="text-1">' . BRAND . ' Sipariş Bilgilendirme</p></div><div class="main"><p class="text-4">Sayın ' . $this->input_control->DecodePreventXSS($order_init['data']['shipping_contact_name']) . '</p><p class="text-2"> ' . rtrim($mail_item_names, ', ') . ' isimli ' . $mail_item_count_text . ' teslim edilmiştir.</p></div><footer class="footer"><p class="footer-text">Bu mesaj bilgilendirme amacıyla gönderilmiştir.</p><a class="footer-url" href="' . PURE_URL . '">' . PURE_URL . '</a><span class="footer-date">' . date('d/m/Y H:i:s') . '</span></footer></div></body></html>') && $this->AdminModel->CreateLogEmailOrderAdmin(array('email_to' => $order_init['data']['user_email'], 'email_message' => 'Sipariş Teslim Edildi'))['result']) {
+                                                            $send_email_error = false;
+                                                            $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_ADMIN_SUCCESS_SEND_EMAIL_1 . ' "SİPARİŞ TESLİM" ' . TR_NOTIFICATION_ADMIN_SUCCESS_SEND_EMAIL_2);
+                                                        }
+                                                    }
+                                                } else {
+                                                    $send_email_error = false;
+                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_SEND_MAIL_STATUS);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    break;
+                                case '3':
+                                    if (!empty($_POST['order_id'])) {
+                                        $checked_order_id = $this->input_control->IsString($_POST['order_id']);
+                                        if (!is_null($checked_order_id)) {
+                                            $order_init = $this->AdminModel->GetOrderInitializeInformationForSendEmail($this->input_control->PreventXSSForId($checked_order_id));
+                                            $order_basket = $this->AdminModel->GetOrderInitializeBasketForSendEmail($this->input_control->PreventXSSForId($checked_order_id));
+                                            if ($order_init['result'] && $order_basket['result']) {
+                                                if ($order_init['data']['status'] == 5) {
+                                                    $mail_item_names = '';
+                                                    $counter = 1;
+                                                    foreach ($order_basket['data'] as $order_basket_item) {
+                                                        $mail_item_names .= $order_basket_item['item_name'] . ', ';
+                                                        $counter++;
+                                                    }
+                                                    if (!empty($mail_item_names)) {
+                                                        if ($counter == 1) {
+                                                            $mail_item_count_text = 'siparişiniz';
+                                                        } else {
+                                                            $mail_item_count_text = 'siparişleriniz';
+                                                        }
+                                                        if ($this->action_control->SendMail($this->input_control->DecodePreventXSS($order_init['data']['user_email']), BRAND . ' Sipariş Bilgilendirme', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>Sipariş Bilgilendirme | ' . BRAND . '</title><style>* {margin: 0px;padding: 0px;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}body {font-family: sans-serif;background-color: #ffffff;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;border-bottom-width: 1px;border-bottom-style: solid;border-bottom-color: #ffffff;}.title {font-size: 40px;letter-spacing: 5px;color: #ffffff;margin-bottom: 20px;}.text-1 {font-size: 16px;line-height: 1.4;color: #ffffff;letter-spacing: 1px;}.main {background-color: #000000;}.text-4 {text-align: center;font-size: 15px;line-height: 1.4;color: #ffffff;padding-top: 20px;margin-bottom: 10px;padding-left: 10px;padding-right: 10px;}.link-1{font-size: 15px;color: #6466ec;text-decoration: none;}.text-2 {text-align: center;font-size: 15px;line-height: 1.4;color: #ffffff;padding-top: 20px;padding-bottom: 20px;margin-top: 20px;margin-bottom: 10px;padding-left: 10px;padding-right: 10px;border-top-width: 1px;border-top-style: solid;border-top-color: #ffffff;}.footer {background-color: #f3f3f398;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.footer-text {font-size: 13px;line-height: 1.4;color: #000000;margin-bottom: 20px;}.footer-url {font-size: 12px;color: #000000;margin-right: 10px;}.footer-date {font-size: 12px;color: #000000;margin-left: 10px;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}}</style></head><body><div class="container"><div class="header"><h1 class="title">BB</h1><p class="text-1">' . BRAND . ' Sipariş Bilgilendirme</p></div><div class="main"><p class="text-4">Sayın ' . $this->input_control->DecodePreventXSS($order_init['data']['shipping_contact_name']) . '</p><p class="text-2"> ' . rtrim($mail_item_names, ', ') . ' isimli ' . $mail_item_count_text . ' bir sorundan dolayı iptal edilmiştir. Paranız ' . DAY_ITEM_RETURN . ' gün içerisinde iade edilecektir. Detaylar için <a class="link-1" href="' . URL . URL_AGREEMENTS . '/' . URL_AGREEMENT_RETURN_POLICY . '">tıklayınız</a></p></div><footer class="footer"><p class="footer-text">Bu mesaj bilgilendirme amacıyla gönderilmiştir.</p><a class="footer-url" href="' . PURE_URL . '">' . PURE_URL . '</a><span class="footer-date">' . date('d/m/Y H:i:s') . '</span></footer></div></body></html>') && $this->AdminModel->CreateLogEmailOrderAdmin(array('email_to' => $order_init['data']['user_email'], 'email_message' => 'Sipariş İptal Edildi'))['result']) {
+                                                            $send_email_error = false;
+                                                            $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_ADMIN_SUCCESS_SEND_EMAIL_1 . ' "SİPARİŞ İPTAL" ' . TR_NOTIFICATION_ADMIN_SUCCESS_SEND_EMAIL_2);
+                                                        }
+                                                    }
+                                                } else {
+                                                    $send_email_error = false;
+                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_SEND_MAIL_STATUS);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    break;
+                                case '4':
+                                    if (!empty($_POST['shipping_number']) && !empty($_POST['order_id'])) {
+                                        $checked_shipping_number = $this->input_control->IsString($_POST['shipping_number']);
+                                        $checked_order_id = $this->input_control->IsString($_POST['order_id']);
+                                        if (!is_null($checked_shipping_number) && !is_null($checked_order_id)) {
+                                            $order_init = $this->AdminModel->GetOrderInitializeInformationForSendEmail($this->input_control->PreventXSSForId($checked_order_id));
+                                            $order_basket = $this->AdminModel->GetOrderInitializeBasketForSendEmail($this->input_control->PreventXSSForId($checked_order_id));
+                                            $shipping_number = $this->input_control->PreventXSSForId($checked_shipping_number);
+                                            if ($order_init['result'] && $order_basket['result'] && !empty($shipping_number)) {
+                                                if ($order_init['data']['status'] == 6) {
+                                                    $mail_item_names = '';
+                                                    $counter = 1;
+                                                    foreach ($order_basket['data'] as $order_basket_item) {
+                                                        $mail_item_names .= $order_basket_item['item_name'] . ', ';
+                                                        $counter++;
+                                                    }
+                                                    if (!empty($mail_item_names)) {
+                                                        if ($counter == 1) {
+                                                            $mail_item_count_text = 'siparişiniz';
+                                                        } else {
+                                                            $mail_item_count_text = 'siparişleriniz';
+                                                        }
+                                                        if ($this->action_control->SendMail($this->input_control->DecodePreventXSS($order_init['data']['user_email']), BRAND . ' Sipariş Bilgilendirme', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>Sipariş Bilgilendirme | ' . BRAND . '</title><style>* {margin: 0px;padding: 0px;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}body {font-family: sans-serif;background-color: #ffffff;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;border-bottom-width: 1px;border-bottom-style: solid;border-bottom-color: #ffffff;}.title {font-size: 40px;letter-spacing: 5px;color: #ffffff;margin-bottom: 20px;}.text-1 {font-size: 16px;line-height: 1.4;color: #ffffff;letter-spacing: 1px;}.main {background-color: #000000;}.text-4 {text-align: center;font-size: 15px;line-height: 1.4;color: #ffffff;padding-top: 20px;margin-bottom: 10px;padding-left: 10px;padding-right: 10px;}.text-2 {text-align: center;font-size: 15px;line-height: 1.4;color: #ffffff;padding-top: 20px;margin-top: 20px;margin-bottom: 10px;padding-left: 10px;padding-right: 10px;border-top-width: 1px;border-top-style: solid;border-top-color: #ffffff;}.text-3 {text-align: center;font-size: 13px;line-height: 1.4;color: #ffffff;padding-left: 10px;padding-right: 10px;padding-bottom: 20px;}.footer {background-color: #f3f3f398;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.footer-text {font-size: 13px;line-height: 1.4;color: #000000;margin-bottom: 20px;}.footer-url {font-size: 12px;color: #000000;margin-right: 10px;}.footer-date {font-size: 12px;color: #000000;margin-left: 10px;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}.confirm {padding-top: 20px;padding-bottom: 20px;}}</style></head><body><div class="container"><div class="header"><h1 class="title">BB</h1><p class="text-1">' . BRAND . ' Sipariş Bilgilendirme</p></div><div class="main"><p class="text-4">Sayın ' . $this->input_control->DecodePreventXSS($order_init['data']['shipping_contact_name']) . '</p><p class="text-2"> ' . rtrim($mail_item_names, ', ') . ' isimli, bedeni güncellenmiş ' . $mail_item_count_text . ' kargoya verilmiştir.</p><p class="text-3">Kargo Takip Numaranız: ' . $shipping_number . ' </p></div><footer class="footer"><p class="footer-text">Bu mesaj bilgilendirme amacıyla gönderilmiştir.</p><a class="footer-url" href="' . PURE_URL . '">' . PURE_URL . '</a><span class="footer-date">' . date('d/m/Y H:i:s') . '</span></footer></div></body></html>') && $this->AdminModel->CreateLogEmailOrderAdmin(array('email_to' => $order_init['data']['user_email'], 'email_message' => 'İade Sipariş Kargoya Verildi', 'email_shipping_number' => $shipping_number))['result']) {
+                                                            $send_email_error = false;
+                                                            $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_ADMIN_SUCCESS_SEND_EMAIL_1 . ' "İADELER KARGOYA VERİLDİ" ' . TR_NOTIFICATION_ADMIN_SUCCESS_SEND_EMAIL_2);
+                                                        }
+                                                    }
+                                                } else {
+                                                    $send_email_error = false;
+                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_SEND_MAIL_STATUS);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    break;
+                                case '5':
+                                    if (!empty($_POST['order_id'])) {
+                                        $checked_order_id = $this->input_control->IsString($_POST['order_id']);
+                                        if (!is_null($checked_order_id)) {
+                                            $order_init = $this->AdminModel->GetOrderInitializeInformationForSendEmail($this->input_control->PreventXSSForId($checked_order_id));
+                                            $order_basket = $this->AdminModel->GetOrderInitializeBasketForSendEmail($this->input_control->PreventXSSForId($checked_order_id));
+                                            if ($order_init['result'] && $order_basket['result']) {
+                                                if ($order_init['data']['status'] == 7) {
+                                                    $mail_item_names = '';
+                                                    $counter = 1;
+                                                    foreach ($order_basket['data'] as $order_basket_item) {
+                                                        $mail_item_names .= $order_basket_item['item_name'] . ', ';
+                                                        $counter++;
+                                                    }
+                                                    if (!empty($mail_item_names)) {
+                                                        if ($counter == 1) {
+                                                            $mail_item_count_text = 'siparişiniz';
+                                                        } else {
+                                                            $mail_item_count_text = 'siparişleriniz';
+                                                        }
+                                                        if ($this->action_control->SendMail($this->input_control->DecodePreventXSS($order_init['data']['user_email']), BRAND . ' Sipariş Bilgilendirme', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>Sipariş Bilgilendirme | ' . BRAND . '</title><style>* {margin: 0px;padding: 0px;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}body {font-family: sans-serif;background-color: #ffffff;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;border-bottom-width: 1px;border-bottom-style: solid;border-bottom-color: #ffffff;}.title {font-size: 40px;letter-spacing: 5px;color: #ffffff;margin-bottom: 20px;}.text-1 {font-size: 16px;line-height: 1.4;color: #ffffff;letter-spacing: 1px;}.main {background-color: #000000;}.text-4 {text-align: center;font-size: 15px;line-height: 1.4;color: #ffffff;padding-top: 20px;margin-bottom: 10px;padding-left: 10px;padding-right: 10px;}.text-2 {text-align: center;font-size: 15px;line-height: 1.4;color: #ffffff;padding-top: 20px;padding-bottom: 20px;margin-top: 20px;margin-bottom: 10px;padding-left: 10px;padding-right: 10px;border-top-width: 1px;border-top-style: solid;border-top-color: #ffffff;}.footer {background-color: #f3f3f398;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.footer-text {font-size: 13px;line-height: 1.4;color: #000000;margin-bottom: 20px;}.footer-url {font-size: 12px;color: #000000;margin-right: 10px;}.footer-date {font-size: 12px;color: #000000;margin-left: 10px;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}}</style></head><body><div class="container"><div class="header"><h1 class="title">BB</h1><p class="text-1">' . BRAND . ' Sipariş Bilgilendirme</p></div><div class="main"><p class="text-4">Sayın ' . $this->input_control->DecodePreventXSS($order_init['data']['shipping_contact_name']) . '</p><p class="text-2"> ' . rtrim($mail_item_names, ', ') . ' isimli, bedeni güncellenmiş ' . $mail_item_count_text . ' teslim edilmiştir.</p></div><footer class="footer"><p class="footer-text">Bu mesaj bilgilendirme amacıyla gönderilmiştir.</p><a class="footer-url" href="' . PURE_URL . '">' . PURE_URL . '</a><span class="footer-date">' . date('d/m/Y H:i:s') . '</span></footer></div></body></html>') && $this->AdminModel->CreateLogEmailOrderAdmin(array('email_to' => $order_init['data']['user_email'], 'email_message' => 'İade Sipariş Teslim Edildi'))['result']) {
+                                                            $send_email_error = false;
+                                                            $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_ADMIN_SUCCESS_SEND_EMAIL_1 . ' "İADE SİPARİŞ TESLİM" ' . TR_NOTIFICATION_ADMIN_SUCCESS_SEND_EMAIL_2);
+                                                        }
+                                                    }
+                                                } else {
+                                                    $send_email_error = false;
+                                                    $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_SEND_MAIL_STATUS);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    break;
+                            }
+                        } elseif (!empty($_POST['email_manuel_message'])) {
+                            $checked_inputs_2 = $this->input_control->CheckPostedInputs(array(
+                                'user_email' => array('input' => isset($_POST['user_email']) ? $_POST['user_email'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'no_white_space' => true, 'error_message_no_white_space' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL, 'is_email' => true, 'error_message_is_email' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL, 'length_control' => true, 'max_length' => EMAIL_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL, 'preventxss' => true, 'length_limit' => EMAIL_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL),
+                                'email_manuel_message' => array('input' => isset($_POST['email_manuel_message']) ? $_POST['email_manuel_message'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'length_control' => true, 'max_length' => 65535, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_SEND_MAIL_MESSAGE)
+                            ));
+                            if (empty($checked_inputs_2['error_message'])) {
+                                $user = $this->AdminModel->GetUserForSendMail($checked_inputs_2['user_email']);
+                                if ($user['result']) {
+                                    if ($this->action_control->SendMail($this->input_control->DecodePreventXSS($checked_inputs_2['user_email']), BRAND . ' Bilgilendirme', '<!DOCTYPE html><html lang="tr"><head><meta http-equiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta charset="UTF-8" /><title>Bilgilendirme | ' . BRAND . '</title><style>* {margin: 0px;padding: 0px;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}body {font-family: sans-serif;background-color: #ffffff;width: 100%;height: 100%;}.container {width: 100%;height: 100%;margin-left: auto;margin-right: auto;}.header {background-color: #000000;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;border-bottom-width: 1px;border-bottom-style: solid;border-bottom-color: #ffffff;}.title {font-size: 40px;letter-spacing: 5px;color: #ffffff;margin-bottom: 20px;}.text-1 {font-size: 16px;line-height: 1.4;color: #ffffff;letter-spacing: 1px;}.main {background-color: #000000;}.text-4 {text-align: center;font-size: 15px;line-height: 1.4;color: #ffffff;padding-top: 20px;margin-bottom: 10px;padding-left: 10px;padding-right: 10px;}.text-2 {text-align: center;font-size: 15px;line-height: 1.4;color: #ffffff;padding-top: 20px;padding-bottom: 20px;margin-top: 20px;margin-bottom: 10px;padding-left: 10px;padding-right: 10px;border-top-width: 1px;border-top-style: solid;border-top-color: #ffffff;}.footer {background-color: #f3f3f398;text-align: center;padding-top: 20px;padding-bottom: 20px;padding-left: 10px;padding-right: 10px;}.footer-text {font-size: 13px;line-height: 1.4;color: #000000;margin-bottom: 20px;}.footer-url {font-size: 12px;color: #000000;margin-right: 10px;}.footer-date {font-size: 12px;color: #000000;margin-left: 10px;}@media only screen and (min-width: 768px) {.container {width: 70%;}}@media only screen and (min-width: 992px) {.container {width: 50%;}}</style></head><body><div class="container"><div class="header"><h1 class="title">BB</h1><p class="text-1">' . BRAND . ' Bilgilendirme</p></div><div class="main"><p class="text-4">Sayın ' . $this->input_control->DecodePreventXSS($user['data']['first_name']) . ' ' . $this->input_control->DecodePreventXSS($user['data']['last_name']) . '</p><p class="text-2"> ' . $checked_inputs_2['email_manuel_message'] . '</p></div><footer class="footer"><p class="footer-text">Bu mesaj bilgilendirme amacıyla gönderilmiştir.</p><a class="footer-url" href="' . PURE_URL . '">' . PURE_URL . '</a><span class="footer-date">' . date('d/m/Y H:i:s') . '</span></footer></div></body></html>') && $this->AdminModel->CreateLogEmailOrderAdmin(array('email_to' => $checked_inputs_2['user_email'], 'email_message' => 'Manuel Mesaj'))['result']) {
+                                        $send_email_error = false;
+                                        $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_ADMIN_SUCCESS_SEND_EMAIL_1 . ' "MANUEL MESAJ İÇEREN" ' . TR_NOTIFICATION_ADMIN_SUCCESS_SEND_EMAIL_2);
+                                    }
+                                }
+                            } else {
+                                $send_email_error = false;
+                                $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                            }
+                        }
+                        if ($send_email_error) {
+                            $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ADMIN_ERROR_SEND_EMAIL);
+                        }
+                    }
+                } else {
+                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
+                }
+                $this->input_control->Redirect(URL_ADMIN_SEND_EMAIL);
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function SendEmail | ' . $th))['result']) {
                 $this->input_control->Redirect(URL_EXCEPTION);
             } else {
                 $this->input_control->Redirect(URL_SHUTDOWN);
@@ -1493,6 +1814,42 @@ class AdminController extends ControllerAdmin
             }
         }
     }
+    function UserComments(string $user_id)
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->input_control->CheckUrl();
+                $user = $this->AdminModel->GetUserName($user_id);
+                if ($user['result']) {
+                    $this->web_data['user_name'] = $user['data']['first_name'] . ' ' . $user['data']['last_name'];
+                }
+                $comments = $this->AdminModel->GetUserComment($user_id);
+                if ($comments['result']) {
+                    foreach ($comments['data'] as $key => $comment) {
+                        $item_url = $this->AdminModel->GetItemUrlForComment($comment['item_id']);
+                        if ($item_url['result']) {
+                            $comments['data'][$key]['item_url'] = $item_url['data']['item_url'];
+                            $comment_reply = $this->AdminModel->GetItemCommentReply($comment['id']);
+                            if ($comment_reply['result']) {
+                                $comments['data'][$key]['comment_reply'] = $comment_reply['data'];
+                            }
+                        } else {
+                            unset($comments['data'][$key]);
+                        }
+                    }
+                    $this->web_data['item_comments'] = $comments['data'];
+                }
+                parent::GetView('Admin/Comments', $this->web_data);
+            }
+            $this->input_control->Redirect(URL_ADMIN_INDEX);
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function UserComments | ' . $th))['result']) {
+                $this->input_control->Redirect(URL_EXCEPTION);
+            } else {
+                $this->input_control->Redirect(URL_SHUTDOWN);
+            }
+        }
+    }
     function UserPastOrders(string $user_id)
     {
         try {
@@ -1554,65 +1911,6 @@ class AdminController extends ControllerAdmin
             $this->input_control->Redirect(URL_ADMIN_INDEX);
         } catch (\Throwable $th) {
             if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function UserDetails | ' . $th))['result']) {
-                $this->input_control->Redirect(URL_EXCEPTION);
-            } else {
-                $this->input_control->Redirect(URL_SHUTDOWN);
-            }
-        }
-    }
-    function SendEmail()
-    {
-        try {
-            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-                $this->input_control->CheckUrl();
-                $this->web_data['form_token'] = parent::SetCSRFToken('AdminSendEmail');
-                parent::GetView('Admin/SendEmail', $this->web_data);
-            } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                $checked_inputs = $this->input_control->CheckPostedInputs(array(
-                    'user_email' => array('input' => isset($_POST['user_email']) ? $_POST['user_email'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'no_white_space' => true, 'error_message_no_white_space' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL, 'is_email' => true, 'error_message_is_email' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL, 'length_control' => true, 'max_length' => EMAIL_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL, 'preventxss' => true, 'length_limit' => EMAIL_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_EMAIL),
-                    'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
-                ));
-                if (empty($checked_inputs['error_message'])) {
-                    if (parent::CheckCSRFToken($checked_inputs['csrf_token'], 'AdminSendEmail')) {
-                        $mail_send_success = false;
-                        if (!empty($_POST['email_ready_message'])) {
-                            switch ($_POST['email_ready_message']) {
-                                case '1':
-                                    if (!empty($_POST['shipping_number'])) {
-                                        $mail_send_success = true;
-                                        // Sipariş Kargoya Verildi
-                                    }
-                                    break;
-                                case '2':
-                                    $mail_send_success = true;
-                                    // Sipariş Teslim Edildi
-                                    break;
-                                case '3':
-                                    $mail_send_success = true;
-                                    // Sipariş İptal Edildi
-                                    break;
-                                case '4':
-                                    if (!empty($_POST['shipping_number'])) {
-                                        $mail_send_success = true;
-                                        // İade Edilen Sipariş Kargoya Verildi
-                                    }
-                                    break;
-                                case '5':
-                                    $mail_send_success = true;
-                                    // İade Edilen Sipariş Teslim Edildi
-                                    break;
-                            }
-                        } elseif (!empty($_POST['email_manuel_message'])) {
-                        }
-                    }
-                } else {
-                    $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
-                }
-                $this->input_control->Redirect(URL_ADMIN_SEND_EMAIL);
-            }
-            $this->input_control->Redirect(URL_ADMIN_INDEX);
-        } catch (\Throwable $th) {
-            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AdminController function SendEmail | ' . $th))['result']) {
                 $this->input_control->Redirect(URL_EXCEPTION);
             } else {
                 $this->input_control->Redirect(URL_SHUTDOWN);
