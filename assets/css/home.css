@@ -3305,12 +3305,14 @@ a {
 .agreements-section .agreements-container .text {
     font-size: 1.4rem;
     line-height: 1.4;
-    text-align: justify;
     color: var(--color-primary-dark);
+    margin-bottom: 1rem;
 }
 
-.agreements-section .agreements-container .text:not(:last-child) {
-    margin-bottom: 2rem;
+.agreements-section .title-sub {
+    font-size: 1.6rem;
+    color: var(--color-primary-dark);
+    margin-bottom: 1rem;
 }
 
 /* Cart Settings */
@@ -3786,10 +3788,16 @@ a {
     cursor: pointer;
 }
 
+.profile-section .profile-container .form-row-addr {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
 .profile-section .profile-container .form-row {
     display: flex;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .profile-section .form-password-row {
@@ -3819,7 +3827,7 @@ a {
 }
 
 .profile-section .profile-container .form-row .label {
-    flex-basis: 20%;
+    width: 25%;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
     font-size: 1.2rem;
@@ -3833,10 +3841,25 @@ a {
     height: 3rem;
 }
 
-.profile-section .profile-container .form-row .input {
-    flex-basis: 80%;
-    padding: 1rem;
+.profile-section .profile-container .form-row-addr .label {
+    width: 30%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
     font-size: 1.2rem;
+    color: var(--color-primary-light);
+    background-color: var(--bg-primary-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top-left-radius: 1rem;
+    border-bottom-left-radius: 1rem;
+    height: 4rem;
+}
+
+.profile-section .profile-container .form-row .input {
+    width: 75%;
+    padding: 1rem;
+    font-size: 1.4rem;
     border-width: 2px;
     border-style: solid;
     border-color: var(--color-primary-dark);
@@ -3848,6 +3871,40 @@ a {
 
 .profile-section .profile-container .form-row .input:focus {
     outline: 0;
+}
+
+.profile-section .profile-container .form-row-addr .input {
+    width: 40%;
+    padding: 1rem;
+    font-size: 1.4rem;
+    border-width: 2px;
+    border-style: solid;
+    border-color: var(--color-primary-dark);
+    color: var(--color-primary-dark);
+    height: 4rem;
+}
+
+.profile-section .profile-container .form-row-addr .input:focus {
+    outline: 0;
+}
+
+.profile-section .profile-container .form-row-addr .info {
+    width: 30%;
+    padding: 1rem;
+    font-size: 1rem;
+    border-top-right-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+    background-color: var(--color-secondary-theme);
+    color: var(--color-primary-light);
+    height: 4rem;
+    display: flex;
+    align-items: center;
+}
+
+.profile-section .profile-container .form-row-addr .info .icon {
+    font-size: 1rem;
+    color: var(--color-primary-light);
+    margin-right: 1rem;
 }
 
 .profile-section .image-label {
@@ -4357,30 +4414,67 @@ a {
     padding-bottom: 1rem !important;
 }
 
+.order-section .form-row-addr {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
 .order-section .form-row {
     display: flex;
     align-items: center;
     margin-bottom: 2rem;
 }
 
-.order-section .form-row .label {
-    width: 45%;
+.order-section .form-row-addr .label-addr {
+    width: 30%;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
     font-size: 1.2rem;
     color: var(--color-primary-light);
     background-color: var(--bg-primary-dark);
     display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top-left-radius: 1rem;
+    border-bottom-left-radius: 1rem;
+    height: 4rem;
+}
+
+.order-section .form-row .label {
+    width: 25%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    font-size: 1.2rem;
+    color: var(--color-primary-light);
+    background-color: var(--bg-primary-dark);
+    display: flex;
+    justify-content: center;
     align-items: center;
     border-top-left-radius: 1rem;
     border-bottom-left-radius: 1rem;
     height: 3rem;
 }
 
-.order-section .form-row .input {
-    width: 55%;
+.order-section .form-row-addr .input-addr {
+    width: 40%;
     padding: 1rem;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
+    border-width: 2px;
+    border-style: solid;
+    border-color: var(--color-primary-dark);
+    color: var(--color-primary-dark);
+    height: 4rem;
+}
+
+.order-section .form-row-addr .input:focus {
+    outline: 0;
+}
+
+.order-section .form-row .input {
+    width: 75%;
+    padding: 1rem;
+    font-size: 1.4rem;
     border-width: 2px;
     border-style: solid;
     border-color: var(--color-primary-dark);
@@ -4392,6 +4486,25 @@ a {
 
 .order-section .form-row .input:focus {
     outline: 0;
+}
+
+.order-section .form-row-addr .info {
+    width: 30%;
+    padding: 1rem;
+    font-size: 1rem;
+    border-top-right-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+    background-color: var(--color-secondary-theme);
+    color: var(--color-primary-light);
+    height: 4rem;
+    display: flex;
+    align-items: center;
+}
+
+.order-section .form-row-addr .info .icon {
+    font-size: 1rem;
+    color: var(--color-primary-light);
+    margin-right: 1rem;
 }
 
 .order-section .row-space {
@@ -4899,6 +5012,23 @@ a {
 
 #btn-order-term {
     cursor: pointer;
+}
+
+.order-section .label-phone {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 3rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    font-size: 1.2rem;
+    border-top-width: 2px;
+    border-top-style: solid;
+    border-top-color: var(--color-primary-dark);
+    border-bottom-width: 2px;
+    border-bottom-style: solid;
+    border-bottom-color: var(--color-primary-dark);
+    color: var(--color-primary-dark);
 }
 
 /* Order Complete Settings */
@@ -6037,13 +6167,6 @@ a {
     }
 
     /* Order Settings */
-    .order-section .form-row .label {
-        width: 25%;
-    }
-
-    .order-section .form-row .input {
-        width: 75%;
-    }
 
     .order-section .col-1 .row-credit .credit-col {
         flex-basis: 49%;
@@ -6264,6 +6387,11 @@ a {
     .profile-section .profile-container .form-row .label,
     .profile-section .profile-container .form-row .label-textarea {
         font-size: 1.4rem;
+    }
+
+    .profile-section .profile-container .form-row .info,
+    .order-section .form-row .info {
+        font-size: 1.2rem;
     }
 
     .profile-section .profile-container .form-row .input,
