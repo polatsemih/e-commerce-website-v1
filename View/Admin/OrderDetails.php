@@ -116,7 +116,7 @@
                         <?php endif; ?>
                     </div>
                     <div class="box box-new-1 center show-user-hover" data-id="<?php echo $web_data['order_initialize_information']['id']; ?>" title="Kullanıcı Detayları İçin Tıklayın"><i class="fas fa-info"></i></div>
-                    <div class="box box-new-3"><?php echo $web_data['order_initialize_information']['shipping_address'] . ' ' . $web_data['order_initialize_information']['shipping_city'] . '/' . $web_data['order_initialize_information']['shipping_country'] . ' ' . $web_data['order_initialize_information']['shipping_zip_code'] . ' ' . $web_data['order_initialize_information']['shipping_contact_name']; ?></div>
+                    <div class="box box-new-3"><?php echo $web_data['order_initialize_information']['shipping_address'] . ' ' . $web_data['order_initialize_information']['shipping_city'] . '/' . $web_data['order_initialize_information']['shipping_country'] . ' ' . $web_data['order_initialize_information']['shipping_contact_name']; ?></div>
                     <div class="box box-new-1 center"><?php echo $web_data['order_initialize_information']['is_returned']; ?></div>
                     <div class="box box-new-1 center"><?php echo $web_data['order_initialize_information']['status']; ?></div>
                     <div class="box box-new-1 center"><?php echo date('d/m/Y H:i:s', strtotime($web_data['order_initialize_information']['date_order_initialize_created'])); ?></div>

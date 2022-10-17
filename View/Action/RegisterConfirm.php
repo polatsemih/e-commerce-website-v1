@@ -122,16 +122,21 @@
     </script>
     <script>
         const emailConfirmInputs = document.querySelectorAll('.verify-token-input');
+        var index2 = 0;
         for (let index = 0; index < emailConfirmInputs.length; index++) {
             emailConfirmInputs[index].addEventListener('keyup', (e) => {
-                if (/^[a-z]$/i.test(e.key) || /^[0-9]$/i.test(event.key)) {
-                    if (emailConfirmInputs.length > index + 1) {
-                        emailConfirmInputs[index + 1].focus();
-                    } else if (emailConfirmInputs.length == index + 1) {
-                        emailConfirmInputs[index].blur();
+                if (e.key == 'Backspace') {
+                    if (index2 >= 1) {
+                        index2--;
+                        emailConfirmInputs[index2].focus();
+                    }
+                } else if (/^[a-z]$/i.test(e.key) || /^[0-9]$/i.test(e.key)) {
+                    if (emailConfirmInputs.length - 1 > index2) {
+                        index2++;
+                        emailConfirmInputs[index2].focus();
                     }
                 } else {
-                    emailConfirmInputs[index].value = '';
+                    emailConfirmInputs[index2].value = '';
                 }
             });
         }

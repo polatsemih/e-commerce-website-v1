@@ -47,7 +47,7 @@ class UserModel extends Model
     }
     function GetAddress(string $user_id)
     {
-        return $this->database->Get(TABLE_ADDRESS, 'id,address_country,address_city,address_county,address_neighborhood,address_street,address_building_no,address_apartment_no,address_zip_no', 'WHERE user_id=? AND is_address_removed=0 ORDER BY address_created DESC', $user_id, 'PLURAL');
+        return $this->database->Get(TABLE_ADDRESS, 'id,address_country,address_city,address_county,full_address,address_quick_name', 'WHERE user_id=? AND is_address_removed=0 ORDER BY address_created DESC', $user_id, 'PLURAL');
     }
     function GetAddressById(string $columns, array $inputs)
     {
@@ -76,5 +76,29 @@ class UserModel extends Model
     function CreateContact(array $inputs)
     {
         return $this->database->Create(TABLE_CONTACT, $inputs); 
+    }
+    function GetCity()
+    {
+        return $this->database->Get(TABLE_ADDRESS_CITY, 'id,city_name', 'ORDER BY city_name ASC', '', 'PLURAL');
+    }
+    function GetCounty(string $city_code)
+    {
+        return $this->database->Get(TABLE_ADDRESS_COUNTY, 'id,county_name', 'WHERE city_code=? ORDER BY id ASC', $city_code, 'PLURAL');
+    }
+    function GetCityById(string $id)
+    {
+        return $this->database->Get(TABLE_ADDRESS_CITY, 'city_name', 'WHERE id=?', $id, 'SINGULAR');
+    }
+    function GetCountyById(string $id)
+    {
+        return $this->database->Get(TABLE_ADDRESS_COUNTY, 'county_name', 'WHERE id=?', $id, 'SINGULAR');
+    }
+    function GetCityByName(string $name)
+    {
+        return $this->database->Get(TABLE_ADDRESS_CITY, 'id', 'WHERE city_name=?', $name, 'SINGULAR');
+    }
+    function GetCountyByName(string $name)
+    {
+        return $this->database->Get(TABLE_ADDRESS_COUNTY, 'id', 'WHERE county_name=?', $name, 'SINGULAR');
     }
 }

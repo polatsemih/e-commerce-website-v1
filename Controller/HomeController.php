@@ -1010,20 +1010,30 @@ class HomeController extends Controller
                         $this->web_data['profile_title'] = URL_PROFILE_ADDRESS_TITLE;
                         $address_from_db = $this->UserModel->GetAddress($this->web_data['authenticated_user']);
                         if ($address_from_db['result']) {
+                            foreach ($address_from_db['data'] as $key => $address) {
+                                $city = $this->UserModel->GetCityByName($address['address_city']);
+                                if ($city['result']) {
+                                    $county = $this->UserModel->GetCounty($city['data']['id']);;
+                                    if ($county['result']) {
+                                        $update_county = array();
+                                        foreach ($county['data'] as $value) {
+                                            $update_county[$value['id']] = $value['county_name'];
+                                        }
+                                        $address_from_db['data'][$key]['update_county'] = $update_county;
+                                    }
+                                    $county_id = $this->UserModel->GetCountyByName($address['address_county']);
+                                    $city_id = $this->UserModel->GetCityByName($address['address_city']);
+                                    if ($county_id['result'] && $city_id['result']) {
+                                        $address_from_db['data'][$key]['county_id'] = $county_id['data']['id'];
+                                        $address_from_db['data'][$key]['city_id'] = $city_id['data']['id'];
+                                    }
+                                }
+                            }
                             $this->web_data['user_address'] = $address_from_db['data'];
                         }
-                        if (!empty($_SESSION[SESSION_WEB_DATA_NAME])) {
-                            if (isset($_SESSION[SESSION_WEB_DATA_NAME]['city']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['county']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['neighborhood']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['street']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['building_no']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['apartment_no']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['zip_no'])) {
-                                $this->web_data['address'] = true;
-                                $this->web_data['city'] = $_SESSION[SESSION_WEB_DATA_NAME]['city'];
-                                $this->web_data['county'] = $_SESSION[SESSION_WEB_DATA_NAME]['county'];
-                                $this->web_data['neighborhood'] = $_SESSION[SESSION_WEB_DATA_NAME]['neighborhood'];
-                                $this->web_data['street'] = $_SESSION[SESSION_WEB_DATA_NAME]['street'];
-                                $this->web_data['building_no'] = $_SESSION[SESSION_WEB_DATA_NAME]['building_no'];
-                                $this->web_data['apartment_no'] = $_SESSION[SESSION_WEB_DATA_NAME]['apartment_no'];
-                                $this->web_data['zip_no'] = $_SESSION[SESSION_WEB_DATA_NAME]['zip_no'];
-                            }
-                            $this->session_control->KillSession(SESSION_WEB_DATA_NAME);
+                        $city = $this->UserModel->GetCity();
+                        if ($city['result']) {
+                            $this->web_data['address_city'] = $city['data'];
                         }
                         break;
                     case URL_PROFILE_PASSWORD:
@@ -1270,21 +1280,15 @@ class HomeController extends Controller
                 $this->input_control->Redirect(URL_LOGIN);
             }
             if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_address_create'])) {
-                $city = isset($_POST['city']) ? ucfirst($_POST['city']) : '';
-                $county = isset($_POST['county']) ? ucfirst($_POST['county']) : '';
-                $neighborhood = isset($_POST['neighborhood']) ? ucwords($_POST['neighborhood']) : '';
-                $street = isset($_POST['street']) ? ucwords($_POST['street']) : '';
-                $building_no = isset($_POST['building_no']) ? $_POST['building_no'] : '';
-                $apartment_no = isset($_POST['apartment_no']) ? $_POST['apartment_no'] : '';
-                $zip_no = isset($_POST['zip_no']) ? $_POST['zip_no'] : '';
+                $city = isset($_POST['city']) ? $_POST['city'] : '';
+                $county = isset($_POST['county']) ? $_POST['county'] : '';
+                $full_address = isset($_POST['full_address']) ? strtoupper($_POST['full_address']) : '';
+                $address_quick_name = isset($_POST['address_quick_name']) ? strtoupper($_POST['address_quick_name']) : '';
                 $checked_inputs = $this->input_control->CheckPostedInputs(array(
-                    'address_city' => array('input' => $city, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_CITY, 'length_control' => true, 'max_length' => ADDRESS_1_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_CITY, 'preventxss' => true, 'length_limit' => ADDRESS_1_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_CITY),
-                    'address_county' => array('input' => $county, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_COUNTY, 'length_control' => true, 'max_length' => ADDRESS_1_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_COUNTY, 'preventxss' => true, 'length_limit' => ADDRESS_1_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_COUNTY),
-                    'address_neighborhood' => array('input' => $neighborhood, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_NEIGHBORHOOD, 'length_control' => true, 'max_length' => ADDRESS_2_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_NEIGHBORHOOD, 'preventxss' => true, 'length_limit' => ADDRESS_2_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_NEIGHBORHOOD),
-                    'address_street' => array('input' => $street, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_STREET, 'length_control' => true, 'max_length' => ADDRESS_2_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_STREET, 'preventxss' => true, 'length_limit' => ADDRESS_2_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_STREET),
-                    'address_building_no' => array('input' => $building_no, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_BUILDING_NO, 'length_control' => true, 'max_length' => ADDRESS_3_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_BUILDING_NO, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ERROR_NOT_VALID_BUILDING_NO, 'length_limit' => ADDRESS_3_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_BUILDING_NO),
-                    'address_apartment_no' => array('input' => $apartment_no, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_APARTMENT_NO, 'length_control' => true, 'max_length' => ADDRESS_3_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_APARTMENT_NO, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ERROR_NOT_VALID_APARTMENT_NO, 'length_limit' => ADDRESS_3_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_APARTMENT_NO),
-                    'address_zip_no' => array('input' => $zip_no, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_ZIP_NO, 'length_control' => true, 'min_length' => ADDRESS_ZIP_LIMIT, 'error_message_min_length' => TR_NOTIFICATION_ERROR_NOT_VALID_ZIP_NO, 'max_length' => ADDRESS_ZIP_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_ZIP_NO, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ERROR_NOT_VALID_ZIP_NO, 'length_limit' => ADDRESS_ZIP_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_ZIP_NO),
+                    'address_city' => array('input' => $city, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_CITY, 'length_control' => true, 'max_length' => ADDRESS_CITY_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_CITY, 'preventxss' => true, 'length_limit' => ADDRESS_CITY_MAX_LIMIT, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_CITY),
+                    'address_county' => array('input' => $county, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_COUNTY, 'length_control' => true, 'max_length' => ADDRESS_COUNTY_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_COUNTY, 'preventxss' => true, 'length_limit' => ADDRESS_COUNTY_MAX_LIMIT, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_COUNTY),
+                    'full_address' => array('input' => $full_address, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_FULL_ADDRESS, 'length_control' => true, 'max_length' => FULL_ADDRESS_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_FULL_ADDRESS, 'preventxss' => true, 'length_limit' => FULL_ADDRESS_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_FULL_ADDRESS),
+                    'address_quick_name' => array('input' => $address_quick_name, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_ADDRESS_QUICK_NAME, 'length_control' => true, 'max_length' => ADDRESS_QUICK_NAME_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_ADDRESS_QUICK_NAME, 'preventxss' => true, 'length_limit' => ADDRESS_QUICK_NAME_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_ADDRESS_QUICK_NAME),
                     'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
                 ));
                 if (empty($checked_inputs['error_message'])) {
@@ -1293,12 +1297,18 @@ class HomeController extends Controller
                         if ($confirmed_user_from_db['result']) {
                             $address_count = $this->UserModel->GetAddressCount($confirmed_user_from_db['data']['id']);
                             if ($address_count['result'] && $address_count['data']['COUNT(id)'] < 5) {
-                                $result_create_address = $this->UserModel->CreateAddress(array('user_id' => $confirmed_user_from_db['data']['id'], 'address_city' => $checked_inputs['address_city'], 'address_county' => $checked_inputs['address_county'], 'address_neighborhood' => $checked_inputs['address_neighborhood'], 'address_street' => $checked_inputs['address_street'], 'address_building_no' => $checked_inputs['address_building_no'], 'address_apartment_no' => $checked_inputs['address_apartment_no'], 'address_zip_no' => $checked_inputs['address_zip_no']));
-                                if ($result_create_address['result']) {
-                                    if (!empty($_SESSION[SESSION_COMPLETE_ADDRESS])) {
-                                        $_SESSION[SESSION_SELECTED_ADDRESS_ID] = $result_create_address['id'];
+                                $city_from_database = $this->UserModel->GetCityById($checked_inputs['address_city']);
+                                $county_from_database = $this->UserModel->GetCountyById($checked_inputs['address_county']);
+                                if ($city_from_database['result'] && $county_from_database['result']) {
+                                    $result_create_address = $this->UserModel->CreateAddress(array('user_id' => $confirmed_user_from_db['data']['id'], 'address_city' => $city_from_database['data']['city_name'], 'address_county' => $county_from_database['data']['county_name'], 'full_address' => $checked_inputs['full_address'], 'address_quick_name' => $checked_inputs['address_quick_name']));
+                                    if ($result_create_address['result']) {
+                                        if (!empty($_SESSION[SESSION_COMPLETE_ADDRESS])) {
+                                            $_SESSION[SESSION_SELECTED_ADDRESS_ID] = $result_create_address['id'];
+                                        } else {
+                                            $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_CREATE_ADDRESS);
+                                        }
                                     } else {
-                                        $this->notification_control->SetNotification('SUCCESS', TR_NOTIFICATION_SUCCESS_CREATE_ADDRESS);
+                                        $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_CREATE_ADDRESS);
                                     }
                                 } else {
                                     $this->notification_control->SetNotification('DANGER', TR_NOTIFICATION_ERROR_CREATE_ADDRESS);
@@ -1312,7 +1322,6 @@ class HomeController extends Controller
                     }
                 } else {
                     $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
-                    $_SESSION[SESSION_WEB_DATA_NAME] = array('city' => $city, 'county' => $county, 'neighborhood' => $neighborhood, 'street' => $street, 'building_no' => $building_no, 'apartment_no' => $apartment_no, 'zip_no' => $zip_no);
                 }
                 if (!empty($_SESSION[SESSION_COMPLETE_ADDRESS])) {
                     $this->session_control->KillSession(SESSION_COMPLETE_ADDRESS);
@@ -1338,23 +1347,12 @@ class HomeController extends Controller
                 $this->input_control->Redirect(URL_LOGIN);
             }
             if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_address_update'])) {
-                $id = isset($_POST['id']) ? $_POST['id'] : '';
-                $city = isset($_POST['city']) ? ucfirst($_POST['city']) : '';
-                $county = isset($_POST['county']) ? ucfirst($_POST['county']) : '';
-                $neighborhood = isset($_POST['neighborhood']) ? ucwords($_POST['neighborhood']) : '';
-                $street = isset($_POST['street']) ? ucwords($_POST['street']) : '';
-                $building_no = isset($_POST['building_no']) ? $_POST['building_no'] : '';
-                $apartment_no = isset($_POST['apartment_no']) ? $_POST['apartment_no'] : '';
-                $zip_no = isset($_POST['zip_no']) ? $_POST['zip_no'] : '';
                 $checked_inputs = $this->input_control->CheckPostedInputs(array(
-                    'id' => array('input' => $id, 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
-                    'address_city' => array('input' => $city, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_CITY, 'length_control' => true, 'max_length' => ADDRESS_1_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_CITY, 'preventxss' => true, 'length_limit' => ADDRESS_1_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_CITY),
-                    'address_county' => array('input' => $county, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_COUNTY, 'length_control' => true, 'max_length' => ADDRESS_1_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_COUNTY, 'preventxss' => true, 'length_limit' => ADDRESS_1_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_COUNTY),
-                    'address_neighborhood' => array('input' => $neighborhood, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_NEIGHBORHOOD, 'length_control' => true, 'max_length' => ADDRESS_2_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_NEIGHBORHOOD, 'preventxss' => true, 'length_limit' => ADDRESS_2_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_NEIGHBORHOOD),
-                    'address_street' => array('input' => $street, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_STREET, 'length_control' => true, 'max_length' => ADDRESS_2_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_STREET, 'preventxss' => true, 'length_limit' => ADDRESS_2_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_STREET),
-                    'address_building_no' => array('input' => $building_no, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_BUILDING_NO, 'length_control' => true, 'max_length' => ADDRESS_3_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_BUILDING_NO, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ERROR_NOT_VALID_BUILDING_NO, 'length_limit' => ADDRESS_3_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_BUILDING_NO),
-                    'address_apartment_no' => array('input' => $apartment_no, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_APARTMENT_NO, 'length_control' => true, 'max_length' => ADDRESS_3_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_APARTMENT_NO, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ERROR_NOT_VALID_APARTMENT_NO, 'length_limit' => ADDRESS_3_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_APARTMENT_NO),
-                    'address_zip_no' => array('input' => $zip_no, 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_ZIP_NO, 'length_control' => true, 'min_length' => ADDRESS_ZIP_LIMIT, 'error_message_min_length' => TR_NOTIFICATION_ERROR_NOT_VALID_ZIP_NO, 'max_length' => ADDRESS_ZIP_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_ZIP_NO, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ERROR_NOT_VALID_ZIP_NO, 'length_limit' => ADDRESS_ZIP_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_ZIP_NO),
+                    'id' => array('input' => isset($_POST['id']) ? $_POST['id'] : '', 'error_message_empty' => TR_NOTIFICATION_EMPTY_HIDDEN_INPUT, 'preventxssforid' => true),
+                    'address_city' => array('input' => isset($_POST['city']) ? $_POST['city'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_CITY, 'length_control' => true, 'max_length' => ADDRESS_CITY_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_CITY, 'preventxssforid' => true, 'length_limit' => ADDRESS_CITY_MAX_LIMIT, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_CITY),
+                    'address_county' => array('input' => isset($_POST['county']) ? $_POST['county'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_COUNTY, 'length_control' => true, 'max_length' => ADDRESS_COUNTY_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_COUNTY, 'preventxssforid' => true, 'length_limit' => ADDRESS_COUNTY_MAX_LIMIT, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_COUNTY),
+                    'full_address' => array('input' => isset($_POST['full_address']) ? strtoupper($_POST['full_address']) : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_FULL_ADDRESS, 'length_control' => true, 'max_length' => FULL_ADDRESS_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_FULL_ADDRESS, 'preventxss' => true, 'length_limit' => FULL_ADDRESS_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_FULL_ADDRESS),
+                    'address_quick_name' => array('input' => isset($_POST['address_quick_name']) ? strtoupper($_POST['address_quick_name']) : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_EMPTY_ADDRESS_QUICK_NAME, 'length_control' => true, 'max_length' => ADDRESS_QUICK_NAME_MAX_LIMIT, 'error_message_max_length' => TR_NOTIFICATION_ERROR_NOT_VALID_ADDRESS_QUICK_NAME, 'preventxss' => true, 'length_limit' => ADDRESS_QUICK_NAME_MAX_LIMIT_DB, 'error_message_length_limit' => TR_NOTIFICATION_ERROR_NOT_VALID_ADDRESS_QUICK_NAME),
                     'csrf_token' => array('input' => isset($_POST['form_token']) ? $_POST['form_token'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_CSRF, 'preventxssforid' => true)
                 ));
                 if (empty($checked_inputs['error_message'])) {
@@ -1362,7 +1360,9 @@ class HomeController extends Controller
                         $confirmed_user_from_db = $this->UserModel->GetUserByUserId('id', $this->web_data['authenticated_user']);
                         if ($confirmed_user_from_db['result']) {
                             $address_confirm = $this->UserModel->GetAddressById('id', array($checked_inputs['id'], $confirmed_user_from_db['data']['id']));
-                            if ($address_confirm['result'] && $this->UserModel->UpdateAddress(array('address_city' => $checked_inputs['address_city'], 'address_county' => $checked_inputs['address_county'], 'address_neighborhood' => $checked_inputs['address_neighborhood'], 'address_street' => $checked_inputs['address_street'], 'address_building_no' => $checked_inputs['address_building_no'], 'address_apartment_no' => $checked_inputs['address_apartment_no'], 'address_zip_no' => $checked_inputs['address_zip_no'], 'address_last_updated' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['id']))['result']) {
+                            $city_from_database = $this->UserModel->GetCityById($checked_inputs['address_city']);
+                            $county_from_database = $this->UserModel->GetCountyById($checked_inputs['address_county']);
+                            if ($address_confirm['result'] && $city_from_database['result'] && $county_from_database['result'] && $this->UserModel->UpdateAddress(array('address_city' => $city_from_database['data']['city_name'], 'address_county' => $county_from_database['data']['county_name'], 'full_address' => $checked_inputs['full_address'], 'address_quick_name' => $checked_inputs['address_quick_name'], 'address_last_updated' => date('Y-m-d H:i:s'), 'id' => $checked_inputs['id']))['result']) {
                                 if (!empty($_SESSION[SESSION_COMPLETE_ADDRESS])) {
                                     $_SESSION[SESSION_SELECTED_ADDRESS_ID] = $checked_inputs['id'];
                                 } else {
@@ -1933,25 +1933,32 @@ class HomeController extends Controller
                             parent::GetView('Home/OrderInitialize', $this->web_data);
                         } elseif (empty($_SESSION[SESSION_SELECTED_ADDRESS_ID])) {
                             $_SESSION[SESSION_COMPLETE_ADDRESS] = true;
-                            $not_from_create_address = true;
-                            if (!empty($_SESSION[SESSION_WEB_DATA_NAME])) {
-                                if (isset($_SESSION[SESSION_WEB_DATA_NAME]['city']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['county']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['neighborhood']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['street']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['building_no']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['apartment_no']) && isset($_SESSION[SESSION_WEB_DATA_NAME]['zip_no'])) {
-                                    $this->web_data['city'] = $_SESSION[SESSION_WEB_DATA_NAME]['city'];
-                                    $this->web_data['county'] = $_SESSION[SESSION_WEB_DATA_NAME]['county'];
-                                    $this->web_data['neighborhood'] = $_SESSION[SESSION_WEB_DATA_NAME]['neighborhood'];
-                                    $this->web_data['street'] = $_SESSION[SESSION_WEB_DATA_NAME]['street'];
-                                    $this->web_data['building_no'] = $_SESSION[SESSION_WEB_DATA_NAME]['building_no'];
-                                    $this->web_data['apartment_no'] = $_SESSION[SESSION_WEB_DATA_NAME]['apartment_no'];
-                                    $this->web_data['zip_no'] = $_SESSION[SESSION_WEB_DATA_NAME]['zip_no'];
-                                    $this->web_data['address'] = true;
-                                    $not_from_create_address = false;
+                            $address_from_db = $this->UserModel->GetAddress($this->web_data['authenticated_user']);
+                            if ($address_from_db['result']) {
+                                foreach ($address_from_db['data'] as $key => $address) {
+                                    $city = $this->UserModel->GetCityByName($address['address_city']);
+                                    if ($city['result']) {
+                                        $county = $this->UserModel->GetCounty($city['data']['id']);;
+                                        if ($county['result']) {
+                                            $update_county = array();
+                                            foreach ($county['data'] as $value) {
+                                                $update_county[$value['id']] = strtoupper($this->input_control->DecodePreventXSS($value['county_name']));
+                                            }
+                                            $address_from_db['data'][$key]['update_county'] = $update_county;
+                                        }
+                                        $address_from_db['data'][$key]['address_county'] = strtoupper($this->input_control->DecodePreventXSS($address['address_county']));
+                                        $county_id = $this->UserModel->GetCountyByName($address['address_county']);
+                                        $city_id = $this->UserModel->GetCityByName($address['address_city']);
+                                        if ($county_id['result'] && $city_id['result']) {
+                                            $address_from_db['data'][$key]['county_id'] = $county_id['data']['id'];
+                                            $address_from_db['data'][$key]['city_id'] = $city_id['data']['id'];
+                                        }
+                                    }
                                 }
-                                $this->session_control->KillSession(SESSION_WEB_DATA_NAME);
-                            }
-                            if ($not_from_create_address) {
-                                $address_from_database = $this->UserModel->GetAddress($this->web_data['authenticated_user']);
-                                if ($address_from_database['result']) {
-                                    $this->web_data['select_address'] = $address_from_database['data'];
+                                $this->web_data['user_address'] = $address_from_db['data'];
+                                $city = $this->UserModel->GetCity();
+                                if ($city['result']) {
+                                    $this->web_data['address_city'] = $city['data'];
                                 }
                             }
                             parent::LogView('Home-OrderInitialize-Address');
@@ -1981,7 +1988,7 @@ class HomeController extends Controller
                                 if ((int)$checked_inputs['cart_expiry_month'] > 0 && (int)$checked_inputs['cart_expiry_month'] <= 12) {
                                     if ((int)$checked_inputs['cart_expiry_year'] >= 22) {
                                         if (!empty($_SESSION[SESSION_SELECTED_ADDRESS_ID])) {
-                                            $selected_address = $this->UserModel->GetAddressById('address_country,address_city,address_county,address_neighborhood,address_street,address_building_no,address_apartment_no,address_zip_no', array($_SESSION[SESSION_SELECTED_ADDRESS_ID], $this->web_data['authenticated_user']));
+                                            $selected_address = $this->UserModel->GetAddressById('address_country,address_city,address_county,full_address', array($_SESSION[SESSION_SELECTED_ADDRESS_ID], $this->web_data['authenticated_user']));
                                             if ($selected_address['result']) {
                                                 $user_address = $selected_address['data'];
                                             }
@@ -2030,20 +2037,17 @@ class HomeController extends Controller
                                                 'user_email' => $confirmed_user_from_db['data']['email'],
                                                 'user_identity_number' => $confirmed_user_from_db['data']['identity_number'],
                                                 'user_phone_number' => $confirmed_user_from_db['data']['phone_number'],
-                                                'user_address' => $user_address['address_county'] . $this->input_control->PreventXSS(', ') . $user_address['address_neighborhood'] . $this->input_control->PreventXSS(', ') . $user_address['address_street'] . $this->input_control->PreventXSS(', No: ') . $user_address['address_building_no'] . $this->input_control->PreventXSS('/') . $user_address['address_apartment_no'],
+                                                'user_address' => $user_address['address_county'] . $this->input_control->PreventXSS(', ') . $user_address['full_address'],
                                                 'user_city' => $user_address['address_city'],
                                                 'user_country' => $user_address['address_country'],
-                                                'user_zip_code' => $user_address['address_zip_no'],
                                                 'shipping_contact_name' => $confirmed_user_from_db['data']['first_name'] . ' ' . $confirmed_user_from_db['data']['last_name'],
                                                 'shipping_city' => $user_address['address_city'],
                                                 'shipping_country' => $user_address['address_country'],
-                                                'shipping_address' => $user_address['address_county'] . $this->input_control->PreventXSS(', ') . $user_address['address_neighborhood'] . $this->input_control->PreventXSS(', ') . $user_address['address_street'] . $this->input_control->PreventXSS(', No: ') . $user_address['address_building_no'] . $this->input_control->PreventXSS('/') . $user_address['address_apartment_no'],
-                                                'shipping_zip_code' => $user_address['address_zip_no'],
+                                                'shipping_address' => $user_address['address_county'] . $this->input_control->PreventXSS(', ') . $user_address['full_address'],
                                                 'billing_contact_name' => $confirmed_user_from_db['data']['first_name'] . ' ' . $confirmed_user_from_db['data']['last_name'],
                                                 'billing_city' => $user_address['address_city'],
                                                 'billing_country' => $user_address['address_country'],
-                                                'billing_address' => $user_address['address_county'] . $this->input_control->PreventXSS(', ') . $user_address['address_neighborhood'] . $this->input_control->PreventXSS(', ') . $user_address['address_street'] . $this->input_control->PreventXSS(', No: ') . $user_address['address_building_no'] . $this->input_control->PreventXSS('/') . $user_address['address_apartment_no'],
-                                                'billing_zip_code' => $user_address['address_zip_no'],
+                                                'billing_address' => $user_address['address_county'] . $this->input_control->PreventXSS(', ') . $user_address['full_address'],
                                                 'status' => 8
                                             ));
                                             if ($result_create_order['result']) {
@@ -2087,18 +2091,14 @@ class HomeController extends Controller
                                                 $user_first_name = $this->input_control->DecodePreventXSS($confirmed_user_from_db['data']['first_name']);
                                                 $user_last_name = $this->input_control->DecodePreventXSS($confirmed_user_from_db['data']['last_name']);
                                                 $user_email = $this->input_control->DecodePreventXSS($confirmed_user_from_db['data']['email']);
-                                                $user_county = $this->input_control->DecodePreventXSS($user_address['address_county']);
-                                                $user_neighborhood = $this->input_control->DecodePreventXSS($user_address['address_neighborhood']);
-                                                $user_street = $this->input_control->DecodePreventXSS($user_address['address_street']);
-                                                $user_city = $this->input_control->DecodePreventXSS($user_address['address_city']);
-                                                $user_country = $this->input_control->DecodePreventXSS($user_address['address_country']);
+                                                $user_full_address = $this->input_control->DecodePreventXSS($user_address['full_address']);
                                                 if ($category_success && !empty($basketItems)) {
                                                     $request->setLocale(\Iyzipay\Model\Locale::TR);
                                                     $request->setConversationId($conversation_id['data']);
                                                     $request->setPrice($this->web_data['order_cart_data_price']);
                                                     $request->setPaidPrice($this->web_data['order_cart_data_total_price']);
                                                     $request->setCurrency(\Iyzipay\Model\Currency::TL);
-                                                    $request->setInstallment($installment);
+                                                    $request->setInstallment(1);
                                                     $request->setBasketId($result_create_order['id']);
                                                     $request->setCallbackUrl(URL . URL_ORDER_PAYMENT);
 
@@ -2117,27 +2117,24 @@ class HomeController extends Controller
                                                     $buyer->setSurname($user_last_name);
                                                     $buyer->setEmail($user_email);
                                                     $buyer->setIdentityNumber($confirmed_user_from_db['data']['identity_number']);
-                                                    $buyer->setRegistrationAddress($user_county . ', ' . $user_neighborhood . ', ' . $user_street . ', No: ' . $user_address['address_building_no'] . '/' . $user_address['address_apartment_no']);
+                                                    $buyer->setRegistrationAddress($user_address['address_county'] . ', ' . $user_full_address);
                                                     $buyer->setIp($_SERVER['REMOTE_ADDR']);
-                                                    $buyer->setCity($user_city);
-                                                    $buyer->setCountry($user_country);
-                                                    $buyer->setZipCode($user_address['address_zip_no']);
+                                                    $buyer->setCity($user_address['address_city']);
+                                                    $buyer->setCountry($user_address['address_country']);
                                                     $request->setBuyer($buyer);
 
                                                     $shippingAddress = new \Iyzipay\Model\Address();
                                                     $shippingAddress->setContactName($user_first_name . ' ' . $user_last_name);
-                                                    $shippingAddress->setCity($user_city);
-                                                    $shippingAddress->setCountry($user_country);
-                                                    $shippingAddress->setAddress($user_county . ', ' . $user_neighborhood . ', ' . $user_street . ', No: ' . $user_address['address_building_no'] . '/' . $user_address['address_apartment_no']);
-                                                    $shippingAddress->setZipCode($user_address['address_zip_no']);
+                                                    $shippingAddress->setCity($user_address['address_city']);
+                                                    $shippingAddress->setCountry($user_address['address_country']);
+                                                    $shippingAddress->setAddress($user_address['address_county'] . ', ' . $user_full_address);
                                                     $request->setShippingAddress($shippingAddress);
 
                                                     $billingAddress = new \Iyzipay\Model\Address();
                                                     $billingAddress->setContactName($user_first_name . ' ' . $user_last_name);
-                                                    $billingAddress->setCity($user_city);
-                                                    $billingAddress->setCountry($user_country);
-                                                    $billingAddress->setAddress($user_county . ', ' . $user_neighborhood . ', ' . $user_street . ', No: ' . $user_address['address_building_no'] . '/' . $user_address['address_apartment_no']);
-                                                    $billingAddress->setZipCode($user_address['address_zip_no']);
+                                                    $billingAddress->setCity($user_address['address_city']);
+                                                    $billingAddress->setCountry($user_address['address_country']);
+                                                    $billingAddress->setAddress($user_address['address_county'] . ', ' . $user_full_address);
                                                     $request->setBillingAddress($billingAddress);
 
                                                     $request->setBasketItems($basketItems);

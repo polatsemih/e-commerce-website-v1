@@ -3,6 +3,8 @@ define('DB_HOST', 'localhost'); // change
 define('DB_NAME', 'blanckbasic_jayq14b5h0'); // change
 define('DB_USER_NAME', 'root'); // change
 define('DB_USER_PASS', ''); // change
+define('TABLE_ADDRESS_CITY', 'address_city_direcgbmk1');
+define('TABLE_ADDRESS_COUNTY', 'address_county_gatruwnb21');
 define('TABLE_CAPTCHA_TIMEOUT', 'captcha_timeout_qqm45mhmk3');
 define('TABLE_COMMENT_REPLY', 'comment_reply_ys512m9lx6');
 define('TABLE_COMMENT', 'comment_uj27dba5ti');

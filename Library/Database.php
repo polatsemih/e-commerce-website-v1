@@ -98,6 +98,23 @@ class Database extends PDO
             }
         } while (true);
     }
+    function CreateWithManuelId(string $table, array $inputs)
+    {
+        $columns = '';
+        $question_marks = '';
+        $values = array();
+        foreach ($inputs as $input_name => $input) {
+            $columns .= $input_name . ',';
+            $question_marks .= '?,';
+            $values[] = $input;
+        }
+        $prepare = 'INSERT INTO ' . $table . ' (' . rtrim($columns, ',') . ') VALUES (' . rtrim($question_marks, ',') . ')';
+        $sql_query = $this->prepare($prepare);
+        if (!empty($sql_query) && $sql_query->execute($values) && $sql_query->rowCount() == 1) {
+            return array('result' => true);
+        }
+        return array('result' => false);
+    }
     function Update(string $table, array $inputs)
     {
         $columns = '';

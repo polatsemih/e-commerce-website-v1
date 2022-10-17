@@ -42,9 +42,6 @@
             <div class="col">
                 <div class="quick-pages-container">
                     <span class="quick-page-span"><a class="quick-page-link" href="<?php echo URL; ?>">Anasayfa</a></span>
-                    <?php foreach ($web_data['genders'] as $gender) : ?>
-                        <span class="quick-page-span"><a class="quick-page-link" href="<?php echo URL . URL_ITEMS . '/' . $gender['gender_url']; ?>"><?php echo $gender['gender_name']; ?></a></span>
-                    <?php endforeach; ?>
                     <span class="quick-page-span"><a class="quick-page-link" href="<?php echo URL . URL_FAVORITES; ?>">Favorilerim</a></span>
                     <span class="quick-page-span"><a class="quick-page-link" href="<?php echo URL . URL_CART; ?>">Sepetim</a></span>
                 </div>

@@ -46,7 +46,7 @@
                             <?php endif; ?>
                         </div>
                         <div class="box box-1 center show-user-hover" data-id="<?php echo $order_initialize_informations['id']; ?>" title="Kullanıcı Detayları İçin Tıklayın"><i class="fas fa-info"></i></div>
-                        <div class="box box-3"><?php echo $order_initialize_informations['shipping_address'] . ' ' . $order_initialize_informations['shipping_city'] . '/' . $order_initialize_informations['shipping_country'] . ' ' . $order_initialize_informations['shipping_zip_code'] . ' ' . $order_initialize_informations['shipping_contact_name']; ?></div>
+                        <div class="box box-3"><?php echo $order_initialize_informations['shipping_address'] . ' ' . $order_initialize_informations['shipping_city'] . '/' . $order_initialize_informations['shipping_country'] . ' ' . $order_initialize_informations['shipping_contact_name']; ?></div>
                         <div class="box box-1 center"><?php echo $order_initialize_informations['is_returned']; ?></div>
                         <div class="box box-1 center"><?php echo $order_initialize_informations['status']; ?></div>
                         <div class="box box-1 center"><?php echo date('d/m/Y H:i:s', strtotime($order_initialize_informations['date_order_initialize_created'])); ?></div>

@@ -106,7 +106,7 @@
                                 <button id="btn-create-address" class="btn-success mb" title="Yeni Adres Ekle">Adres Ekle</button>
                             </div>
                         </div>
-                        <div id="popup-wrapper" class="create-address-wrapper<?php echo !empty($web_data['address']) ? '' : ' disable'; ?>">
+                        <div id="popup-wrapper" class="create-address-wrapper disable">
                             <div class="popup-container">
                                 <div id="create-address-wrapper-exit" class="popup-exit">
                                     <div class="exit">
@@ -118,97 +118,57 @@
                                     <?php if (!empty($web_data['form_token'])) : ?>
                                         <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
                                     <?php endif; ?>
-                                    <div class="form-row-addr">
+                                    <div class="form-row">
                                         <span class="label">Ülke</span>
                                         <input class="input" type="text" value="Türkiye" readonly>
-                                        <span class="info">
-                                            <i class="fas fa-info icon"></i>
-                                            Örn. Türkiye
-                                        </span>
                                     </div>
-                                    <div class="form-row-addr">
+                                    <div class="form-row">
                                         <span class="label">İl</span>
-                                        <?php if (!empty($web_data['city'])) : ?>
-                                            <input class="input" id="address-autofocus" type="text" name="city" value="<?php echo $web_data['city']; ?>">
-                                        <?php else : ?>
-                                            <input class="input" id="address-autofocus" type="text" name="city">
-                                        <?php endif; ?>
-                                        <span class="info">
-                                            <i class="fas fa-info icon"></i>
-                                            Örn. <?php echo IL_SAMPLE; ?>
-                                        </span>
+                                        <div class="city-row">
+                                            <div id="details-city" class="item-city">
+                                                <select class="city-select" name="city">
+                                                    <option id="details-option-0"></option>
+                                                    <?php foreach ($web_data['address_city'] as $address_city) : ?>
+                                                        <option id="details-option-<?php echo $address_city['id']; ?>" value="<?php echo $address_city['id']; ?>"></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                                <span id="select-text" class="select-text">İl Seçin</span>
+                                                <span class="select-triangle"><i class="fas fa-angle-down"></i></span>
+                                                <div id="details-select-city" class="details-select-city">
+                                                    <?php foreach ($web_data['address_city'] as $address_city) : ?>
+                                                        <span class="option" data-option="<?php echo $address_city['id']; ?>" data-url="<?php echo $address_city['city_name']; ?>"><?php echo $address_city['city_name']; ?></span>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="form-row-addr">
+                                    <div class="form-row">
                                         <span class="label">İlçe</span>
-                                        <?php if (!empty($web_data['county'])) : ?>
-                                            <input class="input" type="text" name="county" value="<?php echo $web_data['county']; ?>">
-                                        <?php else : ?>
-                                            <input class="input" type="text" name="county">
-                                        <?php endif; ?>
-                                        <span class="info">
-                                            <i class="fas fa-info icon"></i>
-                                            Örn. <?php echo ILCE_SAMPLE; ?>
-                                        </span>
+                                        <div class="county-row">
+                                            <div id="details-county" class="item-county disable">
+                                                <select class="county-select" name="county">
+                                                    <option id="details-county-option-0"></option>
+                                                </select>
+                                                <span id="select-text-county" class="select-text">İlçe Seçin</span>
+                                                <span class="select-triangle"><i class="fas fa-angle-down"></i></span>
+                                                <div id="details-select-county" class="details-select-county">
+
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="form-row-addr">
-                                        <span class="label">Mahalle</span>
-                                        <?php if (!empty($web_data['neighborhood'])) : ?>
-                                            <input class="input" type="text" name="neighborhood" value="<?php echo $web_data['neighborhood']; ?>">
-                                        <?php else : ?>
-                                            <input class="input" type="text" name="neighborhood">
-                                        <?php endif; ?>
+                                    <div class="form-row">
+                                        <span class="label textarea-label">Açık Adres</span>
+                                        <textarea class="input textarea-input" name="full_address"></textarea>
                                         <span class="info">
                                             <i class="fas fa-info icon"></i>
-                                            Örn. <?php echo MAHALLE_SAMPLE; ?>
+                                            <span class="info-tri"></span>
                                         </span>
+                                        <span class="info-text"><?php echo SAMPLE_ADDRESS; ?></span>
                                     </div>
-                                    <div class="form-row-addr">
-                                        <span class="label">Cadde/ Sokak</span>
-                                        <?php if (!empty($web_data['street'])) : ?>
-                                            <input class="input" type="text" name="street" value="<?php echo $web_data['street']; ?>">
-                                        <?php else : ?>
-                                            <input class="input" type="text" name="street">
-                                        <?php endif; ?>
-                                        <span class="info">
-                                            <i class="fas fa-info icon"></i>
-                                            Örn. <?php echo SOKAK_SAMPLE; ?>
-                                        </span>
-                                    </div>
-                                    <div class="form-row-addr">
-                                        <span class="label label-spec">Apartman Numarası</span>
-                                        <?php if (!empty($web_data['building_no'])) : ?>
-                                            <input class="input" type="text" name="building_no" value="<?php echo $web_data['building_no']; ?>">
-                                        <?php else : ?>
-                                            <input class="input" type="text" name="building_no">
-                                        <?php endif; ?>
-                                        <span class="info">
-                                            <i class="fas fa-info icon"></i>
-                                            Örn. <?php echo APARTMAN_SAMPLE; ?>
-                                        </span>
-                                    </div>
-                                    <div class="form-row-addr">
-                                        <span class="label">Daire Numarası</span>
-                                        <?php if (!empty($web_data['apartment_no'])) : ?>
-                                            <input class="input" type="text" name="apartment_no" value="<?php echo $web_data['apartment_no']; ?>">
-                                        <?php else : ?>
-                                            <input class="input" type="text" name="apartment_no">
-                                        <?php endif; ?>
-                                        <span class="info">
-                                            <i class="fas fa-info icon"></i>
-                                            Örn. <?php echo DAIRE_SAMPLE; ?>
-                                        </span>
-                                    </div>
-                                    <div class="form-row-addr" title="İl Kodunu, arama motorunda il, ilçe, mahalle zip kodu formatında aratarak öğrenebilirisiniz">
-                                        <span class="label label-spec">ZİP Numarası (Posta Kodu)</span>
-                                        <?php if (!empty($web_data['zip_no'])) : ?>
-                                            <input class="input" type="text" name="zip_no" value="<?php echo $web_data['zip_no']; ?>">
-                                        <?php else : ?>
-                                            <input class="input" type="text" name="zip_no">
-                                        <?php endif; ?>
-                                        <span class="info">
-                                            <i class="fas fa-info icon"></i>
-                                            Örn. <?php echo ZIP_SAMPLE; ?>
-                                        </span>
+                                    <div class="form-row">
+                                        <span class="label">Adres Adı</span>
+                                        <input type="text" class="input" name="address_quick_name" placeholder="Örnek: Ev">
                                     </div>
                                     <div class="row-space">
                                         <div class="right">
@@ -231,69 +191,57 @@
                                         <input class="input-token" type="hidden" name="form_token" value="<?php echo $web_data['form_token']; ?>">
                                     <?php endif; ?>
                                     <input id="update-id" class="input" type="hidden" name="id">
-                                    <div class="form-row-addr">
+                                    <div class="form-row">
                                         <span class="label">Ülke</span>
                                         <input class="input" type="text" value="Türkiye" readonly>
-                                        <span class="info">
-                                            <i class="fas fa-info icon"></i>
-                                            Örn. Türkiye
-                                        </span>
                                     </div>
-                                    <div class="form-row-addr">
+                                    <div class="form-row">
                                         <span class="label">İl</span>
-                                        <input id="update-city" class="input" type="text" name="city">
-                                        <span class="info">
-                                            <i class="fas fa-info icon"></i>
-                                            Örn. <?php echo IL_SAMPLE; ?>
-                                        </span>
+                                        <div class="city-row">
+                                            <div id="update-details-city" class="item-city">
+                                                <select class="city-select" name="city">
+                                                    <option id="selected-update-city" selected></option>
+                                                    <?php foreach ($web_data['address_city'] as $address_city) : ?>
+                                                        <option id="update-details-option-<?php echo $address_city['id']; ?>" value="<?php echo $address_city['id']; ?>"></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                                <span id="update-city" class="select-text"></span>
+                                                <span class="select-triangle"><i class="fas fa-angle-down"></i></span>
+                                                <div id="update-details-select-city" class="update-details-select-city">
+                                                    <?php foreach ($web_data['address_city'] as $address_city) : ?>
+                                                        <span class="option" data-option="<?php echo $address_city['id']; ?>" data-url="<?php echo $address_city['city_name']; ?>"><?php echo $address_city['city_name']; ?></span>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="form-row-addr">
+                                    <div class="form-row">
                                         <span class="label">İlçe</span>
-                                        <input id="update-county" class="input" type="text" name="county">
-                                        <span class="info">
-                                            <i class="fas fa-info icon"></i>
-                                            Örn. <?php echo ILCE_SAMPLE; ?>
-                                        </span>
+                                        <div class="county-row">
+                                            <div id="update-details-county" class="item-county">
+                                                <select class="update-county-select" name="county">
+                                                    <option id="selected-update-county" selected></option>
+                                                </select>
+                                                <span id="update-county" class="select-text"></span>
+                                                <span class="select-triangle"><i class="fas fa-angle-down"></i></span>
+                                                <div id="update-details-select-county" class="update-details-select-county">
+
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="form-row-addr">
-                                        <span class="label">Mahalle</span>
-                                        <input id="update-neighborhood" class="input" type="text" name="neighborhood">
+                                    <div class="form-row">
+                                        <span class="label textarea-label">Açık Adres</span>
+                                        <textarea id="update-full_address" class="input textarea-input" name="full_address"></textarea>
                                         <span class="info">
                                             <i class="fas fa-info icon"></i>
-                                            Örn. <?php echo MAHALLE_SAMPLE; ?>
+                                            <span class="info-tri"></span>
                                         </span>
+                                        <span class="info-text"><?php echo SAMPLE_ADDRESS; ?></span>
                                     </div>
-                                    <div class="form-row-addr">
-                                        <span class="label">Cadde/ Sokak</span>
-                                        <input id="update-street" class="input" type="text" name="street">
-                                        <span class="info">
-                                            <i class="fas fa-info icon"></i>
-                                            Örn. <?php echo SOKAK_SAMPLE; ?>
-                                        </span>
-                                    </div>
-                                    <div class="form-row-addr">
-                                        <span class="label label-spec">Apartman Numarası</span>
-                                        <input id="update-building_no" class="input" type="text" name="building_no">
-                                        <span class="info">
-                                            <i class="fas fa-info icon"></i>
-                                            Örn. <?php echo APARTMAN_SAMPLE; ?>
-                                        </span>
-                                    </div>
-                                    <div class="form-row-addr">
-                                        <span class="label">Daire Numarası</span>
-                                        <input id="update-apartment_no" class="input" type="text" name="apartment_no">
-                                        <span class="info">
-                                            <i class="fas fa-info icon"></i>
-                                            Örn. <?php echo DAIRE_SAMPLE; ?>
-                                        </span>
-                                    </div>
-                                    <div class="form-row-addr">
-                                        <span class="label label-spec">ZİP Numarası (Posta Kodu)</span>
-                                        <input id="update-zip_no" class="input" type="text" name="zip_no">
-                                        <span class="info">
-                                            <i class="fas fa-info icon"></i>
-                                            Örn. <?php echo ZIP_SAMPLE; ?>
-                                        </span>
+                                    <div class="form-row">
+                                        <span class="label">Adres Adı</span>
+                                        <input type="text" id="update-address_quick_name" class="input" name="address_quick_name" placeholder="Örnek: Ev">
                                     </div>
                                     <div class="row-space">
                                         <div class="right">
@@ -327,9 +275,19 @@
                             <?php if (!empty($web_data['user_address'])) : ?>
                                 <?php foreach ($web_data['user_address'] as $address) : ?>
                                     <div class="address-box">
-                                        <span class="address-text"><?php echo $address['address_neighborhood'] . ', ' . $address['address_street'] . ', Apartman No: ' . $address['address_building_no'] . ' Daire No: ' . $address['address_apartment_no'] . ' ' . $address['address_county'] . '/' . $address['address_city'] . '/' . $address['address_country'] . ' ZIP Kodu:' . $address['address_zip_no']; ?></span>
+                                        <div class="address-quick-name-wrapper">
+                                            <span class="quick-name"><?php echo $address['address_quick_name']; ?></span>
+                                            <span class="address-text"><?php echo $address['full_address'] . ' ' . $address['address_county'] . '/' . $address['address_city'] . '/' . $address['address_country']; ?></span>
+                                        </div>
                                         <div class="address-btn-row">
-                                            <span class="btn-update-address btn-warning mr" data-id="<?php echo $address['id']; ?>" data-neighborhood="<?php echo $address['address_neighborhood']; ?>" data-street="<?php echo $address['address_street']; ?>" data-building_no="<?php echo $address['address_building_no']; ?>" data-apartment_no="<?php echo $address['address_apartment_no']; ?>" data-county="<?php echo $address['address_county']; ?>" data-city="<?php echo $address['address_city']; ?>" data-zip_no="<?php echo $address['address_zip_no']; ?>">Düzenle</span>
+                                            <?php
+                                                $js_data_county = '{';
+                                                foreach ($address['update_county'] as $key_update_county => $update_county) {
+                                                    $js_data_county .= '"' . $key_update_county . '": "' . $update_county . '", ';
+                                                }
+                                                $js_data_county = rtrim($js_data_county, ', ') . '}';
+                                            ?>
+                                            <span class="btn-update-address btn-warning mr" data-id="<?php echo $address['id']; ?>" data-full_address="<?php echo $address['full_address']; ?>" data-address_quick_name="<?php echo $address['address_quick_name']; ?>" data-county="<?php echo $address['address_county']; ?>" data-city="<?php echo $address['address_city']; ?>" data-city_id="<?php echo $address['city_id']; ?>" data-county_id="<?php echo $address['county_id']; ?>" data-update-selected-counties='<?php echo $js_data_county; ?>'>Düzenle</span>
                                             <span class="btn-danger btn-address-remove btn-delete-address" data-id="<?php echo $address['id']; ?>">Sil</span>
                                         </div>
                                     </div>
@@ -448,7 +406,7 @@
                                     <?php $i++; ?>
                                     <div class="order-container">
                                         <span class="box box-m"><?php echo $order['order_informations']['shipping_contact_name']; ?></span>
-                                        <span class="box box-l-2"><?php echo $order['order_informations']['shipping_address'] . ' ' . $order['order_informations']['shipping_city'] . '/' . $order['order_informations']['shipping_country'] . ' ZIP: ' . $order['order_informations']['shipping_zip_code']; ?></span>
+                                        <span class="box box-l-2"><?php echo $order['order_informations']['shipping_address'] . ' ' . $order['order_informations']['shipping_city'] . '/' . $order['order_informations']['shipping_country']; ?></span>
                                         <span class="box box-xs"><?php echo $order['order_informations']['paid_price']; ?> ₺</span>
                                         <?php if ($order['order_informations']['status'] == 1) : ?>
                                             <span class="box box-xs">Onay Bekliyor</span>
@@ -508,7 +466,7 @@
                                                 </div>
                                                 <div class="order-container">
                                                     <span class="box box-m"><?php echo $order['order_informations']['shipping_contact_name']; ?></span>
-                                                    <span class="box box-l"><?php echo $order['order_informations']['shipping_address'] . ' ' . $order['order_informations']['shipping_city'] . '/' . $order['order_informations']['shipping_country'] . ' ZIP: ' . $order['order_informations']['shipping_zip_code']; ?></span>
+                                                    <span class="box box-l"><?php echo $order['order_informations']['shipping_address'] . ' ' . $order['order_informations']['shipping_city'] . '/' . $order['order_informations']['shipping_country']; ?></span>
                                                     <span class="box box-xs-2"><?php echo $order['order_informations']['paid_price']; ?> ₺</span>
                                                     <?php if ($order['order_informations']['status'] == 1) : ?>
                                                         <span class="box box-xs-2">Onay Bekliyor</span>
@@ -555,7 +513,6 @@
                 e.preventDefault();
                 if (createAddressWrapper.classList.contains('disable')) {
                     createAddressWrapper.classList.remove('disable');
-                    document.getElementById('address-autofocus').focus();
                 }
                 if (!bodyElement.classList.contains('noscroll')) {
                     bodyElement.classList.add('noscroll');
@@ -575,13 +532,13 @@
                 element.addEventListener('click', (e) => {
                     e.preventDefault();
                     document.getElementById('update-id').value = element.dataset.id;
-                    document.getElementById('update-city').value = element.dataset.city;
-                    document.getElementById('update-county').value = element.dataset.county;
-                    document.getElementById('update-neighborhood').value = element.dataset.neighborhood;
-                    document.getElementById('update-street').value = element.dataset.street;
-                    document.getElementById('update-building_no').value = element.dataset.building_no;
-                    document.getElementById('update-apartment_no').value = element.dataset.apartment_no;
-                    document.getElementById('update-zip_no').value = element.dataset.zip_no;
+                    document.getElementById('update-city').innerHTML = element.dataset.city;
+                    document.getElementById('update-county').innerHTML = element.dataset.county;
+                    document.getElementById('update-full_address').value = element.dataset.full_address;
+                    document.getElementById('update-address_quick_name').value = element.dataset.address_quick_name;
+                    document.getElementById('selected-update-city').value = element.dataset.city_id;
+                    console.log(element.dataset.county_id);
+                    document.getElementById('selected-update-county').value = element.dataset.county_id;
                     if (updateAddressWrapper.classList.contains('disable')) {
                         updateAddressWrapper.classList.remove('disable');
                     }
@@ -606,7 +563,6 @@
                     document.getElementById('input-address-id').value = element.dataset.id;
                     if (deleteAddressWrapper.classList.contains('disable')) {
                         deleteAddressWrapper.classList.remove('disable');
-                        document.getElementById('address-autofocus').focus();
                     }
                     if (!bodyElement.classList.contains('noscroll')) {
                         bodyElement.classList.add('noscroll');
@@ -630,6 +586,53 @@
                 if (bodyElement.classList.contains('noscroll')) {
                     bodyElement.classList.remove('noscroll');
                 }
+            });
+            const detailsSelectCity = document.getElementById('details-select-city');
+            const detailsSelectCounty = document.getElementById('details-select-county');
+            document.getElementById('details-city').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (detailsSelectCounty.classList.contains('active')) {
+                    detailsSelectCounty.classList.remove('active');
+                }
+                detailsSelectCity.classList.toggle('active');
+            });
+            document.querySelectorAll('.item-city .details-select-city .option').forEach(detailsSelectOption => {
+                detailsSelectOption.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('details-option-' + detailsSelectOption.dataset.option).selected = true;
+                    document.getElementById('select-text').innerHTML = detailsSelectOption.dataset.url;
+                });
+            });
+            document.getElementById('details-county').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (detailsSelectCity.classList.contains('active')) {
+                    detailsSelectCity.classList.remove('active');
+                }
+                detailsSelectCounty.classList.toggle('active');
+            });
+            const updateDetailsSelectCity = document.getElementById('update-details-select-city');
+            const updateDetailsSelectCounty = document.getElementById('update-details-select-county');
+            document.getElementById('update-details-city').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (updateDetailsSelectCounty.classList.contains('active')) {
+                    updateDetailsSelectCounty.classList.remove('active');
+                }
+                updateDetailsSelectCity.classList.toggle('active');
+            });
+            document.querySelectorAll('.item-city .update-details-select-city .option').forEach(detailsSelectOption => {
+                detailsSelectOption.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('update-details-option-' + detailsSelectOption.dataset.option).selected = true;
+                    document.getElementById('update-city').innerHTML = detailsSelectOption.dataset.url;
+                    document.getElementById('update-county').innerHTML = 'İlçe Seçin';
+                });
+            });
+            document.getElementById('update-details-county').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (updateDetailsSelectCity.classList.contains('active')) {
+                    updateDetailsSelectCity.classList.remove('active');
+                }
+                updateDetailsSelectCounty.classList.toggle('active');
             });
         </script>
     <?php endif; ?>
@@ -852,6 +855,133 @@
                         }
                         $('#form-update-identity').submit();
                     }
+                });
+            <?php endif; ?>
+            <?php if ($web_data['profile_type'] == URL_PROFILE_ADDRESS) : ?>
+                $.each($('.item-city .details-select-city .option'), function(key, option) {
+                    $(this).click(function() {
+                        if ($.isNumeric($(this).data('option')) && $(this).data('option') > 0 && $(this).data('option') < 82) {
+                            requestUsable = false;
+                            request = $.ajax({
+                                url: '<?php echo URL . URL_GET_COUNTY; ?>',
+                                type: 'POST',
+                                data: 'city=' + $(this).data('option')
+                            });
+                            request.done(function(response) {
+                                requestUsable = true;
+                                response = jQuery.parseJSON(response);
+                                if (response.hasOwnProperty('shutdown')) {
+                                    window.location.href = '<?php echo URL . URL_SHUTDOWN; ?>';
+                                } else if (response.hasOwnProperty('exception')) {
+                                    window.location.href = '<?php echo URL . URL_EXCEPTION; ?>';
+                                } else if (response.hasOwnProperty('stop')) {
+
+                                } else if (response.hasOwnProperty('address_county')) {
+                                    if ($('.county-select').children().length > 0) {
+                                        $('.county-select').children().remove();
+                                        let uu1 = $("<option></option>").attr('id', 'details-county-option-0');
+                                        $('.county-select').append(uu1);
+                                        $('.option-county:selected').selected = false;
+                                    }
+                                    if ($('.details-select-county').children().length > 0) {
+                                        $('.details-select-county').children().remove();
+                                        $('#select-text-county').text('İlçe Seçin');
+                                    }
+                                    $.each(response['address_county'], function(key, address_count) {
+                                        let u1 = $("<option></option>").addClass('option-county').attr('id', 'details-county-option-' + address_count['id']).attr('value', address_count['id']);
+                                        $('.county-select').append(u1);
+                                        let u2 = $("<span></span>").addClass('option').attr('data-option', address_count['id']).attr('data-url', address_count['county_name']).text(address_count['county_name']);
+                                        $('.details-select-county').append(u2);
+                                        if ($('#details-county').hasClass('disable')) {
+                                            $('#details-county').removeClass('disable');
+                                        }
+                                    });
+                                    $.each($('.item-county .details-select-county .option'), function(key, optionValue) {
+                                        $(this).click(function(e) {
+                                            e.preventDefault();
+                                            console.log($('#details-county-option-' + $(this).data('option')));
+                                            $('#details-county-option-' + $(this).data('option')).attr('selected', true);
+                                            $('#select-text-county').text($(this).data('url'));
+                                        });
+                                    });
+                                }
+                            });
+                        }
+                    });
+                });
+                $.each($('.item-city .update-details-select-city .option'), function(key, option) {
+                    $(this).click(function() {
+                        if ($.isNumeric($(this).data('option')) && $(this).data('option') > 0 && $(this).data('option') < 82) {
+                            requestUsable = false;
+                            request = $.ajax({
+                                url: '<?php echo URL . URL_GET_COUNTY; ?>',
+                                type: 'POST',
+                                data: 'city=' + $(this).data('option')
+                            });
+                            request.done(function(response) {
+                                requestUsable = true;
+                                response = jQuery.parseJSON(response);
+                                if (response.hasOwnProperty('shutdown')) {
+                                    window.location.href = '<?php echo URL . URL_SHUTDOWN; ?>';
+                                } else if (response.hasOwnProperty('exception')) {
+                                    window.location.href = '<?php echo URL . URL_EXCEPTION; ?>';
+                                } else if (response.hasOwnProperty('stop')) {
+
+                                } else if (response.hasOwnProperty('address_county')) {
+                                    if ($('.update-county-select').children().length > 0) {
+                                        $('.update-county-select').children().remove();
+                                        let uu1 = $("<option></option>").attr('id', 'details-county-option-0');
+                                        $('.update-county-select').append(uu1);
+                                        $('.option-county:selected').selected = false;
+                                    }
+                                    if ($('.update-details-select-county').children().length > 0) {
+                                        $('.update-details-select-county').children().remove();
+                                        $('#update-county').text('İlçe Seçin');
+                                    }
+                                    $.each(response['address_county'], function(key, address_count) {
+                                        let u1 = $("<option></option>").addClass('option-county').attr('id', 'update-details-county-option-' + address_count['id']).attr('value', address_count['id']);
+                                        $('.update-county-select').append(u1);
+                                        let u2 = $("<span></span>").addClass('option').attr('data-option', address_count['id']).attr('data-url', address_count['county_name']).text(address_count['county_name']);
+                                        $('.update-details-select-county').append(u2);
+                                    });
+                                    $.each($('.item-county .update-details-select-county .option'), function(key, optionValue) {
+                                        $(this).click(function(e) {
+                                            e.preventDefault();
+                                            $('#update-details-county-option-' + $(this).data('option')).attr('selected', true);
+                                            $('#update-county').text($(this).data('url'));
+                                        });
+                                    });
+                                }
+                            });
+                        }
+                    });
+                });
+                $.each($('.btn-update-address'), function(key1, value1) {
+                    $(this).click(function(e) {
+                        e.preventDefault();
+                        if ($('.update-county-select').children().length > 0) {
+                            $('.update-county-select').children().remove();
+                            let uu1 = $("<option></option>").attr('id', 'selected-update-county');
+                            $('.update-county-select').append(uu1);
+                            $('.option-county:selected').selected = false;
+                        }
+                        if ($('.update-details-select-county').children().length > 0) {
+                            $('.update-details-select-county').children().remove();
+                        }
+                        $.each($(this).data('update-selected-counties'), function(key, value) {
+                            let u1 = $("<option></option>").addClass('option-county').attr('id', 'update-details-county-option-' + key).attr('value', key);
+                            $('.update-county-select').append(u1);
+                            let u2 = $("<span></span>").addClass('option').attr('data-option', key).attr('data-url', value).text(value);
+                            $('.update-details-select-county').append(u2);
+                        });
+                        $.each($('.item-county .update-details-select-county .option'), function(key, optionValue) {
+                            $(this).click(function(e) {
+                                e.preventDefault();
+                                $('#update-details-county-option-' + $(this).data('option')).attr('selected', true);
+                                $('#update-county').text($(this).data('url'));
+                            });
+                        });
+                    });
                 });
             <?php endif; ?>
             <?php if ($web_data['profile_type'] == URL_PROFILE_PASSWORD) : ?>

@@ -223,7 +223,7 @@ class AdminModel extends Model
     }
     function GetOrderInitializeInformationForSendEmail(string $id)
     {
-        return $this->database->Get(TABLE_ORDER_INITIALIZE_INFORMATIONS, 'user_id,user_email,user_identity_number,user_phone_number,shipping_contact_name,shipping_city,shipping_country,shipping_address,shipping_zip_code,status', 'WHERE id=?', $id, 'SINGULAR');
+        return $this->database->Get(TABLE_ORDER_INITIALIZE_INFORMATIONS, 'user_id,user_email,user_identity_number,user_phone_number,shipping_contact_name,shipping_city,shipping_country,shipping_address,status', 'WHERE id=?', $id, 'SINGULAR');
     }
     function GetOrderInitializeBasketForSendEmail(string $order_initialize_information_id)
     {

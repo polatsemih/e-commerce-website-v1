@@ -55,7 +55,7 @@ class AccountController extends Controller
                     $this->notification_control->SetNotification('DANGER', $checked_inputs['error_message']);
                 }
             } else {
-                parent::KillAuthentication('AccountController AddToFavorites');
+                parent::KillAuthentication('AccountController AddFavorites');
             }
             $jsoned_response = json_encode($response);
             if (!empty($jsoned_response)) {
@@ -748,6 +748,44 @@ class AccountController extends Controller
             }
         } catch (\Throwable $th) {
             if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function AdminCommentReplyApprove | ' . $th))['result']) {
+                echo '{"exception":"exception"}';
+                exit(0);
+            } else {
+                echo '{"shutdown":"shutdown"}';
+                exit(0);
+            }
+        }
+    }
+    function GetCounty()
+    {
+        try {
+            $response = array();
+            $response['reset'] = true;
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $checked_inputs = $this->input_control->CheckPostedInputs(array(
+                    'city_code' => array('input' => isset($_POST['city']) ? $_POST['city'] : '', 'error_message_empty' => TR_NOTIFICATION_ERROR_DATABASE, 'preventxss' => true, 'is_integer_and_positive' => true, 'error_message_is_integer_and_positive' => TR_NOTIFICATION_ERROR_DATABASE)
+                ));
+                if (empty($checked_inputs['error_message'])) {
+                    if ($checked_inputs['city_code'] > 0 && $checked_inputs['city_code'] < 82) {
+                        $county = $this->UserModel->GetCounty($checked_inputs['city_code']);
+                        if ($county['result']) {
+                            foreach ($county['data'] as $key => $value) {
+                                $county['data'][$key]['county_name'] = $value['county_name'];
+                            }
+                            $response['address_county'] = $county['data'];
+                        }
+                    }
+                }
+            } else {
+                parent::KillAuthentication('AccountController GetCounty');
+            }
+            $jsoned_response = json_encode($response);
+            if (!empty($jsoned_response)) {
+                echo $jsoned_response;
+                exit(0);
+            }
+        } catch (\Throwable $th) {
+            if ($this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class AccountController function GetCounty | ' . $th))['result']) {
                 echo '{"exception":"exception"}';
                 exit(0);
             } else {

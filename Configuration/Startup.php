@@ -67,6 +67,7 @@ define('URL_ADMIN_COMMENT_DELETE', 'yonetici-yorum-sil');
 define('URL_ADMIN_COMMENT_REPLY_DELETE', 'yonetici-yorum-cevap-sil');
 define('URL_ADMIN_COMMENT_APPROVE', 'yonetici-yorum-onayla');
 define('URL_ADMIN_COMMENT_REPLY_APPROVE', 'yonetici-yorum-cevap-onayla');
+define('URL_GET_COUNTY', 'ilce-sorgula');
 // AdminController
 define('URL_ADMIN_INDEX', 'yonetici');
 define('URL_ADMIN_LOGOUT', 'yonetici-cikis');
@@ -168,6 +169,7 @@ define('URL_MAPS', array(
     array('url' => 'yonetici-yorum-cevap-sil', 'controller' => 'AccountController', 'action' => 'AdminCommentReplyDelete'),
     array('url' => 'yonetici-yorum-onayla', 'controller' => 'AccountController', 'action' => 'AdminCommentApprove'),
     array('url' => 'yonetici-yorum-cevap-onayla', 'controller' => 'AccountController', 'action' => 'AdminCommentReplyApprove'),
+    array('url' => 'ilce-sorgula', 'controller' => 'AccountController', 'action' => 'GetCounty'),
     // AdminController
     array('url' => 'yonetici', 'controller' => 'AdminController', 'action' => 'Index'),
     array('url' => 'yonetici-cikis', 'controller' => 'AdminController', 'action' => 'LogOut'),

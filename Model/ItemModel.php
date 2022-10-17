@@ -103,7 +103,7 @@ class ItemModel extends Model
     }
     function GetOrders(string $user_id)
     {
-        return $this->database->Get(TABLE_ORDER_INITIALIZE_INFORMATIONS, 'id,paid_price,shipping_contact_name,shipping_city,shipping_country,shipping_address,shipping_zip_code,status,date_order_initialize_created', 'WHERE user_id=? AND NOT status=8 ORDER BY date_order_initialize_created DESC', $user_id, 'PLURAL');
+        return $this->database->Get(TABLE_ORDER_INITIALIZE_INFORMATIONS, 'id,paid_price,shipping_contact_name,shipping_city,shipping_country,shipping_address,status,date_order_initialize_created', 'WHERE user_id=? AND NOT status=8 ORDER BY date_order_initialize_created DESC', $user_id, 'PLURAL');
     }
     function UpdateOrder(array $inputs)
     {

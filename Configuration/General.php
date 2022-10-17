@@ -12,13 +12,8 @@ define('COMPONY_FULL_NAME', '1. Mah. 2. Cad. 3. Bina Kat:2 No:12 34000 Bebek/İs
 
 
 
-define('IL_SAMPLE', 'İstanbul');
-define('ILCE_SAMPLE', 'Bebek');
-define('MAHALLE_SAMPLE', 'Çiçek Mahallesi');
-define('SOKAK_SAMPLE', 'Çiçek Caddesi, Çiçek Sokak');
-define('APARTMAN_SAMPLE', '12');
-define('DAIRE_SAMPLE', '5');
-define('ZIP_SAMPLE', '34000');
+define('SAMPLE_ADDRESS', 'Rüzgar Mahallesi, Çiçek Sokak, NO:41/7');
+
 
 
 
