@@ -29,7 +29,8 @@ class ErrorController extends Controller
             parent::GetView('Error/Shutdown');
         } catch (\Throwable $th) {
             $this->LogModel->CreateLogError(array('user_ip' => $_SERVER['REMOTE_ADDR'], 'error_message' => 'class ErrorController function ShutDown | ' . $th));
-            $this->input_control->Redirect(URL_SHUTDOWN);
+            require_once 'View/Error/Shutdown.php';
+            exit(0);
         }
     }
     function UserBlocked()

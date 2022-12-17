@@ -38,7 +38,8 @@ class Input
         }
         return null;
     }
-    function NumericIsString($input) {
+    function NumericIsString($input)
+    {
         if (is_string($input)) {
             return stripslashes(trim($input));
         }
@@ -135,10 +136,12 @@ class Input
     {
         return htmlentities($input, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
-    function SlashAndXSS($input) {
+    function SlashAndXSS($input)
+    {
         return htmlentities(stripslashes($input), ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
-    function SlashAndXSSForId($input) {
+    function SlashAndXSSForId($input)
+    {
         return htmlentities(stripslashes($input), ENT_QUOTES, 'UTF-8');
     }
     function DecodePreventXSS($input)
@@ -153,7 +156,16 @@ class Input
         }
         return null;
     }
-    function CheckGETInputWithLength($input, int $input_length) {
+    function CheckGETInputForId($get_input)
+    {
+        $get_input = $this->IsString($get_input);
+        if (!is_null($get_input)) {
+            return $this->SlashAndXSSForId(urlencode($get_input));
+        }
+        return null;
+    }
+    function CheckGETInputWithLength($input, int $input_length)
+    {
         $input = $this->IsString($input);
         if (!is_null($input)) {
             if (strlen($input) == $input_length) {
@@ -162,7 +174,8 @@ class Input
         }
         return null;
     }
-    function CheckGETInputWithMaxLength($input, int $input_length) {
+    function CheckGETInputWithMaxLength($input, int $input_length)
+    {
         $input = $this->IsString($input);
         if (!is_null($input)) {
             if (strlen($input) <= $input_length) {
@@ -171,21 +184,24 @@ class Input
         }
         return null;
     }
-    function CheckPositiveGETInput($get_input) {
+    function CheckPositiveGETInput($get_input)
+    {
         $get_input = $this->IsIntegerAndPositiveOrZero($get_input);
         if (!is_null($get_input)) {
             return $this->PreventXSS(urlencode($get_input));
         }
         return null;
     }
-    function CheckPositiveNonZeroGETInput($get_input) {
+    function CheckPositiveNonZeroGETInput($get_input)
+    {
         $get_input = $this->IsIntegerAndPositive($get_input);
         if (!is_null($get_input)) {
             return $this->PreventXSS(urlencode($get_input));
         }
         return null;
     }
-    function CheckPositivePOSTInput($get_input) {
+    function CheckPositivePOSTInput($get_input)
+    {
         $get_input = $this->IsIntegerAndPositiveOrZero($get_input);
         if (!is_null($get_input)) {
             return $this->PreventXSS($get_input);
@@ -378,7 +394,7 @@ class Input
         }
         return array('result' => false);
     }
-    function FormatPrice($price) 
+    function FormatPrice($price)
     {
         $checked_price = $this->IsFloatAndPositive($price);
         if (!is_null($checked_price)) {
