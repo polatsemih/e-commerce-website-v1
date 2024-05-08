@@ -8,4 +8,4 @@ define('PASSWORD_PEPPER', '��n�{B�Z@��yn��');
 define('CONFIRM_TOKEN_SECRET_KEY', 'R�J���s�]��D6��rdu����������y�r�@�)���Y;}�TmK�');
 define('EMAIL_HOST_NAME', 'blanckbasic.com');
 define('EMAIL_FROM_NAME', 'Blanck Basic');
-define('EMAIL_FROM_ADDRESS', 'utkupolat000@gmail.com');
+define('EMAIL_FROM_ADDRESS', '');
